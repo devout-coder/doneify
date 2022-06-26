@@ -1,4 +1,9 @@
 import 'dart:ffi';
+import 'package:conquer_flutter_app/pages/LongTerm.dart';
+import 'package:conquer_flutter_app/pages/Monthly.dart';
+import 'package:conquer_flutter_app/pages/Weekly.dart';
+import 'package:conquer_flutter_app/pages/Yearly.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:conquer_flutter_app/pages/Daily.dart';
 import 'package:conquer_flutter_app/pages/Settings.dart';
@@ -32,6 +37,10 @@ class _RootPageState extends State<RootPage> {
   int currentPage = 0;
   List<Widget> pages = const [
     DailyPage(),
+    WeeklyPage(),
+    MonthlyPage(),
+    YearlyPage(),
+    LongTermPage(),
     SettingsPage(),
   ];
   @override
@@ -42,9 +51,48 @@ class _RootPageState extends State<RootPage> {
       ),
       body: pages[currentPage],
       bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(label: "Daily", icon: Icon(Icons.today)),
-          NavigationDestination(label: "Settings", icon: Icon(Icons.settings))
+        destinations: [
+          NavigationDestination(
+            label: "Daily",
+            icon: SvgPicture.asset(
+              "images/Daily.svg",
+              color: Colors.black,
+              height: 30,
+              width: 30,
+            ),
+          ),
+          NavigationDestination(
+            label: "Weekly",
+            icon: SvgPicture.asset("images/Weekly.svg"),
+          ),
+          NavigationDestination(
+            label: "Monthly",
+            icon: SvgPicture.asset(
+              "images/Monthly.svg",
+              height: 30,
+              width: 30,
+            ),
+          ),
+          NavigationDestination(
+            label: "Yearly",
+            icon: SvgPicture.asset(
+              "images/Yearly.svg",
+              height: 30,
+              width: 30,
+            ),
+          ),
+          NavigationDestination(
+            label: "Long Term",
+            icon: SvgPicture.asset(
+              "images/LongTerm.svg",
+              height: 30,
+              width: 30,
+            ),
+          ),
+          const NavigationDestination(
+            label: "Settings",
+            icon: Icon(Icons.today),
+          ),
         ],
         selectedIndex: currentPage,
         onDestinationSelected: (int index) {

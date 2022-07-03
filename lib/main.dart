@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'package:conquer_flutter_app/pages/LongTerm.dart';
 import 'package:conquer_flutter_app/pages/Monthly.dart';
+import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Weekly.dart';
 import 'package:conquer_flutter_app/pages/Yearly.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,7 +50,16 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[currentPage],
+      // body: pages[currentPage],
+      body: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          Widget page = pages[currentPage];
+          if (settings.name == "todosPage") {
+            page = const Todos();
+          }
+          return MaterialPageRoute(builder: (_) => page);
+        },
+      ),
       backgroundColor: const Color(0xff262647),
       bottomNavigationBar: GNav(
         tabBorderRadius: 25,

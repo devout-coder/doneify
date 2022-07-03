@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:conquer_flutter_app/pages/AllTodos.dart';
+import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:flutter/material.dart';
 
 class DailyPage extends StatelessWidget {
@@ -11,13 +11,14 @@ class DailyPage extends StatelessWidget {
     return Center(
       child: ElevatedButton(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const AllTodos();
-                },
-              ),
-            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (BuildContext context) {
+            //       return const Todos();
+            //     },
+            //   ),
+            // );
+            Navigator.pushNamed(context, "todosPage");
           },
           child: const Text(
             "Open a todo",

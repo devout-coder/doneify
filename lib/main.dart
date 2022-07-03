@@ -4,9 +4,11 @@ import 'package:conquer_flutter_app/pages/Monthly.dart';
 import 'package:conquer_flutter_app/pages/Weekly.dart';
 import 'package:conquer_flutter_app/pages/Yearly.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'package:conquer_flutter_app/pages/Daily.dart';
 import 'package:conquer_flutter_app/pages/Settings.dart';
+import 'package:conquer_flutter_app/icons/time_type_icons.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,7 +22,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme:
+          ThemeData(primarySwatch: Colors.deepPurple, fontFamily: "Cantarell"),
       home: const RootPage(),
     );
   }
@@ -46,56 +49,47 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Conquer"),
-      ),
       body: pages[currentPage],
-      bottomNavigationBar: NavigationBar(
-        destinations: [
-          NavigationDestination(
-            label: "Daily",
-            icon: SvgPicture.asset(
-              "images/Daily.svg",
-              color: Colors.black,
-              height: 30,
-              width: 30,
-            ),
+      backgroundColor: const Color(0xff262647),
+      bottomNavigationBar: GNav(
+        tabBorderRadius: 25,
+        gap: 5, // the tab button gap between icon and text
+        color: const Color(0xff9A9A9A),
+        activeColor: const Color.fromARGB(
+            255, 47, 15, 83), // selected icon and text color
+        tabBackgroundColor: const Color(0xffBA99FF)
+            .withOpacity(0.9), // selected tab background color
+        padding: const EdgeInsets.symmetric(
+            horizontal: 12, vertical: 15), // navigation bar padding
+
+        tabs: const [
+          GButton(
+            icon: TimeTypeIcons.day,
+            text: "Day",
           ),
-          NavigationDestination(
-            label: "Weekly",
-            icon: SvgPicture.asset("images/Weekly.svg"),
+          GButton(
+            icon: TimeTypeIcons.week,
+            text: "Week",
           ),
-          NavigationDestination(
-            label: "Monthly",
-            icon: SvgPicture.asset(
-              "images/Monthly.svg",
-              height: 30,
-              width: 30,
-            ),
+          GButton(
+            icon: TimeTypeIcons.month,
+            text: "Month",
           ),
-          NavigationDestination(
-            label: "Yearly",
-            icon: SvgPicture.asset(
-              "images/Yearly.svg",
-              height: 30,
-              width: 30,
-            ),
+          GButton(
+            icon: TimeTypeIcons.year,
+            text: "Year",
           ),
-          NavigationDestination(
-            label: "Long Term",
-            icon: SvgPicture.asset(
-              "images/LongTerm.svg",
-              height: 30,
-              width: 30,
-            ),
+          GButton(
+            icon: TimeTypeIcons.longterm,
+            text: "Long Term",
           ),
-          const NavigationDestination(
-            label: "Settings",
-            icon: Icon(Icons.today),
+          GButton(
+            icon: Icons.settings,
+            text: "Settings",
           ),
         ],
         selectedIndex: currentPage,
-        onDestinationSelected: (int index) {
+        onTabChange: (index) {
           setState(() {
             currentPage = index;
           });

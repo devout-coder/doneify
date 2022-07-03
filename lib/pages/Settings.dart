@@ -10,13 +10,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(itemBuilder: (BuildContext context, int index) {
-      return ListTile(
-        title: Text("Setting $index"),
-        onTap: () {
-          debugPrint("setting $index tapped");
-        },
-      );
-    });
+    // return ListView.builder(itemBuilder: (BuildContext context, int index) {
+    //   return ListTile(
+    //     title: Text("Setting $index"),
+    //     onTap: () {
+    //       debugPrint("setting $index tapped");
+    //     },
+    //   );
+    // });
+    return Container();
   }
 }

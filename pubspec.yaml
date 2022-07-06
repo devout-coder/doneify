@@ -35,6 +35,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_svg: ^1.1.0
   google_nav_bar: ^5.0.6
+  table_calendar: ^3.0.6
 
 dev_dependencies:
   flutter_test:

@@ -39,7 +39,7 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   int currentPage = 0;
-  List<Widget> pages = const [
+  List<Widget> pages = [
     DailyPage(),
     WeeklyPage(),
     MonthlyPage(),
@@ -50,15 +50,15 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: pages[currentPage],
-      body: Navigator(
-        onGenerateRoute: (RouteSettings settings) {
-          Widget page = pages[currentPage];
-          if (settings.name == "todosPage") {
-            page = const Todos();
-          }
-          return MaterialPageRoute(builder: (_) => page);
-        },
+      body: Stack(
+        children: [
+          _buildOffstageNavigator(0),
+          _buildOffstageNavigator(1),
+          _buildOffstageNavigator(2),
+          _buildOffstageNavigator(3),
+          _buildOffstageNavigator(4),
+          _buildOffstageNavigator(5),
+        ],
       ),
       backgroundColor: const Color(0xff262647),
       bottomNavigationBar: GNav(
@@ -103,6 +103,36 @@ class _RootPageState extends State<RootPage> {
           setState(() {
             currentPage = index;
           });
+        },
+      ),
+    );
+  }
+
+  Map<String, WidgetBuilder> _routeBuilders(BuildContext context, int index) {
+    return {
+      '/': (context) {
+        return [
+          DailyPage(),
+          WeeklyPage(),
+          MonthlyPage(),
+          YearlyPage(),
+          LongTermPage(),
+          SettingsPage()
+        ].elementAt(index);
+      },
+    };
+  }
+
+  Widget _buildOffstageNavigator(int index) {
+    var routeBuilders = _routeBuilders(context, index);
+
+    return Offstage(
+      offstage: currentPage != index,
+      child: Navigator(
+        onGenerateRoute: (routeSettings) {
+          return MaterialPageRoute(
+            builder: (context) => routeBuilders[routeSettings.name]!(context),
+          );
         },
       ),
     );

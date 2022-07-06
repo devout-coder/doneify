@@ -1,3 +1,4 @@
+import 'package:conquer_flutter_app/pages/Daily.dart';
 import 'package:flutter/material.dart';
 
 class Todos extends StatefulWidget {
@@ -8,11 +9,14 @@ class Todos extends StatefulWidget {
 }
 
 class _TodosState extends State<Todos> {
-  bool mySwitch = false;
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text("all the created todos"),
+    return Scaffold(
+      body: TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text("Daily")),
       backgroundColor: Color(0xff262647),
     );
   }

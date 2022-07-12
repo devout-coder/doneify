@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme:
-          ThemeData(primarySwatch: Colors.deepPurple, fontFamily: "Cantarell"),
+          ThemeData(primarySwatch: Colors.deepPurple, fontFamily: "EuclidCircular"),
       home: SplashScreen(),
     );
   }
@@ -61,11 +61,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-      backgroundColor: Color(0xff262647),
-    );
+    return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xff51515A), Color(0xff101016)],
+          ),
+        ),
+        child: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+          backgroundColor: Colors.transparent,
+        ));
   }
 }

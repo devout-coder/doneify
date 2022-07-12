@@ -23,61 +23,75 @@ class _HomePageState extends State<HomePage> {
   int currentPage = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          buildOffstatgeNavigator(0),
-          buildOffstatgeNavigator(1),
-          buildOffstatgeNavigator(2),
-          buildOffstatgeNavigator(3),
-          buildOffstatgeNavigator(4),
-          buildOffstatgeNavigator(5),
-        ],
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors:[
+            Color(0xff404049),
+            // Color(0xff363640),
+            // Color(0xff101016),
+            Color(0xff09090E),
+          ],
+        ),
       ),
-      backgroundColor: const Color(0xff262647),
-      bottomNavigationBar: GNav(
-        tabBorderRadius: 25,
-        gap: 5, // the tab button gap between icon and text
-        color: const Color(0xff9A9A9A),
-        activeColor: const Color.fromARGB(
-            255, 47, 15, 83), // selected icon and text color
-        tabBackgroundColor: const Color(0xffBA99FF)
-            .withOpacity(0.9), // selected tab background color
-        padding: const EdgeInsets.symmetric(
-            horizontal: 12, vertical: 15), // navigation bar padding
+      child: Scaffold(
+        body: Stack(
+          children: [
+            buildOffstatgeNavigator(0),
+            buildOffstatgeNavigator(1),
+            buildOffstatgeNavigator(2),
+            buildOffstatgeNavigator(3),
+            buildOffstatgeNavigator(4),
+            buildOffstatgeNavigator(5),
+          ],
+        ),
+        backgroundColor: Colors.transparent,
+        bottomNavigationBar: GNav(
+          tabBorderRadius: 25,
+          gap: 5, // the tab button gap between icon and text
+          color: const Color(0xff9A9A9A),
+          activeColor: const Color.fromARGB(
+              255, 47, 15, 83), // selected icon and text color
+          tabBackgroundColor: const Color(0xffBA99FF)
+              .withOpacity(0.9), // selected tab background color
+          padding: const EdgeInsets.symmetric(
+              horizontal: 12, vertical: 15), // navigation bar padding
 
-        tabs: const [
-          GButton(
-            icon: TimeTypeIcons.day,
-            text: "Day",
-          ),
-          GButton(
-            icon: TimeTypeIcons.week,
-            text: "Week",
-          ),
-          GButton(
-            icon: TimeTypeIcons.month,
-            text: "Month",
-          ),
-          GButton(
-            icon: TimeTypeIcons.year,
-            text: "Year",
-          ),
-          GButton(
-            icon: TimeTypeIcons.longterm,
-            text: "Long Term",
-          ),
-          GButton(
-            icon: Icons.settings,
-            text: "Settings",
-          ),
-        ],
-        selectedIndex: currentPage,
-        onTabChange: (index) {
-          setState(() {
-            currentPage = index;
-          });
-        },
+          tabs: const [
+            GButton(
+              icon: TimeTypeIcons.day,
+              text: "Day",
+            ),
+            GButton(
+              icon: TimeTypeIcons.week,
+              text: "Week",
+            ),
+            GButton(
+              icon: TimeTypeIcons.month,
+              text: "Month",
+            ),
+            GButton(
+              icon: TimeTypeIcons.year,
+              text: "Year",
+            ),
+            GButton(
+              icon: TimeTypeIcons.longterm,
+              text: "Long Term",
+            ),
+            GButton(
+              icon: Icons.settings,
+              text: "Settings",
+            ),
+          ],
+          selectedIndex: currentPage,
+          onTabChange: (index) {
+            setState(() {
+              currentPage = index;
+            });
+          },
+        ),
       ),
     );
   }

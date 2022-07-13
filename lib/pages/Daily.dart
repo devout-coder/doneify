@@ -19,7 +19,7 @@ class _DailyPageState extends State<DailyPage> {
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          margin: const EdgeInsets.only(top: 40),
+          margin: const EdgeInsets.only(top: 15),
           child: TableCalendar(
             focusedDay: DateTime.now(),
             firstDay: DateTime.utc(2022, 1, 1),
@@ -44,15 +44,8 @@ class _DailyPageState extends State<DailyPage> {
                   color: Color(0xffffffff)),
             ),
             daysOfWeekStyle: const DaysOfWeekStyle(
-              weekdayStyle: TextStyle(
-                  // fontFamily: "EuclidCircular",
-                  // fontWeight: FontWeight.w600,
-                  // fontSize: 14,
-                  color: Color(0xffEADA76)),
-              weekendStyle: TextStyle(
-                  // fontFamily: "EuclidCircular", fontWeight: FontWeight.w600,
-                  // fontSize: 14,
-                  color: Color(0xffEADA76)),
+              weekdayStyle: TextStyle(color: Color(0xffEADA76)),
+              weekendStyle: TextStyle(color: Color(0xffEADA76)),
             ),
             calendarStyle: const CalendarStyle(
               defaultTextStyle: TextStyle(

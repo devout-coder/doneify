@@ -17,8 +17,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme:
-          ThemeData(primarySwatch: Colors.deepPurple, fontFamily: "EuclidCircular"),
+      theme: ThemeData(
+          primarySwatch: Colors.deepPurple, fontFamily: "EuclidCircular"),
       home: SplashScreen(),
     );
   }
@@ -66,7 +66,10 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xff51515A), Color(0xff101016)],
+            colors: [
+              Color(0xff404049),
+              Color(0xff09090E),
+            ],
           ),
         ),
         child: Scaffold(

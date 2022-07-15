@@ -1,7 +1,10 @@
-import 'package:conquer_flutter_app/pages/Daily.dart';
-
+import 'package:animations/animations.dart';
+import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+// import 'package:animations/animations.dart';
+
+import 'package:conquer_flutter_app/pages/Daily.dart';
 
 class Todos extends StatefulWidget {
   final DateTime day;
@@ -12,10 +15,30 @@ class Todos extends StatefulWidget {
 }
 
 class _TodosState extends State<Todos> {
+  String widget_shown = "button";
+
   String formattedDate() {
     final DateFormat formatter = DateFormat('d MMM');
     final String formatted = formatter.format(widget.day);
     return formatted;
+  }
+
+  Widget addButton() {
+    return MaterialButton(
+      shape: const CircleBorder(),
+      color: const Color(0xffBA99FF),
+      padding: const EdgeInsets.all(8),
+      onPressed: () {
+        setState(() {
+          widget_shown = "modal";
+        });
+      },
+      child: const Icon(
+        Icons.add,
+        size: 30,
+        color: Color.fromARGB(255, 47, 15, 83),
+      ),
+    );
   }
 
   @override
@@ -26,7 +49,7 @@ class _TodosState extends State<Todos> {
     return Column(
       children: [
         Container(
-          margin: const EdgeInsets.fromLTRB(5, 25, 5, 5),
+          margin: const EdgeInsets.fromLTRB(5, 40, 5, 5),
           width: screenWidth * 0.5,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -35,6 +58,7 @@ class _TodosState extends State<Todos> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
+                tooltip: "Back",
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
                   color: Color(0xff9A9A9A),
@@ -51,6 +75,7 @@ class _TodosState extends State<Todos> {
               ),
               IconButton(
                 onPressed: () {},
+                tooltip: "Sort by category",
                 icon: const Icon(
                   Icons.filter_list,
                   color: Color(0xffE2DDFF),
@@ -64,17 +89,29 @@ class _TodosState extends State<Todos> {
           child: Align(
             alignment: FractionalOffset.bottomRight,
             child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              child: MaterialButton(
-                shape: const CircleBorder(),
-                color: const Color(0xffBA99FF),
-                padding: const EdgeInsets.all(8),
-                onPressed: () {},
-                child: const Icon(
-                  Icons.add,
-                  size: 28,
-                  color: Color.fromARGB(255, 47, 15, 83),
-                ),
+              margin: const EdgeInsets.fromLTRB(0, 0, 15, 15),
+              child: OpenContainer(
+                useRootNavigator: true,
+                closedShape: const CircleBorder(),
+                closedColor: const Color(0xffBA99FF).withOpacity(0.9),
+                transitionDuration: const Duration(milliseconds: 500),
+                closedBuilder: (context, action) {
+                  return FloatingActionButton(
+                    tooltip: "Add New Task",
+                    onPressed: () {
+                      action.call();
+                    },
+                    backgroundColor: const Color(0xffBA99FF).withOpacity(0.9),
+                    child: const Icon(
+                      Icons.add,
+                      size: 30,
+                      color: Color.fromARGB(255, 47, 15, 83),
+                    ),
+                  );
+                },
+                openBuilder: (context, action) {
+                  return InputModal(action: action);
+                },
               ),
             ),
           ),

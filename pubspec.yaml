@@ -37,6 +37,7 @@ dependencies:
   google_nav_bar: ^5.0.6
   table_calendar: ^3.0.6
   shared_preferences: ^2.0.15
+  animations: ^2.0.3
 
 dev_dependencies:
   flutter_test:

@@ -19,7 +19,7 @@ class _DailyPageState extends State<DailyPage> {
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          margin: const EdgeInsets.only(top: 15),
+          margin: const EdgeInsets.only(top: 33),
           child: TableCalendar(
             focusedDay: DateTime.now(),
             firstDay: DateTime.utc(2022, 1, 1),

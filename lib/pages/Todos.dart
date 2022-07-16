@@ -49,7 +49,6 @@ class _TodosState extends State<Todos> {
     return Column(
       children: [
         Container(
-          margin: const EdgeInsets.fromLTRB(5, 40, 5, 5),
           width: screenWidth * 0.5,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

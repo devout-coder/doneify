@@ -19,14 +19,12 @@ class _DailyPageState extends State<DailyPage> {
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          margin: const EdgeInsets.only(top: 33),
           child: TableCalendar(
             focusedDay: DateTime.now(),
             firstDay: DateTime.utc(2022, 1, 1),
             lastDay: DateTime.utc(2099, 12, 31),
             calendarFormat: CalendarFormat.month,
             headerStyle: const HeaderStyle(
-              headerMargin: EdgeInsets.all(8),
               formatButtonVisible: false,
               leftChevronIcon: Icon(
                 Icons.arrow_back_ios_new_rounded,
@@ -70,11 +68,9 @@ class _DailyPageState extends State<DailyPage> {
               ),
             ),
             onDaySelected: (focussedDay, selectedDay) {
-              debugPrint(selectedDay.toString());
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Todos(day: selectedDay)));
+              // debugPrint(selectedDay.toString());
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Todos(day: selectedDay)));
             },
           ),
         ),

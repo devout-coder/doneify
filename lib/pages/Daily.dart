@@ -1,8 +1,52 @@
 import 'dart:ui';
 
+import 'package:conquer_flutter_app/navigatorKeys.dart';
+import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+class DailyNavigator extends StatefulWidget {
+  DailyNavigator({Key? key}) : super(key: key);
+
+  @override
+  State<DailyNavigator> createState() => _DailyNavigatorState();
+}
+
+class _DailyNavigatorState extends State<DailyNavigator> {
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: dayNavigatorKey,
+      onGenerateRoute: (RouteSettings settings) {
+        // Cast the arguments to the correct
+        // type: ScreenArguments.
+        if (settings.name == "/todos") {
+          final args = settings.arguments as ScreenArguments;
+          return MaterialPageRoute(
+            builder: (context) {
+              return Todos(
+                day: args.day,
+              );
+            },
+          );
+        } else {
+          return MaterialPageRoute(
+            builder: (context) {
+              return DailyPage();
+            },
+          );
+        }
+      },
+    );
+  }
+}
+
+class ScreenArguments {
+  final DateTime day;
+
+  ScreenArguments(this.day);
+}
 
 class DailyPage extends StatefulWidget {
   DailyPage({Key? key}) : super(key: key);
@@ -68,9 +112,8 @@ class _DailyPageState extends State<DailyPage> {
               ),
             ),
             onDaySelected: (focussedDay, selectedDay) {
-              // debugPrint(selectedDay.toString());
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Todos(day: selectedDay)));
+              Navigator.pushNamed(context, "/todos",
+                  arguments: ScreenArguments(selectedDay));
             },
           ),
         ),

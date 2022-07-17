@@ -5,6 +5,13 @@ class WeeklyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return WillPopScope(
+      child: Container(),
+      onWillPop: () async {
+        debugPrint('back is pressed in weekly');
+        Navigator.pop(context, true);
+        return false;
+      },
+    );
   }
 }

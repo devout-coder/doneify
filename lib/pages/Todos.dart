@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:conquer_flutter_app/pages/Daily.dart';
 
 class Todos extends StatefulWidget {
+  static const routeName = '/todos';
   final DateTime day;
   const Todos({Key? key, required this.day}) : super(key: key);
 
@@ -44,25 +45,16 @@ class _TodosState extends State<Todos> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
     return Column(
       children: [
         Container(
-          width: screenWidth * 0.5,
+          // width: screenWidth * 0.3,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                tooltip: "Back",
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Color(0xff9A9A9A),
-                  size: 30,
-                ),
+              const SizedBox(
+                width: 60,
               ),
               Text(
                 formattedDate(),
@@ -71,6 +63,9 @@ class _TodosState extends State<Todos> {
                     fontWeight: FontWeight.w600,
                     fontSize: 20,
                     color: Color(0xffffffff)),
+              ),
+              const SizedBox(
+                width: 20,
               ),
               IconButton(
                 onPressed: () {},

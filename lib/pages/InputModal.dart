@@ -1,12 +1,7 @@
-import 'package:conquer_flutter_app/globalClasses.dart';
+import 'package:conquer_flutter_app/components/AddLabelDialog.dart';
+import 'package:conquer_flutter_app/globalStuff.dart';
+
 import 'package:flutter/material.dart';
-
-class Label {
-  String name;
-  Color color;
-
-  Label(this.name, this.color);
-}
 
 class InputModal extends StatefulWidget {
   final action;
@@ -17,10 +12,6 @@ class InputModal extends StatefulWidget {
 }
 
 class _InputModalState extends State<InputModal> {
-  List<Label> labels = [
-    Label("General", Colors.blue),
-  ];
-
   @override
   Widget build(BuildContext context) {
     // Todo newTodo = Todo("", "");
@@ -109,94 +100,7 @@ class _InputModalState extends State<InputModal> {
                         },
                         transitionBuilder: (ctx, a1, a2, child) {
                           var curve = Curves.easeInOut.transform(a1.value);
-                          return WillPopScope(
-                              child: Transform.scale(
-                                scale: curve,
-                                child: SafeArea(
-                                  child: Expanded(
-                                    child: SimpleDialog(
-                                      contentPadding:
-                                          EdgeInsets.fromLTRB(0, 10, 0, 5),
-                                      titlePadding:
-                                          EdgeInsets.fromLTRB(20, 20, 20, 0),
-                                      title: const Text('Select Label'),
-                                      children: <Widget>[
-                                        Container(
-                                          height: screenHeight * 0.4,
-                                          width: screenWidth * 0.9,
-                                          child: ListView.builder(
-                                              padding: const EdgeInsets.all(8),
-                                              itemCount: labels.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Radio<String>(
-                                                          value: labels[index]
-                                                              .name,
-                                                          groupValue:
-                                                              labels[index]
-                                                                  .name,
-                                                          onChanged:
-                                                              (String? value) {
-                                                            setState(() {
-                                                              labels[index]
-                                                                      .name =
-                                                                  value!;
-                                                            });
-                                                          },
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 15,
-                                                        ),
-                                                        CircleAvatar(
-                                                          radius: 18,
-                                                          backgroundColor:
-                                                              Colors.black87,
-                                                          child: CircleAvatar(
-                                                            radius: 16,
-                                                            backgroundColor:
-                                                                labels[index]
-                                                                    .color,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 10,
-                                                        ),
-                                                        Text(
-                                                          labels[index].name,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () {},
-                                                      icon: const Icon(
-                                                        Icons.create_rounded,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                );
-                                              }),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {},
-                                          child: const Text("Select label"),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              onWillPop: () async {
-                                debugPrint("back pressed now");
-                                return true;
-                              });
+                          return AddLabelDialog(curve: curve);
                         },
                         transitionDuration: const Duration(milliseconds: 300),
                       )

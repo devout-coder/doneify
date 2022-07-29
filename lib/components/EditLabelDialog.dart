@@ -2,6 +2,7 @@ import 'package:conquer_flutter_app/components/NewColorDialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditLabelDialog extends StatefulWidget {
   final double curve;
@@ -12,16 +13,69 @@ class EditLabelDialog extends StatefulWidget {
 }
 
 class _EditLabelDialogState extends State<EditLabelDialog> {
-  Color currentColor = Colors.amber;
-  List<Color> currentColors = [
-    Colors.yellow,
-    Colors.green,
-    Colors.red,
-    Colors.blue,
-    Colors.purple,
-  ];
+  final tagName = TextEditingController();
 
-  void changeColor(Color color) => setState(() => currentColor = color);
+  Color? selectedColor;
+
+  List<Color> displayedColors = [];
+
+  void changeColor(Color color) => setState(() => selectedColor = color);
+
+  Color stringToColor(String strColor) {
+    String colorString = strColor.toString(); // Color(0x12345678)
+    String valueString =
+        colorString.split('(0x')[1].split(')')[0]; // kind of hacky..
+    int value = int.parse(valueString, radix: 16);
+    Color color = Color(value);
+    return color;
+  }
+
+  void handleNewColor(Color newColor) {
+    if (!displayedColors.contains(newColor)) {
+      List<Color> newCols = [...displayedColors, newColor];
+      setState(() {
+        displayedColors = newCols;
+      });
+      List<String> stringCols = newCols.map((e) => e.toString()).toList();
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setStringList("label_colors", stringCols);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    SharedPreferences.getInstance().then((prefs) {
+      List<String> storedColors = prefs.getStringList('label_colors') ?? [];
+      debugPrint("stored colors first" + storedColors.toString());
+      if (storedColors.isEmpty) {
+        List<String> colors = [
+          Colors.yellow.toString(),
+          Colors.green.toString(),
+          Colors.red.toString(),
+          Colors.blue.toString(),
+          Colors.white.toString(),
+        ];
+        prefs.setStringList("label_colors", colors);
+        storedColors = colors;
+        // debugPrint("stored colors after setting: " + storedColors.toString());
+      }
+      setState(() {
+        displayedColors =
+            storedColors.map((color) => stringToColor(color)).toList();
+      });
+      // debugPrint("stored colors at last: " + storedColors.toString());
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    tagName.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +92,15 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
                     contentPadding: EdgeInsets.fromLTRB(0, 10, 0, 5),
                     titlePadding: EdgeInsets.fromLTRB(20, 10, 20, 0),
                     title: TextFormField(
-                      //! taskName text field
+                      //! tag name text field
+                      controller: tagName,
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 25,
                         fontWeight: FontWeight.w500,
                       ),
                       decoration: const InputDecoration(
-                        hintText: "Task Name",
+                        hintText: "Tag Name",
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -59,7 +114,7 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
                         height: screenHeight * 0.3,
                         padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
                         child: GridView.builder(
-                          itemCount: currentColors.length + 1,
+                          itemCount: displayedColors.length + 1,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 5,
@@ -69,52 +124,75 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
                           itemBuilder: (BuildContext context, int index) {
                             return GestureDetector(
                               onTap: () {
-                                changeColor(currentColors[index]);
+                                changeColor(displayedColors[index]);
                               },
-                              child: index != currentColors.length
+                              child: (selectedColor != null &&
+                                      index ==
+                                          displayedColors
+                                              .indexOf(selectedColor!))
                                   ? CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Colors.black54,
+                                      radius: 27,
+                                      backgroundColor: Colors.black87,
                                       child: CircleAvatar(
-                                        backgroundColor: currentColors[index],
-                                        radius: 21,
+                                        backgroundColor: displayedColors[index],
+                                        radius: 20,
                                       ),
                                     )
-                                  : CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Colors.black54,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          showGeneralDialog(
-                                            //! add label dialog box
-                                            context: context,
-                                            pageBuilder: (BuildContext context,
-                                                Animation<double> animation,
-                                                Animation<double>
-                                                    secondaryAnimation) {
-                                              return Container();
+                                  : index != displayedColors.length
+                                      ? CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.black54,
+                                          child: CircleAvatar(
+                                            backgroundColor:
+                                                displayedColors[index],
+                                            radius: 21,
+                                          ),
+                                        )
+                                      : CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.black54,
+                                          child: IconButton(
+                                            onPressed: () {
+                                              showGeneralDialog(
+                                                //! new color dialog box
+                                                context: context,
+                                                pageBuilder: (BuildContext
+                                                        context,
+                                                    Animation<double> animation,
+                                                    Animation<double>
+                                                        secondaryAnimation) {
+                                                  return Container();
+                                                },
+                                                transitionBuilder:
+                                                    (ctx, a1, a2, child) {
+                                                  var curve = Curves.easeInOut
+                                                      .transform(a1.value);
+                                                  return NewColorDialog(
+                                                      curve: curve,
+                                                      handleNewColor:
+                                                          handleNewColor);
+                                                },
+                                                transitionDuration:
+                                                    const Duration(
+                                                        milliseconds: 300),
+                                              );
                                             },
-                                            transitionBuilder:
-                                                (ctx, a1, a2, child) {
-                                              var curve = Curves.easeInOut
-                                                  .transform(a1.value);
-                                              return NewColorDialog(
-                                                  curve: curve);
-                                            },
-                                            transitionDuration: const Duration(
-                                                milliseconds: 300),
-                                          );
-                                        },
-                                        tooltip: "Add new color",
-                                        icon: const Icon(
-                                          Icons.add,
-                                          size: 30,
+                                            tooltip: "Add new color",
+                                            icon: const Icon(
+                                              Icons.add,
+                                              size: 30,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
                             );
                           },
                         ),
+                      ),
+                      ElevatedButton(
+                        onPressed: tagName.text != "" && selectedColor != null
+                            ? () {}
+                            : null,
+                        child: const Text("Save changes"),
                       ),
                     ],
                   ),

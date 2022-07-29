@@ -4,14 +4,17 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class NewColorDialog extends StatefulWidget {
   final double curve;
-  NewColorDialog({Key? key, required this.curve}) : super(key: key);
+  final handleNewColor;
+  const NewColorDialog(
+      {Key? key, required this.curve, required this.handleNewColor})
+      : super(key: key);
 
   @override
   State<NewColorDialog> createState() => _NewColorDialogState();
 }
 
 class _NewColorDialogState extends State<NewColorDialog> {
-  Color selectedColor = Colors.white;
+  Color newSelectedColor = Colors.white;
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +30,19 @@ class _NewColorDialogState extends State<NewColorDialog> {
                     titlePadding: EdgeInsets.fromLTRB(20, 10, 20, 0),
                     children: [
                       ColorPicker(
-                        pickerColor: selectedColor, //default color
+                        pickerColor: newSelectedColor, //default color
                         onColorChanged: (Color color) {
                           setState(() {
-                            selectedColor = color;
+                            newSelectedColor = color;
                           });
                         },
                       ),
                       TextButton(
                           onPressed: () {
-                            print("picked color" +
-                                selectedColor.toString() +
+                            debugPrint("picked color" +
+                                newSelectedColor.toString() +
                                 " ");
+                            widget.handleNewColor(newSelectedColor);
                             Navigator.pop(context);
                           },
                           child: const Text("Save Color")),

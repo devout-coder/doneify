@@ -44,7 +44,8 @@ class _AddLabelDialogState extends State<AddLabelDialog> {
                             itemCount: labels.length,
                             itemBuilder: (BuildContext context, int index) {
                               return Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
@@ -77,6 +78,7 @@ class _AddLabelDialogState extends State<AddLabelDialog> {
                                     ],
                                   ),
                                   IconButton(
+                                    tooltip: "Edit label",
                                     onPressed: () {},
                                     icon: const Icon(
                                       Icons.create_rounded,
@@ -86,25 +88,42 @@ class _AddLabelDialogState extends State<AddLabelDialog> {
                               );
                             }),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          showGeneralDialog(
-                            //! add label dialog box
-                            context: context,
-                            pageBuilder: (BuildContext context,
-                                Animation<double> animation,
-                                Animation<double> secondaryAnimation) {
-                              return Container();
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            tooltip: "Add new label",
+                            onPressed: () {
+                              showGeneralDialog(
+                                //! edit label dialog box
+                                context: context,
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return Container();
+                                },
+                                transitionBuilder: (ctx, a1, a2, child) {
+                                  var curve =
+                                      Curves.easeInOut.transform(a1.value);
+                                  return EditLabelDialog(curve: curve);
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              );
                             },
-                            transitionBuilder: (ctx, a1, a2, child) {
-                              var curve = Curves.easeInOut.transform(a1.value);
-                              return EditLabelDialog(curve: curve);
+                            icon: const Icon(
+                              Icons.add_rounded,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: "Save current label",
+                            onPressed: () {
+                              Navigator.pop(context);
                             },
-                            transitionDuration: const Duration(milliseconds: 300),
-                          );
-                        },
-                        child: const Text("Select label"),
-                      ),
+                            icon: Icon(Icons.check_rounded),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

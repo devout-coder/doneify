@@ -4,16 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class EditLabelDialog extends StatefulWidget {
+class AddOrEditLabelDialog extends StatefulWidget {
   final double curve;
-  EditLabelDialog({Key? key, required this.curve}) : super(key: key);
+  String? labelName;
+  Color? labelColor;
+  final addLabel;
+
+  AddOrEditLabelDialog(
+      {Key? key,
+      required this.curve,
+      this.labelName,
+      this.labelColor,
+      this.addLabel})
+      : super(key: key);
 
   @override
-  State<EditLabelDialog> createState() => _EditLabelDialogState();
+  State<AddOrEditLabelDialog> createState() => _AddOrEditLabelDialogState();
 }
 
-class _EditLabelDialogState extends State<EditLabelDialog> {
+Color stringToColor(String strColor) {
+  String colorString = strColor.toString(); // Color(0x12345678)
+  String valueString =
+      colorString.split('(0x')[1].split(')')[0]; // kind of hacky..
+  int value = int.parse(valueString, radix: 16);
+  Color color = Color(value);
+  return color;
+}
+
+class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
   final tagName = TextEditingController();
+  // ..text = widget.labelName != null ? widget.labelName! : "";
 
   Color? selectedColor;
 
@@ -21,16 +41,8 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
 
   void changeColor(Color color) => setState(() => selectedColor = color);
 
-  Color stringToColor(String strColor) {
-    String colorString = strColor.toString(); // Color(0x12345678)
-    String valueString =
-        colorString.split('(0x')[1].split(')')[0]; // kind of hacky..
-    int value = int.parse(valueString, radix: 16);
-    Color color = Color(value);
-    return color;
-  }
-
   void handleNewColor(Color newColor) {
+    //add a new color to the palette and storage as well
     if (!displayedColors.contains(newColor)) {
       List<Color> newCols = [...displayedColors, newColor];
       setState(() {
@@ -45,9 +57,14 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
 
   @override
   void initState() {
+    tagName.text = widget.labelName != null ? widget.labelName! : "";
+    setState(() {
+      selectedColor = widget.labelColor != null ? widget.labelColor! : null;
+    });
+
     SharedPreferences.getInstance().then((prefs) {
       List<String> storedColors = prefs.getStringList('label_colors') ?? [];
-      debugPrint("stored colors first" + storedColors.toString());
+      // debugPrint("stored colors first" + storedColors.toString());
       if (storedColors.isEmpty) {
         List<String> colors = [
           Colors.yellow.toString(),
@@ -132,10 +149,11 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
                                               .indexOf(selectedColor!))
                                   ? CircleAvatar(
                                       radius: 27,
-                                      backgroundColor: Colors.black87,
+                                      backgroundColor:
+                                          Color.fromARGB(221, 50, 50, 50),
                                       child: CircleAvatar(
                                         backgroundColor: displayedColors[index],
-                                        radius: 20,
+                                        radius: 19,
                                       ),
                                     )
                                   : index != displayedColors.length
@@ -188,12 +206,48 @@ class _EditLabelDialogState extends State<EditLabelDialog> {
                           },
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: tagName.text != "" && selectedColor != null
-                            ? () {}
-                            : null,
-                        child: const Text("Save changes"),
-                      ),
+                      widget.labelName != null
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  tooltip: "Delete tag",
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(Icons.delete),
+                                ),
+                                IconButton(
+                                  tooltip: "Save changes",
+                                  onPressed: tagName.text != "" &&
+                                          selectedColor != null &&
+                                          (widget.labelName != tagName.text ||
+                                              widget.labelColor !=
+                                                  selectedColor)
+                                      ? () {
+                                          Navigator.pop(context);
+                                        }
+                                      : null,
+                                  icon: const Icon(Icons.check_rounded),
+                                ),
+                              ],
+                            )
+                          : IconButton(
+                              tooltip: "Save changes",
+                              onPressed: tagName.text != "" &&
+                                      selectedColor != null &&
+                                      (widget.labelName != tagName.text ||
+                                          widget.labelColor != selectedColor)
+                                  ? () {
+                                      if (widget.addLabel != null) {
+                                        widget.addLabel(
+                                            tagName.text, selectedColor);
+                                      }
+                                      Navigator.pop(context);
+                                    }
+                                  : null,
+                              icon: const Icon(Icons.check_rounded),
+                            )
                     ],
                   ),
                 ),

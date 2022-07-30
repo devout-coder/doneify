@@ -1,4 +1,4 @@
-import 'package:conquer_flutter_app/components/AddLabelDialog.dart';
+import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
 import 'package:conquer_flutter_app/globalStuff.dart';
 
 import 'package:flutter/material.dart';
@@ -100,7 +100,7 @@ class _InputModalState extends State<InputModal> {
                         },
                         transitionBuilder: (ctx, a1, a2, child) {
                           var curve = Curves.easeInOut.transform(a1.value);
-                          return AddLabelDialog(curve: curve);
+                          return SelectLabelDialog(curve: curve);
                         },
                         transitionDuration: const Duration(milliseconds: 300),
                       )

@@ -1,15 +1,10 @@
 import 'dart:convert';
 
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Label {
-  String name;
-  Color color;
-
-  Label(this.name, this.color);
-}
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SelectLabelDialog extends StatefulWidget {
   final double curve;
@@ -21,7 +16,19 @@ class SelectLabelDialog extends StatefulWidget {
 
 class _SelectLabelDialogState extends State<SelectLabelDialog> {
   List<Label> labels = [];
-  String selectedLabel = "General";
+  int selectedLabel = 0;
+
+  List<Label> extractLabels(String labelsString) {
+    List<dynamic> decodedMap = jsonDecode(labelsString);
+    List<Label> storedLabels = [];
+    decodedMap.forEach((element) {
+      String name = element["name"];
+      String color = element["color"];
+      Label thisLabel = Label(name, stringToColor(color));
+      storedLabels.add(thisLabel);
+    });
+    return storedLabels;
+  }
 
   void addLabel(String labelName, Color labelColor) {
     Label newLabel = Label(labelName, labelColor);
@@ -31,6 +38,50 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
     });
     List<Map<String, dynamic>> mapList = [];
     newLabelList.forEach((element) {
+      Map<String, dynamic> eachMap = {
+        'name': element.name,
+        'color': element.color.toString()
+      };
+      mapList.add(eachMap);
+    });
+    String labelsJSON = jsonEncode(mapList);
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('labels', labelsJSON);
+    });
+  }
+
+  void editLabel(String labelName, Color labelColor, int index) {
+    Label newLabel = Label(labelName, labelColor);
+    List<Label> newLabelList = [...labels];
+    newLabelList[index] = newLabel;
+    setState(() {
+      labels = newLabelList;
+    });
+    List<Map<String, dynamic>> mapList = [];
+    newLabelList.forEach((element) {
+      Map<String, dynamic> eachMap = {
+        'name': element.name,
+        'color': element.color.toString()
+      };
+      mapList.add(eachMap);
+    });
+    String labelsJSON = jsonEncode(mapList);
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('labels', labelsJSON);
+    });
+  }
+
+  void deleteLabel(int labelIndex) {
+    if (labelIndex == selectedLabel) {
+      setState(() {
+        selectedLabel = 0;
+      });
+    }
+    setState(() {
+      labels.removeAt(labelIndex);
+    });
+    List<Map<String, dynamic>> mapList = [];
+    labels.forEach((element) {
       Map<String, dynamic> eachMap = {
         'name': element.name,
         'color': element.color.toString()
@@ -59,17 +110,8 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
         stringStoredLabels = labelsJSON;
       }
       // debugPrint(stringStoredLabels);
-
-      List<dynamic> decodedMap = jsonDecode(stringStoredLabels);
-      List<Label> storedLabels = [];
-      decodedMap.forEach((element) {
-        String name = element["name"];
-        String color = element["color"];
-        Label thisLabel = Label(name, stringToColor(color));
-        storedLabels.add(thisLabel);
-      });
       setState(() {
-        labels = storedLabels;
+        labels = extractLabels(stringStoredLabels);
       });
     });
 
@@ -80,6 +122,7 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+
     return WillPopScope(
         child: Transform.scale(
           scale: widget.curve,
@@ -103,7 +146,7 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () => {
                                   setState(() {
-                                    selectedLabel = labels[index].name;
+                                    selectedLabel = index;
                                   })
                                 },
                                 child: Row(
@@ -113,16 +156,13 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                     Row(
                                       children: [
                                         Radio(
-                                          value: labels[index].name,
+                                          value: index,
                                           groupValue: selectedLabel,
-                                          onChanged: (String? value) {
+                                          onChanged: (int? value) {
                                             setState(() {
                                               selectedLabel = value!;
                                             });
                                           },
-                                        ),
-                                        const SizedBox(
-                                          width: 15,
                                         ),
                                         CircleAvatar(
                                           radius: 18,
@@ -142,35 +182,69 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                         ),
                                       ],
                                     ),
-                                    IconButton(
-                                      tooltip: "Edit label",
-                                      onPressed: () {
-                                        showGeneralDialog(
-                                          //! edit label dialog box
-                                          context: context,
-                                          pageBuilder: (BuildContext context,
-                                              Animation<double> animation,
-                                              Animation<double>
-                                                  secondaryAnimation) {
-                                            return Container();
-                                          },
-                                          transitionBuilder:
-                                              (ctx, a1, a2, child) {
-                                            var curve = Curves.easeInOut
-                                                .transform(a1.value);
-                                            return AddOrEditLabelDialog(
-                                              curve: curve,
-                                              labelName: labels[index].name,
-                                              labelColor: labels[index].color,
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          tooltip: "Edit label",
+                                          onPressed: () {
+                                            showGeneralDialog(
+                                              //! edit label dialog box
+                                              context: context,
+                                              pageBuilder: (BuildContext
+                                                      context,
+                                                  Animation<double> animation,
+                                                  Animation<double>
+                                                      secondaryAnimation) {
+                                                return Container();
+                                              },
+                                              transitionBuilder:
+                                                  (ctx, a1, a2, child) {
+                                                var curve = Curves.easeInOut
+                                                    .transform(a1.value);
+                                                return AddOrEditLabelDialog(
+                                                  curve: curve,
+                                                  labelName: labels[index].name,
+                                                  labelColor:
+                                                      labels[index].color,
+                                                  labelIndex: index,
+                                                  labels: labels,
+                                                  editLabel: editLabel,
+                                                );
+                                              },
+                                              transitionDuration:
+                                                  const Duration(
+                                                      milliseconds: 300),
                                             );
                                           },
-                                          transitionDuration:
-                                              const Duration(milliseconds: 300),
-                                        );
-                                      },
-                                      icon: const Icon(
-                                        Icons.create_rounded,
-                                      ),
+                                          icon: const Icon(
+                                            Icons.create_rounded,
+                                            color:
+                                                Color.fromARGB(255, 99, 99, 99),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          tooltip: "Delete tag",
+                                          onPressed: labels.length > 1
+                                              ? () {
+                                                  deleteLabel(index);
+                                                }
+                                              : () {
+                                                  Fluttertoast.showToast(
+                                                    msg:
+                                                        "Atleast one label required",
+                                                    toastLength:
+                                                        Toast.LENGTH_SHORT,
+                                                    gravity:
+                                                        ToastGravity.CENTER,
+                                                  );
+                                                },
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color:
+                                                Color.fromARGB(255, 99, 99, 99),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -195,7 +269,10 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                   var curve =
                                       Curves.easeInOut.transform(a1.value);
                                   return AddOrEditLabelDialog(
-                                      curve: curve, addLabel: addLabel);
+                                    curve: curve,
+                                    labels: labels,
+                                    addLabel: addLabel,
+                                  );
                                 },
                                 transitionDuration:
                                     const Duration(milliseconds: 300),

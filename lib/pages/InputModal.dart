@@ -1,5 +1,5 @@
 import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
-import 'package:conquer_flutter_app/globalStuff.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
 
 import 'package:flutter/material.dart';
 

@@ -1,22 +1,31 @@
 import 'package:conquer_flutter_app/components/NewColorDialog.dart';
+import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddOrEditLabelDialog extends StatefulWidget {
   final double curve;
   String? labelName;
   Color? labelColor;
+  int? labelIndex;
   final addLabel;
+  final editLabel;
+  List<Label> labels;
 
-  AddOrEditLabelDialog(
-      {Key? key,
-      required this.curve,
-      this.labelName,
-      this.labelColor,
-      this.addLabel})
-      : super(key: key);
+  AddOrEditLabelDialog({
+    Key? key,
+    required this.curve,
+    this.labelName,
+    this.labelColor,
+    this.labelIndex,
+    this.addLabel,
+    this.editLabel,
+    required this.labels,
+  }) : super(key: key);
 
   @override
   State<AddOrEditLabelDialog> createState() => _AddOrEditLabelDialogState();
@@ -33,13 +42,23 @@ Color stringToColor(String strColor) {
 
 class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
   final tagName = TextEditingController();
-  // ..text = widget.labelName != null ? widget.labelName! : "";
 
   Color? selectedColor;
 
   List<Color> displayedColors = [];
 
   void changeColor(Color color) => setState(() => selectedColor = color);
+
+  bool labelPresent(String name, Color color) {
+    bool present = false;
+    for (int i = 0; i < widget.labels.length; i++) {
+      if ((i != widget.labelIndex && widget.labels[i].name == name) ||
+          (i != widget.labelIndex && widget.labels[i].color == color)) {
+        present = true;
+      }
+    }
+    return present;
+  }
 
   void handleNewColor(Color newColor) {
     //add a new color to the palette and storage as well
@@ -52,6 +71,23 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
       SharedPreferences.getInstance().then((prefs) {
         prefs.setStringList("label_colors", stringCols);
       });
+    }
+  }
+
+  void saveLabel() {
+    if (!labelPresent(tagName.text, selectedColor!)) {
+      if (widget.addLabel != null) {
+        widget.addLabel(tagName.text, selectedColor);
+      } else {
+        widget.editLabel(tagName.text, selectedColor, widget.labelIndex);
+      }
+      Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(
+        msg: "Name or color matches with previous label",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
     }
   }
 
@@ -206,48 +242,18 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
                           },
                         ),
                       ),
-                      widget.labelName != null
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                IconButton(
-                                  tooltip: "Delete tag",
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: const Icon(Icons.delete),
-                                ),
-                                IconButton(
-                                  tooltip: "Save changes",
-                                  onPressed: tagName.text != "" &&
-                                          selectedColor != null &&
-                                          (widget.labelName != tagName.text ||
-                                              widget.labelColor !=
-                                                  selectedColor)
-                                      ? () {
-                                          Navigator.pop(context);
-                                        }
-                                      : null,
-                                  icon: const Icon(Icons.check_rounded),
-                                ),
-                              ],
-                            )
-                          : IconButton(
-                              tooltip: "Save changes",
-                              onPressed: tagName.text != "" &&
-                                      selectedColor != null &&
-                                      (widget.labelName != tagName.text ||
-                                          widget.labelColor != selectedColor)
-                                  ? () {
-                                      if (widget.addLabel != null) {
-                                        widget.addLabel(
-                                            tagName.text, selectedColor);
-                                      }
-                                      Navigator.pop(context);
-                                    }
-                                  : null,
-                              icon: const Icon(Icons.check_rounded),
-                            )
+                      IconButton(
+                        tooltip: "Save changes",
+                        onPressed: tagName.text != "" &&
+                                selectedColor != null &&
+                                (widget.labelName != tagName.text ||
+                                    widget.labelColor != selectedColor)
+                            ? () {
+                                saveLabel();
+                              }
+                            : null,
+                        icon: const Icon(Icons.check_rounded),
+                      )
                     ],
                   ),
                 ),

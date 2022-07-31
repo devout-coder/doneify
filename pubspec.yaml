@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.0.15
   animations: ^2.0.3
   flutter_colorpicker: ^1.0.3
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:

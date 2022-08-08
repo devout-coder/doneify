@@ -1,3 +1,4 @@
+import 'package:conquer_flutter_app/database/db.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentPage = 0;
+  final Future _init = DB().initializeDB();
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -50,63 +53,76 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          child: Scaffold(
-            body: IndexedStack(
-              index: currentPage,
-              children: [
-                DailyNavigator(),
-                WeeklyPage(),
-                MonthlyPage(),
-                YearlyPage(),
-                LongTermPage(),
-                SettingsPage()
-              ],
-            ),
-            backgroundColor: Colors.transparent,
-            bottomNavigationBar: GNav(
-              tabBorderRadius: 25,
-              gap: 5, // the tab button gap between icon and text
-              color: const Color(0xff9A9A9A),
-              activeColor: const Color.fromARGB(
-                  255, 47, 15, 83), // selected icon and text color
-              tabBackgroundColor: const Color(0xffBA99FF)
-                  .withOpacity(0.9), // selected tab background color
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 15), // navigation bar padding
+          child: FutureBuilder(
+            future: _init,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Scaffold(
+                  body: IndexedStack(
+                    index: currentPage,
+                    children: [
+                      DailyNavigator(),
+                      WeeklyPage(),
+                      MonthlyPage(),
+                      YearlyPage(),
+                      LongTermPage(),
+                      SettingsPage()
+                    ],
+                  ),
+                  backgroundColor: Colors.transparent,
+                  bottomNavigationBar: GNav(
+                    tabBorderRadius: 25,
+                    gap: 5, // the tab button gap between icon and text
+                    color: const Color(0xff9A9A9A),
+                    activeColor: const Color.fromARGB(
+                        255, 47, 15, 83), // selected icon and text color
+                    tabBackgroundColor: const Color(0xffBA99FF)
+                        .withOpacity(0.9), // selected tab background color
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 15), // navigation bar padding
 
-              tabs: const [
-                GButton(
-                  icon: TimeTypeIcons.day,
-                  text: "Day",
-                ),
-                GButton(
-                  icon: TimeTypeIcons.week,
-                  text: "Week",
-                ),
-                GButton(
-                  icon: TimeTypeIcons.month,
-                  text: "Month",
-                ),
-                GButton(
-                  icon: TimeTypeIcons.year,
-                  text: "Year",
-                ),
-                GButton(
-                  icon: TimeTypeIcons.longterm,
-                  text: "Long Term",
-                ),
-                GButton(
-                  icon: Icons.settings,
-                  text: "Settings",
-                ),
-              ],
-              selectedIndex: currentPage,
-              onTabChange: (index) {
-                setState(() {
-                  currentPage = index;
-                });
-              },
-            ),
+                    tabs: const [
+                      GButton(
+                        icon: TimeTypeIcons.day,
+                        text: "Day",
+                      ),
+                      GButton(
+                        icon: TimeTypeIcons.week,
+                        text: "Week",
+                      ),
+                      GButton(
+                        icon: TimeTypeIcons.month,
+                        text: "Month",
+                      ),
+                      GButton(
+                        icon: TimeTypeIcons.year,
+                        text: "Year",
+                      ),
+                      GButton(
+                        icon: TimeTypeIcons.longterm,
+                        text: "Long Term",
+                      ),
+                      GButton(
+                        icon: Icons.settings,
+                        text: "Settings",
+                      ),
+                    ],
+                    selectedIndex: currentPage,
+                    onTabChange: (index) {
+                      setState(() {
+                        currentPage = index;
+                      });
+                    },
+                  ),
+                );
+              } else {
+                return Material(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+            },
           ),
         ),
       ),

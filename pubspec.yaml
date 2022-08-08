@@ -40,6 +40,10 @@ dependencies:
   animations: ^2.0.3
   flutter_colorpicker: ^1.0.3
   fluttertoast: ^8.0.9
+  sembast: ^3.2.0+1
+  path: ^1.8.1
+  path_provider: ^2.0.11
+  get_it: ^7.2.0
 
 dev_dependencies:
   flutter_test:

@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.deepPurple, fontFamily: "EuclidCircular"),
-      home: SplashScreen(),
+      home: HomePage(),
     );
   }
 }

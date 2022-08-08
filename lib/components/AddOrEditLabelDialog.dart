@@ -53,7 +53,8 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
     bool present = false;
     for (int i = 0; i < widget.labels.length; i++) {
       if ((i != widget.labelIndex && widget.labels[i].name == name) ||
-          (i != widget.labelIndex && widget.labels[i].color == color)) {
+          (i != widget.labelIndex &&
+              widget.labels[i].color == color.toString())) {
         present = true;
       }
     }

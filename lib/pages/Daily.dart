@@ -5,6 +5,7 @@ import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 class DailyNavigator extends StatefulWidget {
   DailyNavigator({Key? key}) : super(key: key);
@@ -25,9 +26,7 @@ class _DailyNavigatorState extends State<DailyNavigator> {
           final args = settings.arguments as ScreenArguments;
           return MaterialPageRoute(
             builder: (context) {
-              return Todos(
-                day: args.day,
-              );
+              return Todos(time: args.time, timeType: args.timeType);
             },
           );
         } else {
@@ -43,9 +42,10 @@ class _DailyNavigatorState extends State<DailyNavigator> {
 }
 
 class ScreenArguments {
-  final DateTime day;
+  final String time;
+  final String timeType;
 
-  ScreenArguments(this.day);
+  ScreenArguments(this.time, this.timeType);
 }
 
 class DailyPage extends StatefulWidget {
@@ -57,6 +57,13 @@ class DailyPage extends StatefulWidget {
 
 class _DailyPageState extends State<DailyPage> {
   // CalendarFormat _calendarFormat = CalendarFormat.week;
+
+  String formattedDate(DateTime date) {
+    final DateFormat formatter = DateFormat("d/M/y");
+    final String formatted = formatter.format(date);
+    return formatted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -113,7 +120,8 @@ class _DailyPageState extends State<DailyPage> {
             ),
             onDaySelected: (focussedDay, selectedDay) {
               Navigator.pushNamed(context, "/todos",
-                  arguments: ScreenArguments(selectedDay));
+                  arguments:
+                      ScreenArguments(formattedDate(selectedDay), "daily"));
             },
           ),
         ),

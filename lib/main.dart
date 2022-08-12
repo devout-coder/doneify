@@ -1,5 +1,9 @@
 import 'dart:ffi';
+import 'package:conquer_flutter_app/database/db.dart';
+import 'package:conquer_flutter_app/states/initStates.dart';
+import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,8 +14,16 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // final Future _init = GetItRegister().initializeGlobalStates();
+  final Future _init = DB().initializeDB();
 
   @override
   Widget build(BuildContext context) {
@@ -19,49 +31,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.deepPurple, fontFamily: "EuclidCircular"),
-      home: HomePage(),
-    );
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    SharedPreferences.getInstance().then((prefs) {
-      var isShowed = prefs.getBool("landingShown");
-      // debugPrint("at splash screen landingShown is " + isShowed.toString());
-      if (isShowed != null && isShowed) {
-        //navigate to main page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => HomePage(),
-          ),
-        );
-      } else {
-        //navigate to intro page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LandingPage(),
-          ),
-        );
-      }
-    });
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
+      home: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -74,9 +44,22 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         child: Scaffold(
           body: Center(
-            child: CircularProgressIndicator(),
-          ),
+              child: FutureBuilder(
+                  future: _init,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return const HomePage();
+                    } else {
+                      return const Material(
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                  })),
           backgroundColor: Colors.transparent,
-        ));
+        ),
+      ),
+    );
   }
 }

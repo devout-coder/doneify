@@ -1,30 +1,22 @@
 import 'package:conquer_flutter_app/components/NewColorDialog.dart';
 import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddOrEditLabelDialog extends StatefulWidget {
   final double curve;
-  String? labelName;
-  Color? labelColor;
   int? labelIndex;
-  final addLabel;
-  final editLabel;
-  List<Label> labels;
 
   AddOrEditLabelDialog({
     Key? key,
     required this.curve,
-    this.labelName,
-    this.labelColor,
     this.labelIndex,
-    this.addLabel,
-    this.editLabel,
-    required this.labels,
   }) : super(key: key);
 
   @override
@@ -45,16 +37,30 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
 
   Color? selectedColor;
 
+  int? labelIndex;
+
+  LabelDB labelsDB = GetIt.I.get();
+
   List<Color> displayedColors = [];
 
-  void changeColor(Color color) => setState(() => selectedColor = color);
+  // void changeColor(Color color) => setState(() => selectedColor = color);
+  void changeColor(Color color) {
+    // debugPrint(displayedColors.toString());
+    // displayedColors.forEach((element) {
+    //   debugPrint(element.toString());
+    // });
+    // debugPrint(color.toString());
+    setState(() {
+      selectedColor = color;
+    });
+    // debugPrint(displayedColors.indexOf(selectedColor!).toString());
+  }
 
   bool labelPresent(String name, Color color) {
     bool present = false;
-    for (int i = 0; i < widget.labels.length; i++) {
-      if ((i != widget.labelIndex && widget.labels[i].name == name) ||
-          (i != widget.labelIndex &&
-              widget.labels[i].color == color.toString())) {
+    for (int i = 0; i < labelsDB.labels.length; i++) {
+      if ((i != labelIndex && labelsDB.labels[i].name == name) ||
+          (i != labelIndex && labelsDB.labels[i].color == color.toString())) {
         present = true;
       }
     }
@@ -77,10 +83,11 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
 
   void saveLabel() {
     if (!labelPresent(tagName.text, selectedColor!)) {
-      if (widget.addLabel != null) {
-        widget.addLabel(tagName.text, selectedColor);
+      if (widget.labelIndex != null) {
+        debugPrint("label has been edited");
+        labelsDB.editLabel(tagName.text, selectedColor!, labelIndex!);
       } else {
-        widget.editLabel(tagName.text, selectedColor, widget.labelIndex);
+        labelsDB.addLabel(tagName.text, selectedColor!);
       }
       Navigator.pop(context);
     } else {
@@ -92,34 +99,45 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
     }
   }
 
+  void fetchColorsFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> storedColors = prefs.getStringList('label_colors') ?? [];
+    // debugPrint("stored colors first" + storedColors.toString());
+    if (storedColors.isEmpty) {
+      List<String> colors = [
+        Colors.yellow.toString(),
+        Colors.green.toString(),
+        Colors.red.toString(),
+        Colors.blue.toString(),
+        Colors.white.toString(),
+      ];
+      prefs.setStringList("label_colors", colors);
+      storedColors = colors;
+      // debugPrint("stored colors after setting: " + storedColors.toString());
+    }
+    setState(() {
+      displayedColors =
+          storedColors.map((color) => stringToColor(color)).toList();
+    });
+    // debugPrint("stored colors at last: " + storedColors.toString());
+  }
+
   @override
   void initState() {
-    tagName.text = widget.labelName != null ? widget.labelName! : "";
     setState(() {
-      selectedColor = widget.labelColor != null ? widget.labelColor! : null;
+      labelIndex = widget.labelIndex != null
+          ? widget.labelIndex!
+          : labelsDB.labels.length;
+    });
+    tagName.text =
+        widget.labelIndex != null ? labelsDB.labels[labelIndex!].name : "";
+    setState(() {
+      selectedColor = widget.labelIndex != null
+          ? stringToColor(labelsDB.labels[labelIndex!].color)
+          : null;
     });
 
-    SharedPreferences.getInstance().then((prefs) {
-      List<String> storedColors = prefs.getStringList('label_colors') ?? [];
-      // debugPrint("stored colors first" + storedColors.toString());
-      if (storedColors.isEmpty) {
-        List<String> colors = [
-          Colors.yellow.toString(),
-          Colors.green.toString(),
-          Colors.red.toString(),
-          Colors.blue.toString(),
-          Colors.white.toString(),
-        ];
-        prefs.setStringList("label_colors", colors);
-        storedColors = colors;
-        // debugPrint("stored colors after setting: " + storedColors.toString());
-      }
-      setState(() {
-        displayedColors =
-            storedColors.map((color) => stringToColor(color)).toList();
-      });
-      // debugPrint("stored colors at last: " + storedColors.toString());
-    });
+    fetchColorsFromStorage();
 
     super.initState();
   }
@@ -185,6 +203,7 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
                                           displayedColors
                                               .indexOf(selectedColor!))
                                   ? CircleAvatar(
+                                      //! the selected color
                                       radius: 27,
                                       backgroundColor:
                                           Color.fromARGB(221, 50, 50, 50),
@@ -195,6 +214,7 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
                                     )
                                   : index != displayedColors.length
                                       ? CircleAvatar(
+                                          //!all the normal colors
                                           radius: 20,
                                           backgroundColor: Colors.black54,
                                           child: CircleAvatar(
@@ -204,6 +224,7 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
                                           ),
                                         )
                                       : CircleAvatar(
+                                          //!the add button
                                           radius: 20,
                                           backgroundColor: Colors.black54,
                                           child: IconButton(
@@ -245,10 +266,18 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
                       ),
                       IconButton(
                         tooltip: "Save changes",
-                        onPressed: tagName.text != "" &&
-                                selectedColor != null &&
-                                (widget.labelName != tagName.text ||
-                                    widget.labelColor != selectedColor)
+                        // onPressed: tagName.text != "" &&
+                        //         selectedColor != null &&
+                        //         (labelsDB.labels[labelIndex!].name !=
+                        //                 tagName.text ||
+                        //             stringToColor(labelsDB
+                        //                     .labels[labelIndex!].color) !=
+                        //                 selectedColor)
+                        //     ? () {
+                        //         saveLabel();
+                        //       }
+                        //     : null,
+                        onPressed: tagName.text != "" && selectedColor != null
                             ? () {
                                 saveLabel();
                               }

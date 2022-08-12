@@ -2,22 +2,20 @@ import 'dart:convert';
 
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class SelectLabelDialog extends StatefulWidget {
   final double curve;
   int selectedLabel;
-  final readLabels;
-  List<Label> labels;
   final Function updateSelectedLabel;
   SelectLabelDialog({
     Key? key,
     required this.curve,
     required this.selectedLabel,
-    required this.readLabels,
-    required this.labels,
     required this.updateSelectedLabel,
   }) : super(key: key);
 
@@ -39,75 +37,8 @@ List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
 
 class _SelectLabelDialogState extends State<SelectLabelDialog> {
   int? selectedLabel;
-  void addLabel(String labelName, Color labelColor) {
-    Label newLabel = Label(labelName, labelColor.toString());
-    List<Label> newLabelList = [...widget.labels, newLabel];
-    // setState(() {
-    //   widget.labels = newLabelList;
-    // });
 
-    List<Map<String, dynamic>> mapList = stringifyLabels(newLabelList);
-    String labelsJSON = jsonEncode(mapList);
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('labels', labelsJSON);
-    });
-    widget.readLabels();
-  }
-
-  void editLabel(String labelName, Color labelColor, int index) {
-    Label newLabel = Label(labelName, labelColor.toString());
-    List<Label> newLabelList = [...widget.labels];
-    newLabelList[index] = newLabel;
-    // setState(() {
-    //   widget.labels = newLabelList;
-    // });
-
-    newLabelList.forEach((element) {
-      debugPrint(element.name + " " + element.color);
-    });
-    widget.labels.forEach((element) {
-      debugPrint(element.name + " " + element.color);
-    });
-
-    List<Map<String, dynamic>> mapList = [];
-    newLabelList.forEach((element) {
-      Map<String, dynamic> eachMap = {
-        'name': element.name,
-        'color': element.color.toString()
-      };
-      mapList.add(eachMap);
-    });
-    String labelsJSON = jsonEncode(mapList);
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('labels', labelsJSON);
-    });
-
-    widget.readLabels();
-  }
-
-  void deleteLabel(int labelIndex) {
-    if (labelIndex == selectedLabel) {
-      widget.updateSelectedLabel(0);
-      setState(() {
-        selectedLabel = 0;
-      });
-    }
-    setState(() {
-      widget.labels.removeAt(labelIndex);
-    });
-    List<Map<String, dynamic>> mapList = [];
-    widget.labels.forEach((element) {
-      Map<String, dynamic> eachMap = {
-        'name': element.name,
-        'color': element.color.toString()
-      };
-      mapList.add(eachMap);
-    });
-    String labelsJSON = jsonEncode(mapList);
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('labels', labelsJSON);
-    });
-  }
+  LabelDB labelsDB = GetIt.I.get();
 
   @override
   void initState() {
@@ -137,7 +68,7 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                         width: screenWidth * 0.9,
                         child: ListView.builder(
                             padding: const EdgeInsets.all(8),
-                            itemCount: widget.labels.length,
+                            itemCount: labelsDB.labels.length,
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 behavior: HitTestBehavior.translucent,
@@ -171,14 +102,14 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                           child: CircleAvatar(
                                             radius: 15,
                                             backgroundColor: stringToColor(
-                                                widget.labels[index].color),
+                                                labelsDB.labels[index].color),
                                           ),
                                         ),
                                         const SizedBox(
                                           width: 10,
                                         ),
                                         Text(
-                                          widget.labels[index].name,
+                                          labelsDB.labels[index].name,
                                         ),
                                       ],
                                     ),
@@ -203,14 +134,7 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                                     .transform(a1.value);
                                                 return AddOrEditLabelDialog(
                                                   curve: curve,
-                                                  labelName:
-                                                      widget.labels[index].name,
-                                                  labelColor: stringToColor(
-                                                      widget
-                                                          .labels[index].color),
                                                   labelIndex: index,
-                                                  labels: widget.labels,
-                                                  editLabel: editLabel,
                                                 );
                                               },
                                               transitionDuration:
@@ -226,9 +150,17 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                         ),
                                         IconButton(
                                           tooltip: "Delete tag",
-                                          onPressed: widget.labels.length > 1
+                                          onPressed: labelsDB.labels.length > 1
                                               ? () {
-                                                  deleteLabel(index);
+                                                  if (index == selectedLabel) {
+                                                    widget
+                                                        .updateSelectedLabel(0);
+                                                    setState(() {
+                                                      selectedLabel = 0;
+                                                    });
+                                                  }
+                                                  labelsDB.deleteLabel(index);
+                                                  setState(() {});
                                                 }
                                               : () {
                                                   Fluttertoast.showToast(
@@ -272,8 +204,6 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                       Curves.easeInOut.transform(a1.value);
                                   return AddOrEditLabelDialog(
                                     curve: curve,
-                                    labels: widget.labels,
-                                    addLabel: addLabel,
                                   );
                                 },
                                 transitionDuration:

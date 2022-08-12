@@ -13,7 +13,7 @@ class Todo {
   String taskName;
   String taskDesc;
   bool finished;
-  Label label;
+  String labelName;
   int timeStamp;
   String time;
   String timeType;
@@ -21,21 +21,17 @@ class Todo {
   // List<Map<String, int>> indices;
   // List<String> users;
 
-  Todo(this.taskName, this.taskDesc, this.finished, this.label, this.timeStamp,
-      this.time, this.timeType, this.index, this.id
+  Todo(this.taskName, this.taskDesc, this.finished, this.labelName,
+      this.timeStamp, this.time, this.timeType, this.index, this.id
       // this.indices,
       // this.users,
       );
   Map<String, dynamic> toMap() {
-    Map compatibleLabel = {
-      'name': label.name,
-      'color': label.color,
-    };
     return {
       'taskName': taskName,
       'taskDesc': taskDesc,
       'finished': finished,
-      'label': compatibleLabel,
+      'labelName': labelName,
       'timeStamp': timeStamp,
       'time': time,
       'timeType': timeType,
@@ -51,7 +47,7 @@ class Todo {
       map["taskName"],
       map["taskDesc"],
       map["finished"],
-      Label(map["label"]["name"], map["label"]["color"]),
+      map["labelName"],
       map["timeStamp"],
       map["time"],
       map["timeType"],

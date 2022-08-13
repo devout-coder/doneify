@@ -1,13 +1,6 @@
 import 'dart:ffi';
-import 'package:conquer_flutter_app/database/db.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:conquer_flutter_app/pages/Landing.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 
 void main() {
@@ -23,7 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // final Future _init = GetItRegister().initializeGlobalStates();
-  final Future _init = DB().initializeDB();
+  final Future _init = GetItRegister().initializeGlobalStates();
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,10 @@
 import 'package:animations/animations.dart';
+import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/components/LabelsFilterDialog.dart';
-import 'package:conquer_flutter_app/database/todos_db.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:conquer_flutter_app/states/selectedLabelsFilter.dart';
+import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -26,12 +26,14 @@ class Todos extends StatefulWidget {
 }
 
 class _TodosState extends State<Todos> {
-  TodosDB _todosdb = GetIt.I.get();
+  TodosDB todosdb = GetIt.I.get();
   SelectedLabel selectedLabelsClass = GetIt.I.get();
   // List<String> selectedLabels = [];
-  List<Todo> _todos = [];
+  List<Todo> todos = [];
+  List<Todo> unfinishedTodos = [];
+  List<Todo> finishedTodos = [];
 
-  _loadTodos() async {
+  loadTodos() async {
     var finder = Finder(
         filter: Filter.equals(
               'time',
@@ -41,31 +43,92 @@ class _TodosState extends State<Todos> {
         sortOrders: [
           SortOrder("index"),
         ]);
-    final todos = await _todosdb.getAllTodos(finder);
-    setState(() => _todos = todos);
-    debugPrint("this is runagain");
-    // todos.forEach(
-    //     (element) => debugPrint(element.taskName + " " + element.labelName));
+    final todosTemp = await todosdb.getAllTodos(finder);
+    List<Todo> unfinishedTodosTemp = [];
+    List<Todo> finishedTodosTemp = [];
+    todosTemp.forEach((element) {
+      if (element.finished) {
+        finishedTodosTemp.add(element);
+      } else {
+        unfinishedTodosTemp.add(element);
+      }
+    });
+
+    debugPrint("todos");
+    todosTemp.forEach(
+        (element) => debugPrint("${element.taskName} ${element.index}"));
+    // debugPrint("unfinished");
+    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
+    // debugPrint("finished");
+    // finishedTodosTemp.forEach((element) => debugPrint(element.taskName));
+
+    setState(() {
+      unfinishedTodos = unfinishedTodosTemp;
+      finishedTodos = finishedTodosTemp;
+      todos = todosTemp;
+    });
   }
 
-  _createTodo(Todo todo) async {
-    await _todosdb.createTodo(todo);
-    _loadTodos();
+  createTodo(Todo todo) async {
+    await todosdb.createTodo(todo);
+    loadTodos();
   }
 
-  _editTodo(Todo todo) async {
-    await _todosdb.updateTodo(todo);
-    _loadTodos();
+  editTodo(Todo todo) async {
+    await todosdb.updateTodo(todo);
+    loadTodos();
   }
 
-  _deleteTodo(int todoId) async {
+  editTodoWithoutReload(Todo todo) async {
+    await todosdb.updateTodo(todo);
+  }
+
+  deleteTodo(int todoIndex) async {
+    todos.forEach((element) {
+      if (element.index > todoIndex) {
+        element.index--;
+        editTodoWithoutReload(element);
+      }
+    });
     try {
-      await _todosdb.deleteTodo(todoId);
-      await _loadTodos();
+      await todosdb.deleteTodo(todos[todoIndex].id);
+      await loadTodos();
     } catch (e, s) {
       print("exception e");
       print("Stacktrace $s");
     }
+  }
+
+  rearrangeTodos(int oldIndex, int newIndex) async {
+    // debugPrint("${oldIndex} ${newIndex}");
+    if (newIndex > oldIndex) {
+      newIndex = newIndex - 1;
+      todos.forEach((element) {
+        if (element.index == oldIndex) {
+          element.index = newIndex;
+          editTodoWithoutReload(element);
+        } else if (element.index > oldIndex && element.index <= newIndex) {
+          element.index -= 1;
+          editTodoWithoutReload(element);
+        }
+      });
+    } else if (oldIndex > newIndex) {
+      todos.forEach((element) {
+        if (element.index == oldIndex) {
+          element.index = newIndex;
+          editTodoWithoutReload(element);
+        } else if (element.index < oldIndex && element.index >= newIndex) {
+          element.index += 1;
+          editTodoWithoutReload(element);
+        }
+      });
+    }
+    List<Todo> _todos = todos;
+    final Todo item = _todos.removeAt(oldIndex);
+    _todos.insert(newIndex, item);
+    setState(() {
+      todos = _todos;
+    });
   }
 
   String formattedDate() {
@@ -75,48 +138,9 @@ class _TodosState extends State<Todos> {
     return formatted;
   }
 
-  Widget eachTodo(int index) {
-    return OpenContainer(
-      useRootNavigator: true,
-      // closedShape: const CircleBorder(),
-      // closedColor: const Color(0xffBA99FF).withOpacity(0.9),
-      transitionDuration: const Duration(milliseconds: 500),
-      closedBuilder: (context, action) {
-        return Row(
-          children: [
-            Text(_todos.elementAt(index).taskName),
-            // IconButton(
-            //   tooltip: "Delete tag",
-            //   onPressed: () {
-            //     _deleteTodo(_todos.elementAt(index).id);
-            //   },
-            //   icon: const Icon(
-            //     Icons.delete,
-            //     color: Color.fromARGB(255, 99, 99, 99),
-            //   ),
-            // ),
-          ],
-        );
-      },
-      openBuilder: (context, action) {
-        return InputModal(
-          action: action,
-          editTodo: _editTodo,
-          onDelete: () {
-            _deleteTodo(_todos.elementAt(index).id);
-            action.call();
-          },
-          todo: _todos.elementAt(index),
-          time: widget.time,
-          timeType: widget.timeType,
-        );
-      },
-    );
-  }
-
   @override
   void initState() {
-    _loadTodos();
+    loadTodos();
     super.initState();
   }
 
@@ -127,50 +151,71 @@ class _TodosState extends State<Todos> {
 
     return Column(
       children: [
-        Container(
-          // width: screenWidth * 0.3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // const SizedBox(
-              //   width: 60,
-              // ),
-              Text(
-                formattedDate(),
-                style: const TextStyle(
-                    fontFamily: "EuclidCircular",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                    color: Color(0xffffffff)),
-              ),
-              //   const SizedBox(
-              //     width: 20,
-              //   ),
-              //   IconButton(
-              //     onPressed: () {},
-              //     tooltip: "Sort by category",
-              //     icon: const Icon(
-              //       Icons.filter_list,
-              //       color: Color(0xffE2DDFF),
-              //       size: 30,
-              //     ),
-              //   ),
-            ],
-          ),
+        SizedBox(
+          height: 10,
         ),
-        Container(
-          height: screenHeight * 0.6,
-          width: screenWidth * 0.9,
-          child: ListView.builder(
-              itemCount: _todos.length,
-              itemBuilder: (BuildContext context, int index) {
-                _todos.forEach((element) {
-                  debugPrint("In todos: " + element.taskName);
-                });
-                return eachTodo(
-                  index,
-                );
-              }),
+        Text(
+          formattedDate(),
+          style: const TextStyle(
+              fontFamily: "EuclidCircular",
+              fontWeight: FontWeight.w600,
+              fontSize: 23,
+              color: Color(0xffffffff)),
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        Column(
+          children: [
+            Text(
+              "${unfinishedTodos.length} unfinished",
+              style: const TextStyle(
+                fontFamily: "EuclidCircular",
+                fontWeight: FontWeight.w500,
+                fontSize: 22,
+                color: Color(0xffC6C4C4),
+              ),
+            ),
+            Container(
+              height: screenHeight * 0.3,
+              width: screenWidth * 0.9,
+              child: ReorderableListView(
+                onReorder: rearrangeTodos,
+                children: <Widget>[
+                  for (Todo todo in todos)
+                    EachTodo(
+                      key: ValueKey(todo.id),
+                      todo: todo,
+                      editTodo: editTodo,
+                      deleteTodo: deleteTodo,
+                      finished: false,
+                    ),
+                ],
+              ),
+            ),
+            Text(
+              "${finishedTodos.length} finished",
+              style: const TextStyle(
+                  fontFamily: "EuclidCircular",
+                  fontWeight: FontWeight.w500,
+                  fontSize: 22,
+                  color: Color(0xffC6C4C4)),
+            ),
+            Container(
+              height: screenHeight * 0.3,
+              width: screenWidth * 0.9,
+              child: ListView.builder(
+                  itemCount: finishedTodos.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return EachTodo(
+                      todo: finishedTodos[index],
+                      editTodo: editTodo,
+                      deleteTodo: deleteTodo,
+                      finished: true,
+                    );
+                  }),
+            ),
+          ],
         ),
         Expanded(
           //! add button
@@ -196,7 +241,7 @@ class _TodosState extends State<Todos> {
                           var curve = Curves.easeInOut.transform(a1.value);
                           return LabelsFilterDialog(
                             curve: curve,
-                            reloadTodos: _loadTodos(),
+                            reloadTodos: loadTodos(),
                           );
                         },
                         transitionDuration: const Duration(milliseconds: 300),
@@ -236,10 +281,10 @@ class _TodosState extends State<Todos> {
                     openBuilder: (context, action) {
                       return InputModal(
                         action: action,
-                        addTodo: _createTodo,
+                        addTodo: createTodo,
                         time: widget.time,
                         timeType: widget.timeType,
-                        index: _todos.length,
+                        index: todos.length,
                       );
                     },
                   ),

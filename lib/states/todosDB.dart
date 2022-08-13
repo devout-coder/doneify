@@ -15,7 +15,7 @@ class TodosDB {
     final snapshots = await _store.find(_db, finder: finder);
     return snapshots
         .map((snapshot) => Todo.fromMap(snapshot.value))
-        .toList(growable: false);
+        .toList(growable: true);
   }
 
   Future updateTodo(Todo todo) async {

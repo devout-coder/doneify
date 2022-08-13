@@ -53,7 +53,7 @@ class _InputModalState extends State<InputModal> {
 
   int findLabelIndex(String labelName) {
     int index = 0;
-    debugPrint("now index ${index.toString()} ");
+    // debugPrint("now index ${index.toString()} ");
     // debugPrint
     for (int i = 0; i < labelsDB.labels.length; i++) {
       if (labelsDB.labels[i].name == labelName) {
@@ -102,6 +102,7 @@ class _InputModalState extends State<InputModal> {
     taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
     selectedLabel =
         widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
+    // debugPrint(widget.todo!.index.toString());
   }
 
   @override

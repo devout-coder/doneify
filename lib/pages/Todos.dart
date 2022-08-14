@@ -33,6 +33,9 @@ class _TodosState extends State<Todos> {
   List<Todo> unfinishedTodos = [];
   List<Todo> finishedTodos = [];
 
+  final ScrollController unfinishedScrollController = ScrollController();
+  final ScrollController finishedScrollController = ScrollController();
+
   loadTodos() async {
     var finder = Finder(
         filter: Filter.equals(
@@ -165,57 +168,130 @@ class _TodosState extends State<Todos> {
         SizedBox(
           height: 12,
         ),
-        Column(
-          children: [
-            Text(
-              "${unfinishedTodos.length} unfinished",
-              style: const TextStyle(
-                fontFamily: "EuclidCircular",
-                fontWeight: FontWeight.w500,
-                fontSize: 22,
-                color: Color(0xffC6C4C4),
-              ),
+        Flexible(
+          flex: 7,
+          child: Container(
+            decoration: const BoxDecoration(
+                // color: Colors.white,
+                ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  curve: Curves.fastOutSlowIn,
+                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                  width: screenWidth * 0.9,
+                  height: unfinishedTodos.isNotEmpty && finishedTodos.isEmpty
+                      ? screenHeight * 0.65
+                      : unfinishedTodos.isNotEmpty
+                          ? screenHeight * 0.34
+                          : 0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromARGB(33, 255, 255, 255),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "${unfinishedTodos.length} unfinished",
+                        style: const TextStyle(
+                          fontFamily: "EuclidCircular",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 22,
+                          color: Color(0xffC6C4C4),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Container(
+                        height: finishedTodos.isEmpty
+                            ? screenHeight * 0.59
+                            : screenHeight * 0.28,
+                        width: screenWidth * 0.9,
+                        child: Theme(
+                          data: ThemeData(canvasColor: Colors.transparent),
+                          child: Scrollbar(
+                            thumbVisibility: true,
+                            controller: unfinishedScrollController,
+                            child: ReorderableListView(
+                              onReorder: rearrangeTodos,
+                              scrollController: unfinishedScrollController,
+                              children: <Widget>[
+                                for (Todo todo in todos)
+                                  EachTodo(
+                                    key: ValueKey(todo.id),
+                                    todo: todo,
+                                    editTodo: editTodo,
+                                    deleteTodo: deleteTodo,
+                                    finished: false,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  curve: Curves.fastOutSlowIn,
+                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                  width: screenWidth * 0.9,
+                  height: finishedTodos.isNotEmpty && unfinishedTodos.isEmpty
+                      ? screenHeight * 0.65
+                      : finishedTodos.isNotEmpty
+                          ? screenHeight * 0.34
+                          : 0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromARGB(33, 255, 255, 255),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "${finishedTodos.length} finished",
+                        style: const TextStyle(
+                            fontFamily: "EuclidCircular",
+                            fontWeight: FontWeight.w500,
+                            fontSize: 22,
+                            color: Color(0xffC6C4C4)),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Container(
+                        height: unfinishedTodos.isEmpty
+                            ? screenHeight * 0.59
+                            : screenHeight * 0.28,
+                        width: screenWidth * 0.9,
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          controller: unfinishedScrollController,
+                          child: ListView.builder(
+                              itemCount: finishedTodos.length,
+                              controller: finishedScrollController,
+                              itemBuilder: (BuildContext context, int index) {
+                                return EachTodo(
+                                  todo: finishedTodos[index],
+                                  editTodo: editTodo,
+                                  deleteTodo: deleteTodo,
+                                  finished: true,
+                                );
+                              }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Container(
-              height: screenHeight * 0.3,
-              width: screenWidth * 0.9,
-              child: ReorderableListView(
-                onReorder: rearrangeTodos,
-                children: <Widget>[
-                  for (Todo todo in todos)
-                    EachTodo(
-                      key: ValueKey(todo.id),
-                      todo: todo,
-                      editTodo: editTodo,
-                      deleteTodo: deleteTodo,
-                      finished: false,
-                    ),
-                ],
-              ),
-            ),
-            Text(
-              "${finishedTodos.length} finished",
-              style: const TextStyle(
-                  fontFamily: "EuclidCircular",
-                  fontWeight: FontWeight.w500,
-                  fontSize: 22,
-                  color: Color(0xffC6C4C4)),
-            ),
-            Container(
-              height: screenHeight * 0.3,
-              width: screenWidth * 0.9,
-              child: ListView.builder(
-                  itemCount: finishedTodos.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return EachTodo(
-                      todo: finishedTodos[index],
-                      editTodo: editTodo,
-                      deleteTodo: deleteTodo,
-                      finished: true,
-                    );
-                  }),
-            ),
-          ],
+          ),
         ),
         Expanded(
           //! add button

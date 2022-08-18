@@ -195,6 +195,8 @@ class _InputModalState extends State<InputModal> {
                       showGeneralDialog(
                         //! add label dialog box
                         context: context,
+                        barrierDismissible: true,
+                        barrierLabel: "Select Label",
                         pageBuilder: (BuildContext context,
                             Animation<double> animation,
                             Animation<double> secondaryAnimation) {

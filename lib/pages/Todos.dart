@@ -1,9 +1,9 @@
 import 'package:animations/animations.dart';
 import 'package:conquer_flutter_app/components/EachTodo.dart';
-import 'package:conquer_flutter_app/components/LabelsFilterDialog.dart';
+import 'package:conquer_flutter_app/components/FiltersDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/selectedLabelsFilter.dart';
+import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -25,9 +25,16 @@ class Todos extends StatefulWidget {
   State<Todos> createState() => _TodosState();
 }
 
+String formattedDateTodosPage(String date) {
+  final DateTime dateTime = DateFormat('d/M/y').parse(date);
+  final DateFormat formatter = DateFormat('d MMM');
+  final String formatted = formatter.format(dateTime);
+  return formatted;
+}
+
 class _TodosState extends State<Todos> {
   TodosDB todosdb = GetIt.I.get();
-  SelectedLabel selectedLabelsClass = GetIt.I.get();
+  SelectedFilters selectedFilters = GetIt.I.get();
   // List<String> selectedLabels = [];
   List<Todo> todos = [];
   List<Todo> unfinishedTodos = [];
@@ -42,10 +49,12 @@ class _TodosState extends State<Todos> {
               'time',
               widget.time,
             ) &
-            Filter.inList("labelName", selectedLabelsClass.selectedLabels),
+            Filter.inList("labelName", selectedFilters.selectedLabels),
         sortOrders: [
           SortOrder("index"),
         ]);
+
+    // debugPrint(selectedLabelsClass.selectedLabels.toString());
     final todosTemp = await todosdb.getAllTodos(finder);
     List<Todo> unfinishedTodosTemp = [];
     List<Todo> finishedTodosTemp = [];
@@ -57,7 +66,7 @@ class _TodosState extends State<Todos> {
       }
     });
 
-    debugPrint("todos");
+    // debugPrint("todos");
     todosTemp.forEach(
         (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
@@ -134,13 +143,6 @@ class _TodosState extends State<Todos> {
     });
   }
 
-  String formattedDate() {
-    final DateTime dateTime = DateFormat('d/M/y').parse(widget.time);
-    final DateFormat formatter = DateFormat('d MMM');
-    final String formatted = formatter.format(dateTime);
-    return formatted;
-  }
-
   @override
   void initState() {
     loadTodos();
@@ -158,7 +160,7 @@ class _TodosState extends State<Todos> {
           height: 10,
         ),
         Text(
-          formattedDate(),
+          formattedDateTodosPage(widget.time),
           style: const TextStyle(
               fontFamily: "EuclidCircular",
               fontWeight: FontWeight.w600,
@@ -205,7 +207,9 @@ class _TodosState extends State<Todos> {
                       SizedBox(
                         height: 8,
                       ),
-                      Container(
+                      AnimatedContainer(
+                        duration: Duration(seconds: 1),
+                        curve: Curves.fastOutSlowIn,
                         height: finishedTodos.isEmpty
                             ? screenHeight * 0.59
                             : screenHeight * 0.28,
@@ -294,7 +298,7 @@ class _TodosState extends State<Todos> {
           ),
         ),
         Expanded(
-          //! add button
+          //! bottom buttons
           child: Align(
             alignment: FractionalOffset.bottomRight,
             child: Container(
@@ -308,6 +312,8 @@ class _TodosState extends State<Todos> {
                       showGeneralDialog(
                         //! select filter dialog box
                         context: context,
+                        barrierDismissible: true,
+                        barrierLabel: "Label filters",
                         pageBuilder: (BuildContext context,
                             Animation<double> animation,
                             Animation<double> secondaryAnimation) {
@@ -315,7 +321,7 @@ class _TodosState extends State<Todos> {
                         },
                         transitionBuilder: (ctx, a1, a2, child) {
                           var curve = Curves.easeInOut.transform(a1.value);
-                          return LabelsFilterDialog(
+                          return FiltersDialog(
                             curve: curve,
                             reloadTodos: loadTodos(),
                           );

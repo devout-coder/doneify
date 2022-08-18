@@ -12,7 +12,7 @@ import 'package:conquer_flutter_app/pages/Settings.dart';
 import 'package:conquer_flutter_app/icons/time_type_icons.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
-import 'package:conquer_flutter_app/states/selectedLabelsFilter.dart';
+import 'package:conquer_flutter_app/states/selectedFilters.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,17 +23,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentPage = 0;
-
-  LabelDB labelsDB = GetIt.I.get();
-  SelectedLabel selectedLabelsClass = GetIt.I.get();
-
-  @override
-  void initState() {
-    labelsDB.readLabelsFromStorage();
-    selectedLabelsClass.readLabelsFromStorage();
-    print("Home widget is rendered");
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

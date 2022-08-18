@@ -1,7 +1,10 @@
 import 'dart:ffi';
 import 'package:conquer_flutter_app/states/initStates.dart';
+import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +19,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // final Future _init = GetItRegister().initializeGlobalStates();
-  final Future _init = GetItRegister().initializeGlobalStates();
+
   static const MaterialColor purple = MaterialColor(
     0xffe55f48, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
     <int, Color>{
@@ -32,6 +35,22 @@ class _MyAppState extends State<MyApp> {
       900: const Color(0xff382e4c), //100%
     },
   );
+
+  Future registerDB() async {
+    await GetItRegister().initializeGlobalStates();
+    LabelDB labelsDB = GetIt.I.get();
+    SelectedFilters selectedFilters = GetIt.I.get();
+
+    await selectedFilters.fetchFiltersFromStorage();
+    await labelsDB.readLabelsFromStorage();
+  }
+
+  @override
+  void initState() {
+    // loadLabels();
+    // debugPrint("Home widget is rendered");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +74,10 @@ class _MyAppState extends State<MyApp> {
         child: Scaffold(
           body: Center(
               child: FutureBuilder(
-                  future: _init,
+                  future: registerDB(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
+                      // loadLabels();
                       return const HomePage();
                     } else {
                       return const Material(

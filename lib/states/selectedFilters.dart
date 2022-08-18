@@ -5,18 +5,39 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SelectedLabel {
+class SelectedFilters {
   List<String> selectedLabels = [];
+  bool currentFirst = true;
+  bool ascending = false;
 
-  Future<void> readLabelsFromStorage() async {
+  Future<void> fetchFiltersFromStorage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? fetchedSelectedLabels =
-        prefs.getStringList('selectedLabels') ?? null;
-    if (fetchedSelectedLabels == null) {
-      fetchedSelectedLabels = ["General"];
+    bool firstTime =
+        prefs.getStringList("selectedLabels") != null ? false : true;
+    selectedLabels = prefs.getStringList('selectedLabels') ?? ["General"];
+    currentFirst = prefs.getBool("filtersCurrentFirst") ?? true;
+    ascending = prefs.getBool("filtersAscending") ?? false;
+    if (firstTime) {
       prefs.setStringList('selectedLabels', ["General"]);
+      prefs.setBool("filtersCurrentFirst", true);
+      prefs.setBool("filtersAscending", false);
     }
-    selectedLabels = fetchedSelectedLabels;
+  }
+
+  void setCurrentFirst(bool newCurrentFirstVal) async {
+    currentFirst = newCurrentFirstVal;
+
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('filtersCurrentFirst', currentFirst);
+    });
+  }
+
+  void setAscending(bool newAscendingVal) async {
+    ascending = newAscendingVal;
+
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('filtersAscending', ascending);
+    });
   }
 
   void addLabel(String labelName) {

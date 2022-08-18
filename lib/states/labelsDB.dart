@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/selectedLabelsFilter.dart';
+import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LabelDB {
   List<Label> labels = [];
-  SelectedLabel selectedLabelsClass = GetIt.I.get();
+  SelectedFilters selectedFilters = GetIt.I.get();
   TodosDB _todosdb = GetIt.I.get();
 
   List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
@@ -57,7 +57,7 @@ class LabelDB {
   }
 
   void addLabel(String labelName, Color labelColor) {
-    selectedLabelsClass.addLabel(labelName);
+    selectedFilters.addLabel(labelName);
 
     Label newLabel = Label(labelName, labelColor.toString());
     List<Label> newLabelList = [...labels, newLabel];
@@ -77,9 +77,9 @@ class LabelDB {
   }
 
   void editLabel(String labelName, Color labelColor, int index) async {
-    if (selectedLabelsClass.selectedLabels.contains(labels[index].name)) {
-      selectedLabelsClass.deleteLabel(labels[index].name);
-      selectedLabelsClass.addLabel(labelName);
+    if (selectedFilters.selectedLabels.contains(labels[index].name)) {
+      selectedFilters.deleteLabel(labels[index].name);
+      selectedFilters.addLabel(labelName);
     }
 
     var finder = Finder(
@@ -114,8 +114,8 @@ class LabelDB {
   }
 
   void deleteLabel(int labelIndex) async {
-    if (selectedLabelsClass.selectedLabels.contains(labels[labelIndex].name)) {
-      selectedLabelsClass.deleteLabel(labels[labelIndex].name);
+    if (selectedFilters.selectedLabels.contains(labels[labelIndex].name)) {
+      selectedFilters.deleteLabel(labels[labelIndex].name);
     }
 
     var finder = Finder(

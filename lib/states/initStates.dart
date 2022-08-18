@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:conquer_flutter_app/states/labelsDB.dart';
-import 'package:conquer_flutter_app/states/selectedLabelsFilter.dart';
+import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart';
@@ -19,7 +19,7 @@ class GetItRegister {
     GetIt.I.registerSingleton<Database>(db);
     GetIt.I.registerLazySingleton<TodosDB>(() => TodosDB());
     GetIt.I.registerLazySingleton<LabelDB>(() => LabelDB());
-    GetIt.I.registerLazySingleton<SelectedLabel>(() => SelectedLabel());
+    GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }

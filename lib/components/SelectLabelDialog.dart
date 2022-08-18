@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class SelectLabelDialog extends StatefulWidget {
@@ -108,8 +105,11 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                         const SizedBox(
                                           width: 10,
                                         ),
-                                        Text(
-                                          labelsDB.labels[index].name,
+                                        SizedBox(
+                                          width: 100,
+                                          child: Text(
+                                            labelsDB.labels[index].name,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -121,6 +121,8 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                             showGeneralDialog(
                                               //! edit label dialog box
                                               context: context,
+                                              barrierDismissible: true,
+                                              barrierLabel: "Edit Color",
                                               pageBuilder: (BuildContext
                                                       context,
                                                   Animation<double> animation,
@@ -194,6 +196,8 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                               showGeneralDialog(
                                 //! add new label dialog box
                                 context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Select Color",
                                 pageBuilder: (BuildContext context,
                                     Animation<double> animation,
                                     Animation<double> secondaryAnimation) {
@@ -231,7 +235,7 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
           ),
         ),
         onWillPop: () async {
-          debugPrint("back pressed now in add label dialog");
+          // debugPrint("back pressed now in add label dialog");
           return true;
         });
   }

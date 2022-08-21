@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/components/FiltersDialog.dart';
+import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -10,7 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 // import 'package:animations/animations.dart';
 
-import 'package:conquer_flutter_app/pages/Daily.dart';
+import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:provider/provider.dart';
 import 'package:sembast/sembast.dart';
 
@@ -25,11 +26,21 @@ class Todos extends StatefulWidget {
   State<Todos> createState() => _TodosState();
 }
 
-String formattedDateTodosPage(String date) {
-  final DateTime dateTime = DateFormat('d/M/y').parse(date);
-  final DateFormat formatter = DateFormat('d MMM');
-  final String formatted = formatter.format(dateTime);
-  return formatted;
+String formattedDateTodosPage(String time, String timeType) {
+  if (timeType == 'day') {
+    DateTime dateTime = DateFormat('d/M/y').parse(time);
+    String formatted = DateFormat('d MMM').format(dateTime);
+    return formatted;
+  } else {
+    List<String> bothDates = time.split('-');
+    String startDateString = bothDates[0];
+    String endDateString = bothDates[1];
+    DateTime dateTime = DateFormat('d/M/y').parse(time);
+    String formatted =
+        "${DateFormat("d MMM").format(DateFormat("d/M/y").parse(startDateString))} - ${DateFormat("d MMM").format(DateFormat("d/M/y").parse(endDateString))}";
+
+    return formatted;
+  }
 }
 
 class _TodosState extends State<Todos> {
@@ -67,8 +78,8 @@ class _TodosState extends State<Todos> {
     });
 
     // debugPrint("todos");
-    todosTemp.forEach(
-        (element) => debugPrint("${element.taskName} ${element.index}"));
+    // todosTemp.forEach(
+    //     (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
     // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
     // debugPrint("finished");
@@ -145,6 +156,7 @@ class _TodosState extends State<Todos> {
 
   @override
   void initState() {
+    debugPrint(widget.time + widget.timeType);
     loadTodos();
     super.initState();
   }
@@ -160,12 +172,13 @@ class _TodosState extends State<Todos> {
           height: 10,
         ),
         Text(
-          formattedDateTodosPage(widget.time),
+          formattedDateTodosPage(widget.time, widget.timeType),
           style: const TextStyle(
-              fontFamily: "EuclidCircular",
-              fontWeight: FontWeight.w600,
-              fontSize: 23,
-              color: Color(0xffffffff)),
+            fontFamily: "EuclidCircular",
+            fontWeight: FontWeight.w600,
+            fontSize: 23,
+            color: Color(0xffffffff),
+          ),
         ),
         SizedBox(
           height: 12,
@@ -343,7 +356,7 @@ class _TodosState extends State<Todos> {
                   OpenContainer(
                     useRootNavigator: true,
                     closedShape: const CircleBorder(),
-                    closedColor: const Color(0xffBA99FF).withOpacity(0.9),
+                    closedColor: themePurple.withOpacity(0.9),
                     transitionDuration: const Duration(milliseconds: 500),
                     closedBuilder: (context, action) {
                       return FloatingActionButton(
@@ -351,8 +364,7 @@ class _TodosState extends State<Todos> {
                         onPressed: () {
                           action.call();
                         },
-                        backgroundColor:
-                            const Color(0xffBA99FF).withOpacity(0.9),
+                        backgroundColor: themePurple.withOpacity(0.9),
                         child: const Icon(
                           Icons.add,
                           size: 30,

@@ -1,9 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Daily.dart';
+import 'package:conquer_flutter_app/navigatorKeys.dart';
+import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
+import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -45,11 +47,15 @@ class _EachTodoState extends State<EachTodo> {
   }
 
   bool isCurrentTime() {
-    if (widget.todo.time == formattedDate(DateTime.now())) {
-      return true;
-    } else {
-      return false;
+    bool isCurrent = false;
+    if (widget.todo.timeType == "day" &&
+        widget.todo.time == formattedDate(DateTime.now())) {
+      isCurrent = true;
+    } else if (widget.todo.timeType == "week" &&
+        widget.todo.time == formattedWeek(DateTime.now())) {
+      isCurrent = true;
     }
+    return isCurrent;
   }
 
   @override
@@ -118,8 +124,9 @@ class _EachTodoState extends State<EachTodo> {
                         ),
                       ),
                     ),
+                    SizedBox(width: 10),
                     Expanded(
-                      flex: 1,
+                      // flex: 1,
                       child: widget.incompleteTodos != null
                           ? GestureDetector(
                               onTap: () {
@@ -129,7 +136,8 @@ class _EachTodoState extends State<EachTodo> {
                                     .whenComplete(() => widget.loadTodos!());
                               },
                               child: Text(
-                                formattedDateTodosPage(widget.todo.time),
+                                formattedDateTodosPage(
+                                    widget.todo.time, widget.todo.timeType),
                                 style: TextStyle(
                                   fontFamily: "EuclidCircular",
                                   fontWeight: isCurrentTime()

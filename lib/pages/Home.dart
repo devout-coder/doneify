@@ -1,13 +1,14 @@
+import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'package:conquer_flutter_app/pages/LongTerm.dart';
-import 'package:conquer_flutter_app/pages/Monthly.dart';
-import 'package:conquer_flutter_app/pages/Weekly.dart';
-import 'package:conquer_flutter_app/pages/Yearly.dart';
-import 'package:conquer_flutter_app/pages/Daily.dart';
+import 'package:conquer_flutter_app/pages/Month.dart';
+import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:conquer_flutter_app/pages/Year.dart';
+import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/Settings.dart';
 import 'package:conquer_flutter_app/icons/time_type_icons.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
@@ -22,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int currentPage = 0;
+  int currentPage = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +56,8 @@ class _HomePageState extends State<HomePage> {
             body: IndexedStack(
               index: currentPage,
               children: [
-                DailyNavigator(),
-                WeeklyPage(),
+                DayNavigator(),
+                WeekNavigator(),
                 MonthlyPage(),
                 YearlyPage(),
                 LongTermPage(),
@@ -70,8 +71,8 @@ class _HomePageState extends State<HomePage> {
               color: const Color(0xff9A9A9A),
               activeColor: const Color.fromARGB(
                   255, 47, 15, 83), // selected icon and text color
-              tabBackgroundColor: const Color(0xffBA99FF)
-                  .withOpacity(0.9), // selected tab background color
+              tabBackgroundColor:
+                  themePurple.withOpacity(0.9), // selected tab background color
               padding: const EdgeInsets.symmetric(
                   horizontal: 12, vertical: 15), // navigation bar padding
 

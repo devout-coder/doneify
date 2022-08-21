@@ -1,5 +1,6 @@
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
+import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/foundation.dart';
@@ -119,7 +120,7 @@ class _InputModalState extends State<InputModal> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      color: const Color(0xffBA99FF),
+      color: themePurple,
       padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
       child: Column(
         children: [

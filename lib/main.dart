@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -20,10 +21,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // final Future _init = GetItRegister().initializeGlobalStates();
 
-  static const MaterialColor purple = MaterialColor(
+  MaterialColor purple = const MaterialColor(
     0xffe55f48, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
     <int, Color>{
-      50: const Color(0xffba99ff), //10%
+      50: themePurple, //10%
       100: const Color(0xffa78ae6), //20%
       200: const Color(0xff957acc), //30%
       300: const Color(0xff826bb3), //40%

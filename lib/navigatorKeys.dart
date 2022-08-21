@@ -15,3 +15,10 @@ List<GlobalKey<NavigatorState>> navigatorKeys = [
   longTermNavigatorKey,
   settingsNavigatorKey
 ];
+
+class ScreenArguments {
+  final String time;
+  final String timeType;
+
+  ScreenArguments(this.time, this.timeType);
+}

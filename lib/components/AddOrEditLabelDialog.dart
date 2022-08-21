@@ -1,10 +1,7 @@
 import 'package:conquer_flutter_app/components/NewColorDialog.dart';
-import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';

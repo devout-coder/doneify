@@ -73,7 +73,7 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
       curve: Curves.fastOutSlowIn,
       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
       width: screenWidth * 0.9,
-      height: scrolledUp ? screenHeight * 0.9 : screenHeight * 0.32,
+      height: scrolledUp ? screenHeight * 0.9 : screenHeight * 0.39,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Color.fromARGB(33, 255, 255, 255),
@@ -93,7 +93,7 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
             height: 8,
           ),
           Container(
-            height: scrolledUp ? 0.85 * screenHeight : 0.26 * screenHeight,
+            height: scrolledUp ? 0.85 * screenHeight : 0.33 * screenHeight,
             width: screenWidth * 0.9,
             child: Theme(
               data: ThemeData(canvasColor: Colors.transparent),

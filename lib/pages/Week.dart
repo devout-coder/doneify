@@ -87,6 +87,9 @@ class _WeekPageState extends State<WeekPage> {
   }
 
   loadTodos() async {
+    if (this.mounted) {
+      _controller.selectedDate = null;
+    }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',

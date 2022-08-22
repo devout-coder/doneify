@@ -23,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int currentPage = 2;
+  int currentPage = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                 DayNavigator(),
                 WeekNavigator(),
                 MonthNavigator(),
-                YearlyPage(),
+                YearNavigator(),
                 LongTermPage(),
                 SettingsPage()
               ],

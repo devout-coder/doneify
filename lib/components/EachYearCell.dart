@@ -1,29 +1,29 @@
 import 'package:conquer_flutter_app/components/EachWeekCell.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:conquer_flutter_app/pages/Year.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-class EachMonthCell extends StatefulWidget {
+class EachYearCell extends StatefulWidget {
   DateTime date;
-  List<String> unfinishedMonths;
+  List<String> unfinishedYears;
   DateRangePickerView? currentView;
 
-  EachMonthCell({
+  EachYearCell({
     Key? key,
     required this.date,
-    required this.unfinishedMonths,
+    required this.unfinishedYears,
     required this.currentView,
   }) : super(key: key);
 
   @override
-  State<EachMonthCell> createState() => _EachMonthCellState();
+  State<EachYearCell> createState() => _EachYearCellState();
 }
 
-class _EachMonthCellState extends State<EachMonthCell> {
+class _EachYearCellState extends State<EachYearCell> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -43,8 +43,7 @@ class _EachMonthCellState extends State<EachMonthCell> {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(20)),
-              color: DateTime.now().month == widget.date.month &&
-                      DateTime.now().year == widget.date.year
+              color: DateTime.now().year == widget.date.year
                   ? themePurple
                   : Colors.transparent,
             ),
@@ -56,16 +55,11 @@ class _EachMonthCellState extends State<EachMonthCell> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                widget.currentView == DateRangePickerView.year
-                    ? DateFormat("MMM").format(widget.date)
-                    : widget.currentView == DateRangePickerView.decade
-                        ? widget.date.year.toString()
-                        : "${widget.date.year.toString()} - ${(widget.date.year + 9).toString()}",
-                style: DateTime.now().month == widget.date.month &&
-                        DateTime.now().year == widget.date.year
+                widget.date.year.toString(),
+                style: DateTime.now().year == widget.date.year
                     ? TextStyle(
-                        color: widget.unfinishedMonths
-                                .contains(formattedMonth(widget.date))
+                        color: widget.unfinishedYears
+                                .contains(formattedYear(widget.date))
                             ? Color.fromARGB(255, 170, 0, 0)
                             : Color.fromARGB(255, 47, 15, 83),
                         fontSize: 15,
@@ -73,8 +67,8 @@ class _EachMonthCellState extends State<EachMonthCell> {
                         fontWeight: FontWeight.w600,
                       )
                     : TextStyle(
-                        color: widget.unfinishedMonths
-                                .contains(formattedMonth(widget.date))
+                        color: widget.unfinishedYears
+                                .contains(formattedYear(widget.date))
                             ? Color.fromARGB(255, 255, 105, 105)
                             : Color.fromARGB(255, 255, 255, 255),
                         fontSize: 15,

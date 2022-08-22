@@ -1,3 +1,4 @@
+import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:flutter/material.dart';
 
 class LongTermPage extends StatelessWidget {
@@ -5,6 +6,6 @@ class LongTermPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Todos(time: "longTerm", timeType: "longTerm");
   }
 }

@@ -7,6 +7,7 @@ import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:conquer_flutter_app/pages/Year.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -57,6 +58,9 @@ class _EachTodoState extends State<EachTodo> {
       isCurrent = true;
     } else if (widget.todo.timeType == "month" &&
         widget.todo.time == formattedMonth(DateTime.now())) {
+      isCurrent = true;
+    } else if (widget.todo.timeType == "year" &&
+        widget.todo.time == formattedYear(DateTime.now())) {
       isCurrent = true;
     }
     return isCurrent;

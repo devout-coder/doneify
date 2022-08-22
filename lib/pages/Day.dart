@@ -98,6 +98,9 @@ class _DayPageState extends State<DayPage> {
     // debugPrint(selectedLabelsClass.selectedLabels.toString());
     // debugPrint("todos loaded");
     // debugPrint("loading...");
+    if (this.mounted) {
+      _controller.selectedDate = null;
+    }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',

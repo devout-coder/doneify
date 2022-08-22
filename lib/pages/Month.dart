@@ -73,7 +73,7 @@ class _MonthPageState extends State<MonthPage> {
   // bool currentFirst = false;
   // bool ascending = false;
 
-  int comparingDates(Todo todo1, Todo todo2) {
+  int comparingTodos(Todo todo1, Todo todo2) {
     DateTime time1 = DateFormat("MMM y").parse(todo1.time);
     DateTime time2 = DateFormat("MMM y").parse(todo2.time);
     int compared = selectedFilters.ascending
@@ -90,6 +90,9 @@ class _MonthPageState extends State<MonthPage> {
     // debugPrint(selectedLabelsClass.selectedLabels.toString());
     // debugPrint("todos loaded");
     // debugPrint("loading...");
+    if (this.mounted) {
+      _controller.selectedDate = null;
+    }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -108,9 +111,9 @@ class _MonthPageState extends State<MonthPage> {
         currentTodosTemp.add(element);
       }
       if (!unfinishedMonths.contains(element.time)) {
-        List<String> tempUnfinishedDates = [...unfinishedMonths, element.time];
+        List<String> tempUnfinishedMonths = [...unfinishedMonths, element.time];
         setState(() {
-          unfinishedMonths = tempUnfinishedDates;
+          unfinishedMonths = tempUnfinishedMonths;
         });
       }
     });
@@ -122,7 +125,7 @@ class _MonthPageState extends State<MonthPage> {
 
     currentTodosTemp
         .sort((Todo todo1, Todo todo2) => todo1.index.compareTo(todo2.index));
-    todosTemp.sort(comparingDates);
+    todosTemp.sort(comparingTodos);
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
@@ -160,7 +163,6 @@ class _MonthPageState extends State<MonthPage> {
           child: SfDateRangePicker(
             controller: _controller,
             view: DateRangePickerView.year,
-            initialSelectedRange: null,
             // onViewChanged: (args) {
             //   WidgetsBinding.instance.addPostFrameCallback((_) {
             //     if (args.view == DateRangePickerView.month) {

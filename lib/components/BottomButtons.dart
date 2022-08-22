@@ -32,7 +32,7 @@ class _BottomButtonsState extends State<BottomButtons> {
       child: Align(
         alignment: FractionalOffset.bottomRight,
         child: Container(
-          margin: const EdgeInsets.fromLTRB(0, 0, 15, 5),
+          margin: const EdgeInsets.fromLTRB(0, 0, 15, 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

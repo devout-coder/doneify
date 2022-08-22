@@ -4,6 +4,7 @@ import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
@@ -53,6 +54,9 @@ class _EachTodoState extends State<EachTodo> {
       isCurrent = true;
     } else if (widget.todo.timeType == "week" &&
         widget.todo.time == formattedWeek(DateTime.now())) {
+      isCurrent = true;
+    } else if (widget.todo.timeType == "month" &&
+        widget.todo.time == formattedMonth(DateTime.now())) {
       isCurrent = true;
     }
     return isCurrent;

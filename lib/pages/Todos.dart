@@ -31,7 +31,7 @@ String formattedDateTodosPage(String time, String timeType) {
     DateTime dateTime = DateFormat('d/M/y').parse(time);
     String formatted = DateFormat('d MMM').format(dateTime);
     return formatted;
-  } else {
+  } else if (timeType == 'week') {
     List<String> bothDates = time.split('-');
     String startDateString = bothDates[0];
     String endDateString = bothDates[1];
@@ -40,6 +40,8 @@ String formattedDateTodosPage(String time, String timeType) {
         "${DateFormat("d MMM").format(DateFormat("d/M/y").parse(startDateString))} - ${DateFormat("d MMM").format(DateFormat("d/M/y").parse(endDateString))}";
 
     return formatted;
+  } else {
+    return time;
   }
 }
 

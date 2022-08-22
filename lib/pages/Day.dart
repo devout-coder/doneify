@@ -81,7 +81,7 @@ class _DayPageState extends State<DayPage> {
   // bool currentFirst = false;
   // bool ascending = false;
 
-  int comparingDates(Todo todo1, Todo todo2) {
+  int comparingTodos(Todo todo1, Todo todo2) {
     DateTime time1 = DateFormat("d/M/y").parse(todo1.time);
     DateTime time2 = DateFormat("d/M/y").parse(todo2.time);
     int compared = selectedFilters.ascending
@@ -130,7 +130,7 @@ class _DayPageState extends State<DayPage> {
 
     currentTodosTemp
         .sort((Todo todo1, Todo todo2) => todo1.index.compareTo(todo2.index));
-    todosTemp.sort(comparingDates);
+    todosTemp.sort(comparingTodos);
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }

@@ -24,6 +24,10 @@ class EachMonthCell extends StatefulWidget {
 }
 
 class _EachMonthCellState extends State<EachMonthCell> {
+  bool unfinishedMonth() {
+    return widget.unfinishedMonths.contains(formattedMonth(widget.date));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,10 +49,10 @@ class _EachMonthCellState extends State<EachMonthCell> {
               borderRadius: BorderRadius.all(Radius.circular(20)),
               color: DateTime.now().month == widget.date.month &&
                       DateTime.now().year == widget.date.year
-                  ? themePurple
+                  ? (unfinishedMonth() ? Color(0xffFFA1C3) : themePurple)
                   : Colors.transparent,
             ),
-            width: 90,
+            width: 80,
             height: 50,
           ),
           // ),
@@ -64,22 +68,20 @@ class _EachMonthCellState extends State<EachMonthCell> {
                 style: DateTime.now().month == widget.date.month &&
                         DateTime.now().year == widget.date.year
                     ? TextStyle(
-                        color: widget.unfinishedMonths
-                                .contains(formattedMonth(widget.date))
-                            ? Color.fromARGB(255, 170, 0, 0)
-                            : Color.fromARGB(255, 47, 15, 83),
+                        color: Color.fromARGB(255, 47, 15, 83),
                         fontSize: 15,
                         fontFamily: 'EuclidCircular',
                         fontWeight: FontWeight.w600,
                       )
                     : TextStyle(
-                        color: widget.unfinishedMonths
-                                .contains(formattedMonth(widget.date))
-                            ? Color.fromARGB(255, 255, 105, 105)
+                        color: unfinishedMonth()
+                            ? Color.fromARGB(255, 255, 142, 142)
                             : Color.fromARGB(255, 255, 255, 255),
                         fontSize: 15,
                         fontFamily: 'EuclidCircular',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: unfinishedMonth()
+                            ? FontWeight.w500
+                            : FontWeight.w400,
                       ),
               ),
             ],

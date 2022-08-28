@@ -98,9 +98,7 @@ class _DayPageState extends State<DayPage> {
     // debugPrint(selectedLabelsClass.selectedLabels.toString());
     // debugPrint("todos loaded");
     // debugPrint("loading...");
-    if (this.mounted) {
-      _controller.selectedDate = null;
-    }
+    _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -170,6 +168,7 @@ class _DayPageState extends State<DayPage> {
           height: 330,
           child: SfDateRangePicker(
             controller: _controller,
+            initialSelectedDate: null,
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,
               textStyle: TextStyle(
@@ -189,10 +188,12 @@ class _DayPageState extends State<DayPage> {
             headerHeight: 40,
             selectionColor: Colors.transparent,
             onSelectionChanged: (args) {
-              Navigator.pushNamed(context, "/todos",
-                      arguments:
-                          ScreenArguments(formattedDate(args.value), timeType))
-                  .whenComplete(() => loadTodos());
+              if (_controller.selectedDate != null) {
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedDate(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
             },
             cellBuilder:
                 (BuildContext context, DateRangePickerCellDetails details) {

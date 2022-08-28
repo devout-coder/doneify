@@ -90,9 +90,9 @@ class _MonthPageState extends State<MonthPage> {
     // debugPrint(selectedLabelsClass.selectedLabels.toString());
     // debugPrint("todos loaded");
     // debugPrint("loading...");
-    if (this.mounted) {
-      _controller.selectedDate = null;
-    }
+    // if (this.mounted) {
+    _controller.selectedDate = null;
+    // }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -179,12 +179,15 @@ class _MonthPageState extends State<MonthPage> {
             //   });
             //   debugPrint(args.visibleDateRange.toString());
             // },
+            initialSelectedDate: null,
             allowViewNavigation: false,
             onSelectionChanged: (args) {
-              Navigator.pushNamed(context, "/todos",
-                      arguments:
-                          ScreenArguments(formattedMonth(args.value), timeType))
-                  .whenComplete(() => loadTodos());
+              if (_controller.selectedDate != null) {
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedMonth(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
             },
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,

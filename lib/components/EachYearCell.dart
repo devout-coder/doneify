@@ -24,6 +24,10 @@ class EachYearCell extends StatefulWidget {
 }
 
 class _EachYearCellState extends State<EachYearCell> {
+  bool unfinishedYear() {
+    return widget.unfinishedYears.contains(formattedYear(widget.date));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -44,10 +48,10 @@ class _EachYearCellState extends State<EachYearCell> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(20)),
               color: DateTime.now().year == widget.date.year
-                  ? themePurple
+                  ? (unfinishedYear() ? Color(0xffFFA1C3) : themePurple)
                   : Colors.transparent,
             ),
-            width: 90,
+            width: 70,
             height: 50,
           ),
           // ),
@@ -58,22 +62,20 @@ class _EachYearCellState extends State<EachYearCell> {
                 widget.date.year.toString(),
                 style: DateTime.now().year == widget.date.year
                     ? TextStyle(
-                        color: widget.unfinishedYears
-                                .contains(formattedYear(widget.date))
-                            ? Color.fromARGB(255, 170, 0, 0)
-                            : Color.fromARGB(255, 47, 15, 83),
+                        color: Color.fromARGB(255, 47, 15, 83),
                         fontSize: 15,
                         fontFamily: 'EuclidCircular',
                         fontWeight: FontWeight.w600,
                       )
                     : TextStyle(
-                        color: widget.unfinishedYears
-                                .contains(formattedYear(widget.date))
-                            ? Color.fromARGB(255, 255, 105, 105)
+                        color: unfinishedYear()
+                            ? Color.fromARGB(255, 255, 142, 142)
                             : Color.fromARGB(255, 255, 255, 255),
                         fontSize: 15,
                         fontFamily: 'EuclidCircular',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: unfinishedYear()
+                            ? FontWeight.w500
+                            : FontWeight.w400,
                       ),
               ),
             ],

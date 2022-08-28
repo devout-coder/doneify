@@ -87,9 +87,7 @@ class _WeekPageState extends State<WeekPage> {
   }
 
   loadTodos() async {
-    if (this.mounted) {
-      _controller.selectedDate = null;
-    }
+    _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -158,6 +156,7 @@ class _WeekPageState extends State<WeekPage> {
           height: 330,
           child: SfDateRangePicker(
             controller: _controller,
+            initialSelectedDate: null,
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,
               textStyle: TextStyle(
@@ -177,10 +176,12 @@ class _WeekPageState extends State<WeekPage> {
             headerHeight: 40,
             selectionColor: Colors.transparent,
             onSelectionChanged: (args) {
-              Navigator.pushNamed(context, "/todos",
-                      arguments:
-                          ScreenArguments(formattedWeek(args.value), timeType))
-                  .whenComplete(() => loadTodos());
+              if (_controller.selectedDate != null) {
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedWeek(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
             },
             cellBuilder:
                 (BuildContext context, DateRangePickerCellDetails details) {

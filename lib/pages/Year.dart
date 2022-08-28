@@ -99,11 +99,7 @@ class _YearPageState extends State<YearPage> {
     // debugPrint(selectedLabelsClass.selectedLabels.toString());
     // debugPrint("todos loaded");
 
-    debugPrint("loading...");
-
-    if (this.mounted) {
-      _controller.selectedDate = null;
-    }
+    _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -174,6 +170,7 @@ class _YearPageState extends State<YearPage> {
           child: SfDateRangePicker(
             controller: _controller,
             view: DateRangePickerView.decade,
+            initialSelectedDate: null,
             // onViewChanged: (args) {
             //   WidgetsBinding.instance.addPostFrameCallback((_) {
             //     if (args.view == DateRangePickerView.month) {
@@ -192,10 +189,12 @@ class _YearPageState extends State<YearPage> {
             // },
             allowViewNavigation: false,
             onSelectionChanged: (args) {
-              Navigator.pushNamed(context, "/todos",
-                      arguments:
-                          ScreenArguments(formattedYear(args.value), timeType))
-                  .whenComplete(() => loadTodos());
+              if (_controller.selectedDate != null) {
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedYear(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
             },
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,

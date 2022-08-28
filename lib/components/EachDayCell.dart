@@ -23,13 +23,17 @@ class EachDayCell extends StatefulWidget {
 }
 
 class _EachDayCellState extends State<EachDayCell> {
+  bool unfinishedDay() {
+    return widget.unfinishedDays.contains(formattedDate(widget.date));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
         color: justDate(DateTime.now()) == widget.date
-            ? themePurple
+            ? (unfinishedDay() ? Color(0xffFFA1C3) : themePurple)
             : Colors.transparent,
       ),
       child: Row(
@@ -45,22 +49,19 @@ class _EachDayCellState extends State<EachDayCell> {
                         : "${widget.date.year.toString()} - ${(widget.date.year + 9).toString()}",
             style: justDate(DateTime.now()) == widget.date
                 ? TextStyle(
-                    color: widget.unfinishedDays
-                            .contains(formattedDate(widget.date))
-                        ? Color.fromARGB(255, 170, 0, 0)
-                        : Color.fromARGB(255, 47, 15, 83),
+                    color: Color.fromARGB(255, 47, 15, 83),
                     fontSize: 15,
                     fontFamily: 'EuclidCircular',
                     fontWeight: FontWeight.w600,
                   )
                 : TextStyle(
-                    color: widget.unfinishedDays
-                            .contains(formattedDate(widget.date))
-                        ? Color.fromARGB(255, 255, 105, 105)
+                    color: unfinishedDay()
+                        ? Color.fromARGB(255, 255, 142, 142)
                         : Color.fromARGB(255, 255, 255, 255),
                     fontSize: 15,
                     fontFamily: 'EuclidCircular',
-                    fontWeight: FontWeight.w400,
+                    fontWeight:
+                        unfinishedDay() ? FontWeight.w500 : FontWeight.w400,
                   ),
           ),
         ],

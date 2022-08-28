@@ -35,6 +35,10 @@ class _EachWeekCellState extends State<EachWeekCell> {
     }
   }
 
+  bool unfinishedWeek() {
+    return widget.unfinishedWeeks.contains(formattedWeek(widget.date));
+  }
+
   @override
   void initState() {
     markThisWeek();
@@ -60,7 +64,7 @@ class _EachWeekCellState extends State<EachWeekCell> {
               : Radius.circular(0),
         ),
         color: thisWeekDates.contains(widget.date)
-            ? themePurple
+            ? (unfinishedWeek() ? Color(0xffFFA1C3) : themePurple)
             : Colors.transparent,
       ),
       child: Row(
@@ -76,10 +80,7 @@ class _EachWeekCellState extends State<EachWeekCell> {
                         : "${widget.date.year.toString()} - ${(widget.date.year + 9).toString()}",
             style: thisWeekDates.contains(widget.date)
                 ? TextStyle(
-                    color: widget.unfinishedWeeks
-                            .contains(formattedWeek(widget.date))
-                        ? Color.fromARGB(255, 170, 0, 0)
-                        : Color.fromARGB(255, 47, 15, 83),
+                    color: Color.fromARGB(255, 47, 15, 83),
                     fontSize: 15,
                     fontFamily: 'EuclidCircular',
                     fontWeight: FontWeight.w600,
@@ -87,11 +88,12 @@ class _EachWeekCellState extends State<EachWeekCell> {
                 : TextStyle(
                     color: widget.unfinishedWeeks
                             .contains(formattedWeek(widget.date))
-                        ? Color.fromARGB(255, 255, 105, 105)
+                        ? Color.fromARGB(255, 255, 142, 142)
                         : Color.fromARGB(255, 255, 255, 255),
                     fontSize: 15,
                     fontFamily: 'EuclidCircular',
-                    fontWeight: FontWeight.w400,
+                    fontWeight:
+                        unfinishedWeek() ? FontWeight.w500 : FontWeight.w400,
                   ),
           ),
         ],

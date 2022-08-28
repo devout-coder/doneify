@@ -140,7 +140,7 @@ class _EachTodoState extends State<EachTodo> {
                               onTap: () {
                                 Navigator.pushNamed(context, "/todos",
                                         arguments: ScreenArguments(
-                                            widget.todo.time, "day"))
+                                            widget.todo.time, widget.todo.timeType))
                                     .whenComplete(() => widget.loadTodos!());
                               },
                               child: Text(

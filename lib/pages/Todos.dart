@@ -161,7 +161,7 @@ class _TodosState extends State<Todos> {
 
   @override
   void initState() {
-    debugPrint(widget.time + widget.timeType);
+    // debugPrint(widget.time + widget.timeType);
     loadTodos();
     super.initState();
   }

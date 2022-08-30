@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="8dp"
+    android:id="@+id/widget_container">
+
+
+    <TextView
+        android:id="@+id/timeType"
+        android:text="@string/timeType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        tools:text="Title" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/widget_message"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="18sp"-->
+<!--        tools:text="Message" />-->
+</LinearLayout>

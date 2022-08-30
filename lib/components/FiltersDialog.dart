@@ -45,7 +45,6 @@ class _FiltersDialogState extends State<FiltersDialog> {
   }
 
   Future<bool> saveFilters() async {
-    debugPrint("this is called");
     List<String> newLabels = [];
     labelsSelectedVal.forEach((key, value) {
       if (value) {

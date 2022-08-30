@@ -2,11 +2,8 @@ package com.example.conquer_flutter_app
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Window
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 class TimeTypeDialog : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {

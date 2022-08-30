@@ -21,7 +21,6 @@ class TodosDB {
   Future updateTodo(Todo todo) async {
     final updated =
         await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
-    print(updated);
   }
 
   Future deleteTodo(int todoId) async {

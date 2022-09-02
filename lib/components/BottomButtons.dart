@@ -10,6 +10,7 @@ class BottomButtons extends StatefulWidget {
   int index;
   final Function loadTodos;
   final Function createTodo;
+  bool tasksPage;
 
   BottomButtons({
     Key? key,
@@ -18,6 +19,7 @@ class BottomButtons extends StatefulWidget {
     required this.index,
     required this.loadTodos,
     required this.createTodo,
+    required this.tasksPage,
   }) : super(key: key);
 
   @override
@@ -54,7 +56,8 @@ class _BottomButtonsState extends State<BottomButtons> {
                       return FiltersDialog(
                         curve: curve,
                         reloadTodos: widget.loadTodos(),
-                        homePage: true,
+                        timeType: widget.timeType,
+                        tasksPage: widget.tasksPage,
                         // currentFirst: currentFirst,
                         // ascending: ascending,
                       );

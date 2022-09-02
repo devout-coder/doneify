@@ -35,6 +35,20 @@ class _EachWeekCellState extends State<EachWeekCell> {
     }
   }
 
+  String startOrEndOfMonth() {
+    String retString = "none";
+    if (thisWeekDates.contains(justDate(widget.date))) {
+      DateTime reqDay = thisWeekDates[0];
+      if (widget.date.day == 1) {
+        retString = "start";
+      } else if (widget.date.day ==
+          DateTime(reqDay.year, reqDay.month + 1, 0).day) {
+        retString = "end";
+      }
+    }
+    return retString;
+  }
+
   bool unfinishedWeek() {
     return widget.unfinishedWeeks.contains(formattedWeek(widget.date));
   }
@@ -50,18 +64,22 @@ class _EachWeekCellState extends State<EachWeekCell> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: thisWeekDates[0] == widget.date
-              ? Radius.circular(25)
-              : Radius.circular(0),
-          topRight: thisWeekDates[6] == widget.date
-              ? Radius.circular(25)
-              : Radius.circular(0),
-          bottomLeft: thisWeekDates[0] == widget.date
-              ? Radius.circular(25)
-              : Radius.circular(0),
-          bottomRight: thisWeekDates[6] == widget.date
-              ? Radius.circular(25)
-              : Radius.circular(0),
+          topLeft:
+              thisWeekDates[0] == widget.date || startOrEndOfMonth() == "start"
+                  ? Radius.circular(25)
+                  : Radius.circular(0),
+          topRight:
+              thisWeekDates[6] == widget.date || startOrEndOfMonth() == "end"
+                  ? Radius.circular(25)
+                  : Radius.circular(0),
+          bottomLeft:
+              thisWeekDates[0] == widget.date || startOrEndOfMonth() == "start"
+                  ? Radius.circular(25)
+                  : Radius.circular(0),
+          bottomRight:
+              thisWeekDates[6] == widget.date || startOrEndOfMonth() == "end"
+                  ? Radius.circular(25)
+                  : Radius.circular(0),
         ),
         color: thisWeekDates.contains(widget.date)
             ? (unfinishedWeek() ? Color(0xffFFA1C3) : themePurple)

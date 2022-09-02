@@ -321,6 +321,7 @@ class _TodosState extends State<Todos> {
           index: todos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
+          tasksPage: true,
         )
       ],
     );

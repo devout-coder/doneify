@@ -8,13 +8,15 @@ import 'package:get_it/get_it.dart';
 class FiltersDialog extends StatefulWidget {
   final double curve;
   final reloadTodos;
-  bool? homePage;
+  bool tasksPage;
+  String timeType;
 
   FiltersDialog({
     Key? key,
     required this.curve,
     required this.reloadTodos,
-    this.homePage,
+    required this.tasksPage,
+    required this.timeType,
   }) : super(key: key);
 
   @override
@@ -29,6 +31,20 @@ class _FiltersDialogState extends State<FiltersDialog> {
   bool currentFirst = true;
   bool ascending = false;
   double turns = 0.0;
+
+  String thisDay() {
+    if (widget.timeType == "day") {
+      return "Today";
+    } else if (widget.timeType == "week") {
+      return "This week";
+    } else if (widget.timeType == "month") {
+      return "This month";
+    } else if (widget.timeType == "year") {
+      return "This year";
+    } else {
+      return "";
+    }
+  }
 
   void readFiltersVal() {
     Map<String, bool> labelsSelectedValTemp = {};
@@ -90,11 +106,11 @@ class _FiltersDialogState extends State<FiltersDialog> {
                 child: SimpleDialog(
                   contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 5),
                   titlePadding: EdgeInsets.fromLTRB(20, 20, 10, 0),
-                  title: widget.homePage != null
-                      ? Text("Select filters")
-                      : Text('Choose Labels'),
+                  title: widget.tasksPage
+                      ? Text('Choose Labels')
+                      : Text("Select filters"),
                   children: <Widget>[
-                    widget.homePage != null
+                    !widget.tasksPage
                         ? Column(
                             children: [
                               SizedBox(height: 5),
@@ -109,7 +125,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Today's tasks at the top",
+                                      "${thisDay()}'s tasks at the top",
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 17,
@@ -165,10 +181,10 @@ class _FiltersDialogState extends State<FiltersDialog> {
                             ],
                           )
                         : Container(),
-                    widget.homePage != null
+                    !widget.tasksPage
                         ? SizedBox(height: 20)
                         : Container(),
-                    widget.homePage != null
+                    !widget.tasksPage
                         ? Text(
                             "Select labels",
                             style: TextStyle(

@@ -205,6 +205,7 @@ class _WeekPageState extends State<WeekPage> {
           index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
+          tasksPage: false,
         )
       ],
     );

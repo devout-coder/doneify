@@ -229,6 +229,7 @@ class _YearPageState extends State<YearPage> {
           index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
+          tasksPage: false,
         )
       ],
     );

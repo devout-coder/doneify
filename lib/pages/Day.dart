@@ -219,6 +219,7 @@ class _DayPageState extends State<DayPage> {
           index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
+          tasksPage: false,
         )
       ],
     );

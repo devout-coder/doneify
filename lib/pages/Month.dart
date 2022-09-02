@@ -229,6 +229,7 @@ class _MonthPageState extends State<MonthPage> {
           index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
+          tasksPage: false,
         )
       ],
     );

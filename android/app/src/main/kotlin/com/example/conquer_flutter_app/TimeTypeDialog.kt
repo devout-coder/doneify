@@ -2,6 +2,11 @@ package com.example.conquer_flutter_app
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 
@@ -12,26 +17,32 @@ class TimeTypeDialog : Activity() {
         val alertDialog = AlertDialog.Builder(this)
         // title of the alert dialog
         alertDialog.setTitle("Choose an Item")
-        val listItems = arrayOf("Android Development", "Web Development", "Machine Learning")
+        val listItems = arrayOf("Day", "Week", "Month", "Year", "Long Term")
 
-        alertDialog.setSingleChoiceItems(listItems, -1
+        val sharedPref: SharedPreferences = applicationContext.getSharedPreferences(
+                "ApplicationListener", Context.MODE_PRIVATE)
+        val timeType: String? = sharedPref.getString("timeType", "none")
+        var checkedItem: Int = -1
+        for(item in listItems.indices){
+            if(timeType == listItems[item]){
+                checkedItem = item
+            }
+        }
+
+
+        alertDialog.setSingleChoiceItems(listItems, checkedItem
         ) { _, which ->
             Log.d("debugging", listItems[which])
+
+            val editor: SharedPreferences.Editor = sharedPref.edit()
+            editor.putString("timeType", listItems[which])
+            editor.apply()
+            val intent = Intent(this, WidgetProvider::class.java)
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+            val ids: IntArray = AppWidgetManager.getInstance(applicationContext).getAppWidgetIds(ComponentName(application, WidgetProvider::class.java))
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            sendBroadcast(intent)
             finish()
-            // Get the dialog selected item
-//                    val color = array[which]
-//
-//                    // Try to parse user selected color string
-//                    try {
-//                        // Change the layout background color using user selection
-//                        root_layout.setBackgroundColor(Color.parseColor(color))
-//                        toast("$color color selected.")
-//                    }catch (e:IllegalArgumentException){
-//                        // Catch the color string parse exception
-//                        toast("$color color not supported.")
-//                    }
-//
-//                    // Dismiss the dialog
         }
         alertDialog.setOnCancelListener { dialogInterface -> finish() }
         alertDialog.create()

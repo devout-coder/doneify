@@ -1,0 +1,10 @@
+{
+	"configurations": [
+		{
+			"name": "Flutter (lib/states/widget_clicked.dart)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/states/widget_clicked.dart"
+		}
+	]
+}

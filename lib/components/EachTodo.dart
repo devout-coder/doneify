@@ -140,7 +140,8 @@ class _EachTodoState extends State<EachTodo> {
                               onTap: () {
                                 Navigator.pushNamed(context, "/todos",
                                         arguments: ScreenArguments(
-                                            widget.todo.time, widget.todo.timeType))
+                                            widget.todo.time,
+                                            widget.todo.timeType))
                                     .whenComplete(() => widget.loadTodos!());
                               },
                               child: Text(
@@ -166,7 +167,7 @@ class _EachTodoState extends State<EachTodo> {
             },
             openBuilder: (context, action) {
               return InputModal(
-                action: action,
+                goBack: () => action.call(),
                 editTodo: widget.editTodo,
                 onDelete: () {
                   widget.deleteTodo(widget.todo.index);

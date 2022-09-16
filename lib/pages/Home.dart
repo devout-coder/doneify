@@ -1,4 +1,5 @@
 import 'package:conquer_flutter_app/globalColors.dart';
+import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get_it/get_it.dart';
@@ -16,7 +17,13 @@ import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  String? launchFromWidgetTimeType;
+  String? launchFromWidgetCommand;
+  HomePage({
+    Key? key,
+    required this.launchFromWidgetTimeType,
+    required this.launchFromWidgetCommand,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -24,6 +31,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentPage = 0;
+  var timeTypeMap = {
+    'Day': 0,
+    'Week': 1,
+    "Month": 2,
+    "Year": 3,
+    "Long Term": 4
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint("In Home ${widget.launchFromWidgetTimeType}");
+    if (widget.launchFromWidgetTimeType == null) {
+      currentPage = 0;
+    } else {
+      currentPage = timeTypeMap[widget.launchFromWidgetTimeType]!;
+    }
+    // currentPage = timeType != null ? timeTypeMap[timeType]! : 0;
+  }
 
   @override
   Widget build(BuildContext context) {

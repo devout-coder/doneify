@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InputModal extends StatefulWidget {
-  final action;
+  final goBack;
   Todo? todo;
   final addTodo;
   final editTodo;
@@ -23,7 +23,8 @@ class InputModal extends StatefulWidget {
 
   InputModal({
     Key? key,
-    this.action,
+    // this.action,
+    this.goBack,
     this.todo,
     this.addTodo,
     this.editTodo,
@@ -64,7 +65,7 @@ class _InputModalState extends State<InputModal> {
     return index;
   }
 
-  void _saveTodo() {
+  void _saveTodo() async {
     int id;
     Todo newTodo;
     if (widget.todo != null) {
@@ -93,9 +94,9 @@ class _InputModalState extends State<InputModal> {
           widget.index!,
           getRandInt());
 
-      widget.addTodo(newTodo);
+      await widget.addTodo(newTodo);
     }
-    widget.action.call();
+    widget.goBack();
   }
 
   void setValues() async {
@@ -121,6 +122,7 @@ class _InputModalState extends State<InputModal> {
 
     return Container(
       color: themePurple,
+      height: screenHeight,
       padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
       child: Column(
         children: [

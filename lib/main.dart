@@ -1,13 +1,19 @@
 import 'dart:ffi';
 import 'package:conquer_flutter_app/globalColors.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/pages/Day.dart';
+import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
+import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:get_it/get_it.dart';
+import 'package:home_widget/home_widget.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -20,6 +26,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // final Future _init = GetItRegister().initializeGlobalStates();
+  String? launchFromWidgetTimeType;
+  String? launchFromWidgetCommand;
 
   MaterialColor purple = const MaterialColor(
     0xffe55f48, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
@@ -48,9 +56,32 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    // loadLabels();
-    // debugPrint("Home widget is rendered");
     super.initState();
+  }
+
+  createTodo(Todo todo) async {
+    TodosDB todosdb = GetIt.I.get();
+    await todosdb.createTodo(todo);
+  }
+
+  void _launchedFromWidget(Uri? uri) {
+    if (uri != null) {
+      String parsedURI = uri.toString().split("://")[1];
+      String command = parsedURI.split("/")[0];
+      String timeType = parsedURI.split("/")[1];
+      setState(() {
+        launchFromWidgetCommand = command;
+        launchFromWidgetTimeType = timeType;
+      });
+      debugPrint("in main $timeType");
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
+    HomeWidget.widgetClicked.listen(_launchedFromWidget);
   }
 
   @override
@@ -78,8 +109,39 @@ class _MyAppState extends State<MyApp> {
                   future: registerDB(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      // loadLabels();
-                      return const HomePage();
+                      if (launchFromWidgetCommand == "add_todo") {
+                        return Navigator(
+                          onGenerateRoute: (RouteSettings settings) {
+                            return MaterialPageRoute(builder: (context) {
+                              return InputModal(
+                                goBack: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HomePage(
+                                      key: UniqueKey(),
+                                      launchFromWidgetTimeType:
+                                          launchFromWidgetTimeType,
+                                      launchFromWidgetCommand:
+                                          launchFromWidgetCommand,
+                                    ),
+                                  ),
+                                ),
+                                timeType: "day", //!hardcoded value
+                                time: formattedDate(
+                                    DateTime.now()), //!hardcoded value
+                                index: 2, //!hardcoded value
+                                addTodo: createTodo,
+                              );
+                            });
+                          },
+                        );
+                      } else {
+                        return HomePage(
+                          key: UniqueKey(),
+                          launchFromWidgetTimeType: launchFromWidgetTimeType,
+                          launchFromWidgetCommand: launchFromWidgetCommand,
+                        );
+                      }
                     } else {
                       return const Material(
                         child: Center(

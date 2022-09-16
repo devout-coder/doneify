@@ -1,8 +1,3 @@
-import 'dart:convert';
-
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectedFilters {

@@ -1,4 +1,4 @@
-package com.example.conquer_flutter_app
+package com.example.doneify
 
 import io.flutter.embedding.android.FlutterActivity
 

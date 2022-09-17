@@ -1,4 +1,4 @@
-package com.example.conquer_flutter_app
+package com.example.doneify
 
 import android.app.Activity
 import android.app.AlertDialog

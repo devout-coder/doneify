@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.conquer_flutter_app">
+    package="com.example.doneify">
    <application
-        android:label="conquer_flutter_app"
+        android:label="Doneify"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/doneify_logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,7 +30,7 @@
         </activity>
        <activity android:name=".TimeTypeDialog" android:theme="@style/Theme.AppCompat.Translucent" android:exported="true" android:launchMode="singleInstance"
            android:taskAffinity=".TimeTypeDialog" android:autoRemoveFromRecents="true"   />
-       <receiver android:name="WidgetProvider" android:exported="true" >
+       <receiver android:name=".WidgetProvider" android:exported="true" >
            <intent-filter>
                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
            </intent-filter>

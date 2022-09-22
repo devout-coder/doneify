@@ -5,16 +5,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
+import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
+import org.json.JSONObject
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
 //import es.antonborri.home_widget.HomeWidgetProvider
 
+const val EXTRA_ITEM = "com.example.android.listview.EXTRA_ITEM"
 class WidgetProvider : HomeWidgetProvider() {
+
 
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, widgetData: SharedPreferences) {
@@ -24,6 +30,7 @@ class WidgetProvider : HomeWidgetProvider() {
                 "ApplicationListener", Context.MODE_PRIVATE)
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
+
                 val timeType: String? = sharedPref.getString("timeType", "none")
                 if(timeType == "none"){
                     setTextViewText(R.id.timeType, "Day")
@@ -36,18 +43,82 @@ class WidgetProvider : HomeWidgetProvider() {
                 val pendingIntent = PendingIntent.getActivity(context, 0, Intent(context, TimeTypeDialog::class.java) , PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 setOnClickPendingIntent(R.id.timeType, pendingIntent)
 
-                val message = "add_todo"
-                val pendingIntentWithData = HomeWidgetLaunchIntent.getActivity(
+
+                setOnClickPendingIntent(R.id.add_button, HomeWidgetLaunchIntent.getActivity(
                         context,
                         MainActivity::class.java,
-                        Uri.parse("http://add_todo/$timeType"))
-                setOnClickPendingIntent(R.id.add_button, pendingIntentWithData)
+                        Uri.parse("http://add_todo/$timeType")))
 
+
+                val todosStr  = widgetData.getString("todos", "null")
+                val todos = ArrayList<HashMap<String, Any>>()
+                val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
+                if(todosStr != "null"){
+                    val jObj = JSONObject(todosStr)
+                    val jsonArry = jObj.getJSONArray("todos")
+                    for (i in 0 until jsonArry.length()) {
+                        val todo = HashMap<String, Any>()
+                        val obj = jsonArry.getJSONObject(i)
+                        todo["id"] = obj.getInt("id")
+                        todo["taskName"] = obj.getString("taskName")
+                        todo["taskDesc"] = obj.getString("taskDesc")
+                        todo["finished"] = obj.getBoolean("finished")
+                        todo["labelName"] = obj.getString("labelName")
+                        todo["timeStamp"] = obj.getInt("timeStamp")
+                        todo["time"] = obj.getString("time")
+                        todo["timeType"] = obj.getString("timeType")
+                        todo["index"] = obj.getInt("index")
+                        todos.add(todo)
+
+                        val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
+                            setTextViewText(R.id.each_todo_container_text, todo["taskName"].toString())
+                            setCompoundButtonChecked(R.id.each_todo_container_checkbox, todo["finished"].toString().toBoolean())
+                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(context,
+                                    Uri.parse("myAppWidget://todo_checked/${todo["id"].toString()}"))
+                            setOnCheckedChangeResponse(
+                                    R.id.each_todo_container_checkbox,
+                                    RemoteViews.RemoteResponse.fromPendingIntent(backgroundIntent)
+                            )
+                            Log.d("debugging",  "id received is ${todo["id"].toString()}" )
+                            val fillInIntent = Intent().apply {
+                                Bundle().also { extras ->
+                                    extras.putInt(EXTRA_ITEM, todo["id"].toString().toInt())
+                                    putExtras(extras)
+                                }
+                            }
+                            setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
+                        }
+
+                        todosRemoteView.addItem(todo["id"].toString().toInt().toLong(), view)
+                    }
+                    Log.d("debugging", "no of todos " + todos.count().toString())
+                    Log.d("debugging", "name of first todo " + todos[0]["taskName"].toString())
+                }
+                Log.d( "debugging", "update is triggered");
+
+                setRemoteAdapter(
+                        R.id.todos_list,
+                        todosRemoteView
+                    .build()
+                )
+
+               val editTodoIntent =  HomeWidgetLaunchIntent.getActivity(
+                       context,
+                       MainActivity::class.java,
+                       Uri.parse("http://edit_todo/$timeType"))
+                setPendingIntentTemplate(R.id.todos_list, editTodoIntent)
             }
 
             appWidgetManager.updateAppWidget(widgetId, views)
     }
 
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val viewIndex: Int = intent!!.getIntExtra(EXTRA_ITEM, 0)
+        Log.d("debugging", "an item is clicked $viewIndex")
+        PendingIntent.getActivity(context, 0, Intent(context, TimeTypeDialog::class.java) , PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        super.onReceive(context, intent)
     }
 
 

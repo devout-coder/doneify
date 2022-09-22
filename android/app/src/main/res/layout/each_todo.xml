@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:weightSum="2"
+    android:id="@+id/each_todo_container"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_height="wrap_content">
+    <CheckBox
+        android:id="@+id/each_todo_container_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         />
+
+    <TextView android:id="@+id/each_todo_container_text"
+        android:layout_width="wrap_content"
+        android:gravity="start"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

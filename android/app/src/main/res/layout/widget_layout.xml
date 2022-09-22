@@ -1,13 +1,63 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="8dp"
-    android:orientation="horizontal"
-    android:background="@drawable/widget_background"
-    android:padding="8dp"
-    android:id="@+id/widget_container">
+<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    android:layout_margin="10dp">-->
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:background="#bbDEDFDE"-->
+<!--        android:orientation="vertical">-->
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    android:layout_margin="8dp"-->
+<!--    android:orientation="horizontal"-->
+<!--    android:background="@drawable/widget_background"-->
+<!--    android:padding="8dp"-->
+<!--    android:id="@+id/widget_container">-->
 
+
+<!--    <TextView-->
+<!--        android:id="@+id/timeType"-->
+<!--        android:text="@string/timeType"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="36sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:clickable="true"-->
+<!--        android:focusable="true"-->
+<!--        tools:text="Title" />-->
+
+<!--    <ImageButton-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:src="@drawable/add_icon_foreground"-->
+<!--        android:id="@+id/add_button"-->
+<!--    />-->
+<!--    </LinearLayout>-->
+<!--        <ListView-->
+<!--            android:id="@+id/todos_list"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="fill_parent">-->
+<!--        </ListView>-->
+<!--    </LinearLayout>-->
+<!--</FrameLayout>-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+xmlns:tools="http://schemas.android.com/tools">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:orientation="horizontal"
+
+        android:padding="8dp"
+        android:id="@+id/widget_container">
 
     <TextView
         android:id="@+id/timeType"
@@ -21,9 +71,19 @@
         tools:text="Title" />
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:src="@drawable/add_icon_foreground"
         android:id="@+id/add_button"
-    />
-</LinearLayout>
+        />
+    </LinearLayout>
+<ListView
+    android:id="@+id/todos_list"
+    android:layout_width="match_parent"
+    android:layout_margin="8dp"
+    tools:listitem="@layout/each_todo"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/widget_container"
+    >
+</ListView>
+</RelativeLayout>

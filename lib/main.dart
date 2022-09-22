@@ -14,7 +14,23 @@ import 'package:home_widget/home_widget.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  HomeWidget.registerBackgroundCallback(backgroundCallback);
   runApp(const MyApp());
+}
+
+dynamic backgroundCallback(Uri? uri) async {
+  debugPrint(uri.toString());
+  // if (uri.host == 'todo_checked') {
+    // debugPrint(uri.toString());
+    // await HomeWidget.getWidgetData<int>('_counter', defaultValue: 0)
+    //     .then((value) {
+    //   _counter = value;
+    //   _counter++;
+    // });
+    // await HomeWidget.saveWidgetData<int>('_counter', _counter);
+    // await HomeWidget.updateWidget(
+    //     name: 'AppWidgetProvider', iOSName: 'AppWidgetProvider');
+  // }
 }
 
 class MyApp extends StatefulWidget {
@@ -69,6 +85,8 @@ class _MyAppState extends State<MyApp> {
       String parsedURI = uri.toString().split("://")[1];
       String command = parsedURI.split("/")[0];
       String timeType = parsedURI.split("/")[1];
+      debugPrint(command);
+      debugPrint(timeType);
       setState(() {
         launchFromWidgetCommand = command;
         launchFromWidgetTimeType = timeType;

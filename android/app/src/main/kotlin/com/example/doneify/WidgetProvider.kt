@@ -73,19 +73,20 @@ class WidgetProvider : HomeWidgetProvider() {
                         val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
                             setTextViewText(R.id.each_todo_container_text, todo["taskName"].toString())
                             setCompoundButtonChecked(R.id.each_todo_container_checkbox, todo["finished"].toString().toBoolean())
-                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(context,
-                                    Uri.parse("myAppWidget://todo_checked/${todo["id"].toString()}"))
-                            setOnCheckedChangeResponse(
-                                    R.id.each_todo_container_checkbox,
-                                    RemoteViews.RemoteResponse.fromPendingIntent(backgroundIntent)
-                            )
-                            Log.d("debugging",  "id received is ${todo["id"].toString()}" )
+
                             val fillInIntent = Intent().apply {
                                 Bundle().also { extras ->
                                     extras.putInt(EXTRA_ITEM, todo["id"].toString().toInt())
                                     putExtras(extras)
                                 }
                             }
+                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(context,
+                                    Uri.parse("myAppWidget://todo_checked/${todo["id"].toString()}"))
+                            setOnCheckedChangeResponse(
+                                    R.id.each_todo_container_checkbox,
+                                    RemoteViews.RemoteResponse.fromFillInIntent(fillInIntent)
+                            )
+                            Log.d("debugging",  "id received is ${todo["id"].toString()}" )
                             setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
                         }
 
@@ -102,11 +103,20 @@ class WidgetProvider : HomeWidgetProvider() {
                     .build()
                 )
 
-               val editTodoIntent =  HomeWidgetLaunchIntent.getActivity(
+               val editTodoIntent = HomeWidgetLaunchIntent.getActivity(
                        context,
                        MainActivity::class.java,
                        Uri.parse("http://edit_todo/$timeType"))
-                setPendingIntentTemplate(R.id.todos_list, editTodoIntent)
+                val pendingIntentx: PendingIntent = Intent(
+                        context,
+                        WidgetProvider::class.java
+                ).run {
+                    // Set the action for the intent.
+                    // When the user touches a particular view, it will have the effect of
+                    // broadcasting TOAST_ACTION.
+                    PendingIntent.getBroadcast(context, 0, this, PendingIntent.FLAG_IMMUTABLE)
+                }
+                setPendingIntentTemplate(R.id.todos_list, pendingIntentx)
             }
 
             appWidgetManager.updateAppWidget(widgetId, views)
@@ -117,7 +127,15 @@ class WidgetProvider : HomeWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val viewIndex: Int = intent!!.getIntExtra(EXTRA_ITEM, 0)
         Log.d("debugging", "an item is clicked $viewIndex")
-        PendingIntent.getActivity(context, 0, Intent(context, TimeTypeDialog::class.java) , PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+//        if(context!=null){
+//            Log.d("debugging", "pending intent must be executed")
+//            HomeWidgetLaunchIntent.getActivity(
+//                    context,
+//                    MainActivity::class.java,
+//                    Uri.parse("http://edit_todo/some_timeType")).send()
+//        }else{
+//            Log.d("debugging", "context is null")
+//        }
         super.onReceive(context, intent)
     }
 

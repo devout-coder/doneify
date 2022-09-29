@@ -7,9 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class InputModal extends StatefulWidget {
   final goBack;
@@ -45,6 +47,24 @@ class _InputModalState extends State<InputModal> {
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
+
+  static const platform = MethodChannel('alarm_method_channel');
+
+  Future<void> saveReminder() async {
+    try {
+      final String formatted = DateFormat("d/M/y,H:m").format(DateTime.now());
+      await platform.invokeMethod("setAlarm", {
+        "repeat_status": "once",
+        "taskName": taskName.text,
+        "taskDesc": taskDesc.text,
+        "label": labelsDB.labels[selectedLabel].name,
+        "time": formatted,
+      });
+      // batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      // batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
+  }
 
   int getRandInt() {
     var random = Random.secure();
@@ -223,7 +243,8 @@ class _InputModalState extends State<InputModal> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // action.call();
+                      saveReminder();
+                      widget.goBack();
                     },
                     tooltip: "Add reminder",
                     icon: const Icon(

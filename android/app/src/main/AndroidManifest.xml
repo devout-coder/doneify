@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.doneify">
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
    <application
         android:label="Doneify"
         android:name="${applicationName}"
@@ -30,6 +31,9 @@
         </activity>
        <activity android:name=".TimeTypeDialog" android:theme="@style/Theme.AppCompat.Translucent" android:exported="true" android:launchMode="singleInstance"
            android:taskAffinity=".TimeTypeDialog" android:autoRemoveFromRecents="true"   />
+       <activity android:name=".AlarmInterface" android:theme="@style/Theme.AppCompat.New" android:exported="true" android:launchMode="singleInstance"
+           android:taskAffinity=".AlarmInterface" android:autoRemoveFromRecents="true"   />
+
        <receiver android:name=".WidgetProvider" android:exported="true" >
            <intent-filter>
                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

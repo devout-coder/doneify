@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.doneify">
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
    <application
         android:label="Doneify"
         android:name="${applicationName}"
@@ -31,8 +32,13 @@
         </activity>
        <activity android:name=".TimeTypeDialog" android:theme="@style/Theme.AppCompat.Translucent" android:exported="true" android:launchMode="singleInstance"
            android:taskAffinity=".TimeTypeDialog" android:autoRemoveFromRecents="true"   />
-       <activity android:name=".AlarmInterface" android:theme="@style/Theme.AppCompat.New" android:exported="true" android:launchMode="singleInstance"
-           android:taskAffinity=".AlarmInterface" android:autoRemoveFromRecents="true"   />
+       <activity android:name=".AlarmInterface" android:theme="@style/Theme.AppCompat.Translucent" android:exported="true" android:launchMode="singleInstance"
+           android:taskAffinity=".AlarmInterface" android:autoRemoveFromRecents="true" android:showOnLockScreen="true"
+           android:showWhenLocked="true"
+           android:turnScreenOn="true" />
+
+       <receiver android:name=".AlarmReceiver" android:exported="true" >
+       </receiver>
 
        <receiver android:name=".WidgetProvider" android:exported="true" >
            <intent-filter>

@@ -1,13 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
+    android:layout_width="300dp"
+    android:layout_height="150dp"
+    android:background="@drawable/alarm_interface_dialog"
     xmlns:tools="http://schemas.android.com/tools">
         <TextView
             android:id="@+id/taskName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="36sp"
+            android:textColor="#000000"
             android:textStyle="bold"
              />
     <TextView
@@ -15,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/taskName"
+        android:textColor="#000000"
         android:textSize="32sp"
         />
     <TextView
@@ -22,6 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/taskDesc"
+        android:textColor="#000000"
         android:textSize="28sp"
         />
 </RelativeLayout>

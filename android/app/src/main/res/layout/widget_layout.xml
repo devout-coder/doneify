@@ -9,7 +9,6 @@ xmlns:tools="http://schemas.android.com/tools">
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:orientation="horizontal"
-
         android:padding="8dp"
         android:id="@+id/widget_container">
 

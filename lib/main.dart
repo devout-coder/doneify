@@ -9,9 +9,12 @@ import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todosDB.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:sembast/sembast.dart';
 
+final channel = MethodChannel('alarm_method_channel');
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   HomeWidget.registerBackgroundCallback(backgroundCallback);
@@ -21,15 +24,15 @@ void main() {
 dynamic backgroundCallback(Uri? uri) async {
   debugPrint(uri.toString());
   // if (uri.host == 'todo_checked') {
-    // debugPrint(uri.toString());
-    // await HomeWidget.getWidgetData<int>('_counter', defaultValue: 0)
-    //     .then((value) {
-    //   _counter = value;
-    //   _counter++;
-    // });
-    // await HomeWidget.saveWidgetData<int>('_counter', _counter);
-    // await HomeWidget.updateWidget(
-    //     name: 'AppWidgetProvider', iOSName: 'AppWidgetProvider');
+  // debugPrint(uri.toString());
+  // await HomeWidget.getWidgetData<int>('_counter', defaultValue: 0)
+  //     .then((value) {
+  //   _counter = value;
+  //   _counter++;
+  // });
+  // await HomeWidget.saveWidgetData<int>('_counter', _counter);
+  // await HomeWidget.updateWidget(
+  //     name: 'AppWidgetProvider', iOSName: 'AppWidgetProvider');
   // }
 }
 
@@ -70,8 +73,27 @@ class _MyAppState extends State<MyApp> {
     await labelsDB.readLabelsFromStorage();
   }
 
+  void handleKotlinEvents() async {
+    channel.setMethodCallHandler((call) async {
+      debugPrint("some call made");
+      if (call.method == 'task_done') {
+        await registerDB();
+        TodosDB todosdb = GetIt.I.get();
+        Todo? todo =
+            await todosdb.getTodo(int.parse(call.arguments.toString()));
+        todo?.finished = true;
+        await todosdb.updateTodo(todo!);
+        todo = await todosdb.getTodo(int.parse(call.arguments.toString()));
+        debugPrint("updated: ${todo?.toMap().toString()}");
+        setState(() {});
+      }
+      return Future<dynamic>.value();
+    });
+  }
+
   @override
   void initState() {
+    handleKotlinEvents();
     super.initState();
   }
 

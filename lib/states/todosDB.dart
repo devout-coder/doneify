@@ -30,6 +30,12 @@ class TodosDB {
     storeDataInWidget();
   }
 
+  Future<Todo?> getTodo(int key) async {
+    final snapshot = await _store.record(key).getSnapshot(_db);
+    return Future<Todo?>.value(
+        snapshot != null ? Todo.fromMap(snapshot.value) : null);
+  }
+
   Future<List<Todo>> getAllTodos(Finder finder) async {
     final snapshots = await _store.find(_db, finder: finder);
     return snapshots

@@ -1,6 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="300dp"
-    android:layout_height="150dp"
+    android:layout_width="400dp"
+    android:layout_height="350dp"
     android:background="@drawable/alarm_interface_dialog"
     xmlns:tools="http://schemas.android.com/tools">
         <TextView
@@ -27,4 +27,27 @@
         android:textColor="#000000"
         android:textSize="28sp"
         />
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@+id/label"
+        android:text="Snooze"
+        android:drawableTop="@drawable/snooze_icon_foreground"
+        android:id="@+id/snooze_button" />
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_toRightOf="@+id/snooze_button"
+        android:text="Dismiss"
+        android:drawableTop="@drawable/dismiss_icon_foreground"
+        android:layout_below="@+id/label"
+        android:id="@+id/dismiss_button" />
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_toRightOf="@+id/dismiss_button"
+        android:layout_below="@+id/label"
+        android:text="Task completed"
+        android:drawableTop="@drawable/task_completed_icon_foreground"
+        android:id="@+id/check_off_button" />
 </RelativeLayout>

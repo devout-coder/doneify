@@ -47,14 +47,17 @@ class _InputModalState extends State<InputModal> {
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
+  int? taskId;
 
   static const platform = MethodChannel('alarm_method_channel');
 
   Future<void> saveReminder() async {
     try {
+      debugPrint("$taskId");
       final String formatted = DateFormat("d/M/y,H:m").format(DateTime.now());
       await platform.invokeMethod("setAlarm", {
         "repeat_status": "once",
+        "taskId": taskId.toString(),
         "taskName": taskName.text,
         "taskDesc": taskDesc.text,
         "label": labelsDB.labels[selectedLabel].name,
@@ -86,10 +89,8 @@ class _InputModalState extends State<InputModal> {
   }
 
   void _saveTodo() async {
-    int id;
     Todo newTodo;
     if (widget.todo != null) {
-      id = widget.todo!.id;
       newTodo = Todo(
         taskName.text,
         taskDesc.text,
@@ -99,27 +100,28 @@ class _InputModalState extends State<InputModal> {
         widget.time,
         widget.timeType,
         widget.todo!.index,
-        id,
+        taskId!,
       );
       widget.editTodo(newTodo);
     } else {
       newTodo = Todo(
-          taskName.text,
-          taskDesc.text,
-          false,
-          labelsDB.labels[selectedLabel].name,
-          DateTime.now().millisecondsSinceEpoch,
-          widget.time,
-          widget.timeType,
-          widget.index!,
-          getRandInt());
-
+        taskName.text,
+        taskDesc.text,
+        false,
+        labelsDB.labels[selectedLabel].name,
+        DateTime.now().millisecondsSinceEpoch,
+        widget.time,
+        widget.timeType,
+        widget.index!,
+        taskId!,
+      );
       await widget.addTodo(newTodo);
     }
     widget.goBack();
   }
 
   void setValues() async {
+    taskId = widget.todo != null ? widget.todo!.id : getRandInt();
     taskName.text = widget.todo != null ? widget.todo!.taskName : '';
     taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
     selectedLabel =

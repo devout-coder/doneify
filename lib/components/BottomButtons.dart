@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class BottomButtons extends StatefulWidget {
   String time;
   String timeType;
-  int index;
   final Function loadTodos;
   final Function createTodo;
   bool tasksPage;
@@ -16,7 +15,6 @@ class BottomButtons extends StatefulWidget {
     Key? key,
     required this.time,
     required this.timeType,
-    required this.index,
     required this.loadTodos,
     required this.createTodo,
     required this.tasksPage,
@@ -101,7 +99,6 @@ class _BottomButtonsState extends State<BottomButtons> {
                     addTodo: widget.createTodo,
                     time: widget.time, //time
                     timeType: widget.timeType,
-                    index: widget.index, //index
                   );
                 },
               ),

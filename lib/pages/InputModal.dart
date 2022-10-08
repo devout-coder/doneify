@@ -1,13 +1,20 @@
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
+import 'package:conquer_flutter_app/components/EachWeekCell.dart';
 import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
+import 'package:conquer_flutter_app/components/SelectTimeDialog.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/pages/Day.dart';
+import 'package:conquer_flutter_app/pages/Month.dart';
+import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:conquer_flutter_app/pages/Year.dart';
 import 'package:conquer_flutter_app/states/labelsDB.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +28,6 @@ class InputModal extends StatefulWidget {
   final onDelete;
   String time;
   String timeType;
-  int? index;
 
   InputModal({
     Key? key,
@@ -33,15 +39,25 @@ class InputModal extends StatefulWidget {
     this.onDelete,
     required this.time,
     required this.timeType,
-    this.index,
   }) : super(key: key);
 
   @override
   State<InputModal> createState() => _InputModalState();
 }
 
+List<DateTime> allDatesInWeek(DateTime day) {
+  List<DateTime> allDates = [];
+  DateTime startDate = day.subtract(Duration(days: day.weekday - 1));
+  for (int i = 0; i < 7; i++) {
+    allDates.add(justDate(startDate.add(Duration(days: i))));
+  }
+  return allDates;
+}
+
 class _InputModalState extends State<InputModal> {
   int selectedLabel = 0;
+  List<DateTime> selectedWeekDates = [];
+  DateTime? selectedTime;
 
   LabelDB labelsDB = GetIt.I.get();
 
@@ -88,36 +104,65 @@ class _InputModalState extends State<InputModal> {
     return index;
   }
 
-  void _saveTodo() async {
-    Todo newTodo;
-    if (widget.todo != null) {
-      newTodo = Todo(
-        taskName.text,
-        taskDesc.text,
-        false,
-        labelsDB.labels[selectedLabel].name,
-        DateTime.now().millisecondsSinceEpoch,
-        widget.time,
-        widget.timeType,
-        widget.todo!.index,
-        taskId!,
-      );
-      widget.editTodo(newTodo);
-    } else {
-      newTodo = Todo(
-        taskName.text,
-        taskDesc.text,
-        false,
-        labelsDB.labels[selectedLabel].name,
-        DateTime.now().millisecondsSinceEpoch,
-        widget.time,
-        widget.timeType,
-        widget.index!,
-        taskId!,
-      );
-      await widget.addTodo(newTodo);
+  String figureOutTime() {
+    switch (widget.timeType) {
+      case "day":
+        return formattedDate(selectedTime!);
+      case "week":
+        return formattedWeek(selectedWeekDates[0]);
+      case "month":
+        return formattedMonth(selectedTime!);
+      case "year":
+        return formattedYear(selectedTime!);
+      default:
+        return "longTerm";
     }
-    widget.goBack();
+  }
+
+  void _saveTodo() async {
+    // debugPrint(figureOutTime());
+    Todo newTodo;
+    if (taskName.text != "") {
+      if (widget.todo != null) {
+        newTodo = Todo(
+          taskName.text,
+          taskDesc.text,
+          false,
+          labelsDB.labels[selectedLabel].name,
+          DateTime.now().millisecondsSinceEpoch,
+          figureOutTime(),
+          widget.timeType,
+          widget.todo!.index,
+          taskId!,
+        );
+        await widget.editTodo(newTodo);
+      } else {
+        newTodo = Todo(
+          taskName.text,
+          taskDesc.text,
+          false,
+          labelsDB.labels[selectedLabel].name,
+          DateTime.now().millisecondsSinceEpoch,
+          figureOutTime(),
+          widget.timeType,
+          0,
+          taskId!,
+        );
+        await widget.addTodo(newTodo);
+      }
+      Fluttertoast.showToast(
+        msg: "Task saved",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+      widget.goBack();
+    } else {
+      Fluttertoast.showToast(
+        msg: "Task saved",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
   }
 
   void setValues() async {
@@ -126,6 +171,16 @@ class _InputModalState extends State<InputModal> {
     taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
     selectedLabel =
         widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
+
+    setState(() {
+      switch (widget.timeType) {
+        case "week":
+          selectedWeekDates = allDatesInWeek(DateTime.now());
+          break;
+        default:
+          selectedTime = DateTime.now();
+      }
+    });
     // debugPrint(widget.todo!.index.toString());
   }
 
@@ -245,8 +300,38 @@ class _InputModalState extends State<InputModal> {
                   ),
                   IconButton(
                     onPressed: () {
-                      saveReminder();
-                      widget.goBack();
+                      showGeneralDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: "Select Label",
+                        pageBuilder: (BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation) {
+                          return Container();
+                        },
+                        transitionBuilder: (ctx, a1, a2, child) {
+                          var curve = Curves.easeInOut.transform(a1.value);
+                          return SelectTimeDialog(
+                            curve: curve,
+                            timeType: widget.timeType,
+                            selectedWeekDates: selectedWeekDates,
+                            selectedTime: selectedTime,
+                            updateSelectedWeekDates: (newWeekDates) {
+                              setState(() {
+                                selectedWeekDates = newWeekDates;
+                              });
+                            },
+                            updateSelectedTime: (newTime) {
+                              setState(() {
+                                selectedTime = newTime;
+                              });
+                            },
+                          );
+                        },
+                        transitionDuration: const Duration(milliseconds: 300),
+                      );
+                      // saveReminder();
+                      // widget.goBack();
                     },
                     tooltip: "Add reminder",
                     icon: const Icon(
@@ -264,29 +349,16 @@ class _InputModalState extends State<InputModal> {
                       size: 30,
                     ),
                   ),
-                  Container(
-                      child: widget.todo != null
-                          ? Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () {},
-                                  tooltip: "Postpone this task",
-                                  icon: const Icon(
-                                    Icons.subdirectory_arrow_right,
-                                    size: 30,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: widget.onDelete,
-                                  tooltip: "Delete this task",
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    size: 30,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : const SizedBox()),
+                  widget.todo != null
+                      ? IconButton(
+                          onPressed: widget.onDelete,
+                          tooltip: "Delete this task",
+                          icon: const Icon(
+                            Icons.delete,
+                            size: 30,
+                          ),
+                        )
+                      : SizedBox(),
                   IconButton(
                     onPressed: () {
                       _saveTodo();

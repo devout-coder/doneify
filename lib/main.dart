@@ -169,7 +169,6 @@ class _MyAppState extends State<MyApp> {
                                 timeType: "day", //!hardcoded value
                                 time: formattedDate(
                                     DateTime.now()), //!hardcoded value
-                                index: 2, //!hardcoded value
                                 addTodo: createTodo,
                               );
                             });

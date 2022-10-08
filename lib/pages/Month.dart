@@ -226,7 +226,6 @@ class _MonthPageState extends State<MonthPage> {
         BottomButtons(
           time: formattedMonth(DateTime.now()),
           timeType: timeType,
-          index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
           tasksPage: false,

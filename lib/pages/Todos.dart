@@ -82,9 +82,9 @@ class _TodosState extends State<Todos> {
       }
     });
 
-    // debugPrint("todos");
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
+    debugPrint("todos");
+    todosTemp.forEach(
+        (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
     // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
     // debugPrint("finished");
@@ -111,15 +111,9 @@ class _TodosState extends State<Todos> {
     await todosdb.updateTodo(todo);
   }
 
-  deleteTodo(int todoIndex) async {
-    todos.forEach((element) {
-      if (element.index > todoIndex) {
-        element.index--;
-        editTodoWithoutReload(element);
-      }
-    });
+  deleteTodo(int todoId) async {
     try {
-      await todosdb.deleteTodo(todos[todoIndex].id);
+      await todosdb.deleteTodo(todoId);
       await loadTodos();
     } catch (e, s) {
       print("exception e");
@@ -129,39 +123,19 @@ class _TodosState extends State<Todos> {
 
   rearrangeTodos(int oldIndex, int newIndex) async {
     // debugPrint("${oldIndex} ${newIndex}");
-    if (newIndex > oldIndex) {
-      newIndex = newIndex - 1;
-      todos.forEach((element) {
-        if (element.index == oldIndex) {
-          element.index = newIndex;
-          editTodoWithoutReload(element);
-        } else if (element.index > oldIndex && element.index <= newIndex) {
-          element.index -= 1;
-          editTodoWithoutReload(element);
-        }
-      });
-    } else if (oldIndex > newIndex) {
-      todos.forEach((element) {
-        if (element.index == oldIndex) {
-          element.index = newIndex;
-          editTodoWithoutReload(element);
-        } else if (element.index < oldIndex && element.index >= newIndex) {
-          element.index += 1;
-          editTodoWithoutReload(element);
-        }
-      });
-    }
-    List<Todo> _todos = todos;
-    final Todo item = _todos.removeAt(oldIndex);
-    _todos.insert(newIndex, item);
+    newIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    todosdb.rearrangeTodos(oldIndex, newIndex, widget.time);
+    List<Todo> newTodos = todos;
+    final Todo item = newTodos.removeAt(oldIndex);
+    newTodos.insert(newIndex, item);
     setState(() {
-      todos = _todos;
+      todos = newTodos;
     });
   }
 
   @override
   void initState() {
-    // debugPrint(widget.time + widget.timeType);
+    debugPrint(widget.time + widget.timeType);
     loadTodos();
     super.initState();
   }
@@ -197,6 +171,17 @@ class _TodosState extends State<Todos> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                todos.isEmpty
+                    ? Text(
+                        "No tasks added yet",
+                        style: const TextStyle(
+                          fontFamily: "EuclidCircular",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 25,
+                          color: Color.fromARGB(255, 173, 219, 255),
+                        ),
+                      )
+                    : Container(),
                 AnimatedContainer(
                   duration: Duration(seconds: 1),
                   curve: Curves.fastOutSlowIn,
@@ -318,7 +303,6 @@ class _TodosState extends State<Todos> {
         BottomButtons(
           time: widget.time,
           timeType: widget.timeType,
-          index: todos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
           tasksPage: true,

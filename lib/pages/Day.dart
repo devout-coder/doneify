@@ -8,7 +8,6 @@ import 'package:conquer_flutter_app/components/IncompleteTodos.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/components/FiltersDialog.dart';
@@ -97,9 +96,6 @@ class _DayPageState extends State<DayPage> {
   }
 
   loadTodos() async {
-    // debugPrint(selectedLabelsClass.selectedLabels.toString());
-    // debugPrint("todos loaded");
-    // debugPrint("loading...");
     _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
@@ -216,7 +212,6 @@ class _DayPageState extends State<DayPage> {
         BottomButtons(
           time: formattedDate(DateTime.now()),
           timeType: timeType,
-          index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
           tasksPage: false,

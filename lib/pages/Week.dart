@@ -202,7 +202,6 @@ class _WeekPageState extends State<WeekPage> {
         BottomButtons(
           time: formattedWeek(DateTime.now()),
           timeType: timeType,
-          index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
           tasksPage: false,

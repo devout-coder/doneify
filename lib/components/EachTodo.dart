@@ -170,7 +170,7 @@ class _EachTodoState extends State<EachTodo> {
                 goBack: () => action.call(),
                 editTodo: widget.editTodo,
                 onDelete: () {
-                  widget.deleteTodo(widget.todo.index);
+                  widget.deleteTodo(widget.todo.id);
                   action.call();
                 },
                 todo: widget.todo,

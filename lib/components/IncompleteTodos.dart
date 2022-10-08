@@ -39,23 +39,17 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
     await todosdb.updateTodo(todo);
   }
 
-  deleteTodo(int originaltodoIndex, int todoIndex) async {
-    widget.todos.forEach((element) {
-      if (widget.todos[todoIndex].time == element.time) {
-        if (element.index > originaltodoIndex) {
-          element.index--;
-          editTodoWithoutReload(element);
-        }
-      }
-    });
+  deleteTodo(int todoId) async {
     try {
-      await todosdb.deleteTodo(widget.todos[todoIndex].id);
+      await todosdb.deleteTodo(todoId);
       await widget.loadTodos();
     } catch (e, s) {
       print("exception e");
       print("Stacktrace $s");
     }
   }
+
+  
 
   // @override
   // void initState() {
@@ -107,9 +101,7 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
                       return EachTodo(
                         todo: widget.todos[index],
                         editTodo: editTodo,
-                        deleteTodo: (int originalTodosIndex) {
-                          deleteTodo(originalTodosIndex, index);
-                        },
+                        deleteTodo: deleteTodo,
                         loadTodos: widget.loadTodos,
                         finished: false,
                         incompleteTodos: true,

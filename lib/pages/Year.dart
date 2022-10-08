@@ -226,7 +226,6 @@ class _YearPageState extends State<YearPage> {
         BottomButtons(
           time: formattedYear(DateTime.now()),
           timeType: timeType,
-          index: currentTodos.length,
           loadTodos: loadTodos,
           createTodo: createTodo,
           tasksPage: false,

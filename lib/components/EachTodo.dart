@@ -8,7 +8,7 @@ import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -35,7 +35,7 @@ class EachTodo extends StatefulWidget {
 }
 
 class _EachTodoState extends State<EachTodo> {
-  LabelDB labelsDB = GetIt.I.get();
+  LabelAPI labelsDB = GetIt.I.get();
 
   Color findLabelColor() {
     Color reqColor = Color(0xffffffff);

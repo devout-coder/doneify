@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/alarmsAPI.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosDB.dart';
+import 'package:conquer_flutter_app/states/todosAPI.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,8 +18,9 @@ class GetItRegister {
         .openDatabase(join(appDocDir.path, dbPath), version: 1);
 
     GetIt.I.registerSingleton<Database>(db);
-    GetIt.I.registerLazySingleton<TodosDB>(() => TodosDB());
-    GetIt.I.registerLazySingleton<LabelDB>(() => LabelDB());
+    GetIt.I.registerLazySingleton<TodosAPI>(() => TodosAPI());
+    GetIt.I.registerLazySingleton<LabelAPI>(() => LabelAPI());
+    GetIt.I.registerLazySingleton<AlarmsAPI>(() => AlarmsAPI());
     GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
     //lazy singleton won't be initialized until its resource is used for the first time
   }

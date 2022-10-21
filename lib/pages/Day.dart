@@ -11,7 +11,7 @@ import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/components/FiltersDialog.dart';
-import 'package:conquer_flutter_app/states/todosDB.dart';
+import 'package:conquer_flutter_app/states/todosAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
@@ -19,7 +19,6 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:home_widget/home_widget.dart';
-
 
 class DayNavigator extends StatefulWidget {
   DayNavigator({Key? key}) : super(key: key);
@@ -72,7 +71,7 @@ class _DayPageState extends State<DayPage> {
   String timeType = "day";
   final DateRangePickerController _controller = DateRangePickerController();
 
-  TodosDB todosdb = GetIt.I.get();
+  TodosAPI todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
 
   List<Todo> todos = [];

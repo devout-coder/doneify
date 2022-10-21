@@ -6,7 +6,7 @@ import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosDB.dart';
+import 'package:conquer_flutter_app/states/todosAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -49,7 +49,7 @@ String formattedDateTodosPage(String time, String timeType) {
 }
 
 class _TodosState extends State<Todos> {
-  TodosDB todosdb = GetIt.I.get();
+  TodosAPI todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
   // List<String> selectedLabels = [];
   List<Todo> todos = [];

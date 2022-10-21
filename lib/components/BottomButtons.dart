@@ -89,14 +89,14 @@ class _BottomButtonsState extends State<BottomButtons> {
                     child: const Icon(
                       Icons.add,
                       size: 30,
-                      color: Color.fromARGB(255, 47, 15, 83),
+                      color: themeDarkPurple,
                     ),
                   );
                 },
                 openBuilder: (context, action) {
                   return InputModal(
                     goBack: () => action.call(),
-                    addTodo: widget.createTodo,
+                    createTodo: widget.createTodo,
                     time: widget.time, //time
                     timeType: widget.timeType,
                   );

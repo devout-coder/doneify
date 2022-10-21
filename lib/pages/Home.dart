@@ -12,7 +12,7 @@ import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/Settings.dart';
 import 'package:conquer_flutter_app/icons/time_type_icons.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 
 class HomePage extends StatefulWidget {
@@ -94,8 +94,7 @@ class _HomePageState extends State<HomePage> {
               tabBorderRadius: 25,
               gap: 5, // the tab button gap between icon and text
               color: const Color(0xff9A9A9A),
-              activeColor: const Color.fromARGB(
-                  255, 47, 15, 83), // selected icon and text color
+              activeColor: themeDarkPurple, // selected icon and text color
               tabBackgroundColor:
                   themePurple.withOpacity(0.9), // selected tab background color
               padding: const EdgeInsets.symmetric(

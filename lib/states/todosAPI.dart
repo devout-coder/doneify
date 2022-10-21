@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
 
-class TodosDB {
+class TodosAPI {
   final Database _db = GetIt.I.get();
 
   final StoreRef _store = intMapStoreFactory.store("todos");

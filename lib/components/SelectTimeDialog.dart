@@ -1,5 +1,7 @@
 import 'package:conquer_flutter_app/components/EachWeekCell.dart';
+import 'package:conquer_flutter_app/components/SetAlarmDialog.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
@@ -10,8 +12,12 @@ class SelectTimeDialog extends StatefulWidget {
   String timeType;
   DateTime? selectedTime;
   List<DateTime> selectedWeekDates = [];
+  List<Alarm>? taskAlarms;
+  List<Alarm> deletedTaskAlarms;
   final Function updateSelectedWeekDates;
   final Function updateSelectedTime;
+  final Function updateTaskAlarms;
+  final Function updateDeletedTaskAlarms;
   SelectTimeDialog({
     Key? key,
     required this.curve,
@@ -20,6 +26,10 @@ class SelectTimeDialog extends StatefulWidget {
     required this.selectedWeekDates,
     required this.updateSelectedWeekDates,
     required this.updateSelectedTime,
+    required this.taskAlarms,
+    required this.deletedTaskAlarms,
+    required this.updateTaskAlarms,
+    required this.updateDeletedTaskAlarms,
   }) : super(key: key);
 
   @override
@@ -28,8 +38,6 @@ class SelectTimeDialog extends StatefulWidget {
 
 class _SelectTimeDialogState extends State<SelectTimeDialog> {
   final DateRangePickerController _controller = DateRangePickerController();
-  Color primaryDark = Color.fromARGB(255, 51, 49, 49);
-  Color secondaryDark = Color.fromARGB(255, 71, 68, 68);
 
   String startOrEndOfMonth(DateTime date) {
     String retString = "none";
@@ -72,12 +80,12 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
           Expanded(
             child: SimpleDialog(
               contentPadding: EdgeInsets.fromLTRB(5, 10, 5, 5),
-              backgroundColor: primaryDark,
+              backgroundColor: modalDark,
               children: [
                 Container(
                   height: screenHeight * 0.85,
                   width: screenWidth,
-                  color: primaryDark,
+                  color: modalDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -226,8 +234,7 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                                         : "${details.date.year.toString()} - ${(details.date.year + 9).toString()}",
                                             style: isSelectedTime(details.date)
                                                 ? TextStyle(
-                                                    color: Color.fromARGB(
-                                                        255, 47, 15, 83),
+                                                    color: themeDarkPurple,
                                                     fontSize: 15,
                                                     fontFamily:
                                                         'EuclidCircular',
@@ -246,6 +253,47 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                       ),
                                     );
                                   },
+                                ),
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        barrierLabel: "Select Time",
+                                        pageBuilder: (BuildContext context,
+                                            Animation<double> animation,
+                                            Animation<double>
+                                                secondaryAnimation) {
+                                          return Container();
+                                        },
+                                        transitionBuilder:
+                                            (ctx, a1, a2, child) {
+                                          var curve = Curves.easeInOut
+                                              .transform(a1.value);
+                                          return SetAlarmDialog(
+                                            curve: curve,
+                                            timeType: widget.timeType,
+                                          );
+                                        },
+                                        transitionDuration:
+                                            const Duration(milliseconds: 300),
+                                      );
+                                    },
+                                    style: TextButton.styleFrom(
+                                        padding: EdgeInsets.all(12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              new BorderRadius.circular(30.0),
+                                        ),
+                                        primary: themeDarkPurple,
+                                        elevation: 2,
+                                        backgroundColor: themePurple),
+                                    child: Text(
+                                      "Add alarm",
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                  ),
                                 ),
                               ],
                             )

@@ -8,7 +8,8 @@ import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/alarmsAPI.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'dart:convert';
@@ -23,7 +24,7 @@ import 'package:intl/intl.dart';
 class InputModal extends StatefulWidget {
   final goBack;
   Todo? todo;
-  final addTodo;
+  final createTodo;
   final editTodo;
   final onDelete;
   String time;
@@ -34,7 +35,7 @@ class InputModal extends StatefulWidget {
     // this.action,
     this.goBack,
     this.todo,
-    this.addTodo,
+    this.createTodo,
     this.editTodo,
     this.onDelete,
     required this.time,
@@ -58,8 +59,11 @@ class _InputModalState extends State<InputModal> {
   int selectedLabel = 0;
   List<DateTime> selectedWeekDates = [];
   DateTime? selectedTime;
+  List<Alarm>? taskAlarms = [];
+  List<Alarm> deletedTaskAlarms = [];
 
-  LabelDB labelsDB = GetIt.I.get();
+  LabelAPI labelsDB = GetIt.I.get();
+  AlarmsAPI alarmsDB = GetIt.I.get();
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
@@ -67,7 +71,7 @@ class _InputModalState extends State<InputModal> {
 
   static const platform = MethodChannel('alarm_method_channel');
 
-  Future<void> saveReminder() async {
+  Future<void> saveAlarm() async {
     try {
       debugPrint("$taskId");
       final String formatted = DateFormat("d/M/y,H:m").format(DateTime.now());
@@ -145,10 +149,10 @@ class _InputModalState extends State<InputModal> {
           DateTime.now().millisecondsSinceEpoch,
           figureOutTime(),
           widget.timeType,
-          0,
+          0, //this is going to be changed in createTodo method
           taskId!,
         );
-        await widget.addTodo(newTodo);
+        await widget.createTodo(newTodo);
       }
       Fluttertoast.showToast(
         msg: "Task saved",
@@ -171,6 +175,7 @@ class _InputModalState extends State<InputModal> {
     taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
     selectedLabel =
         widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
+    taskAlarms = await alarmsDB.getAlarms(taskId!);
 
     setState(() {
       switch (widget.timeType) {
@@ -303,7 +308,7 @@ class _InputModalState extends State<InputModal> {
                       showGeneralDialog(
                         context: context,
                         barrierDismissible: true,
-                        barrierLabel: "Select Label",
+                        barrierLabel: "Select Time",
                         pageBuilder: (BuildContext context,
                             Animation<double> animation,
                             Animation<double> secondaryAnimation) {
@@ -314,8 +319,20 @@ class _InputModalState extends State<InputModal> {
                           return SelectTimeDialog(
                             curve: curve,
                             timeType: widget.timeType,
-                            selectedWeekDates: selectedWeekDates,
+                            taskAlarms: taskAlarms,
+                            updateTaskAlarms: (newAlarms) {
+                              setState(() {
+                                taskAlarms = newAlarms;
+                              });
+                            },
+                            deletedTaskAlarms: deletedTaskAlarms,
+                            updateDeletedTaskAlarms: (newDeletedAlarms) {
+                              setState(() {
+                                deletedTaskAlarms = newDeletedAlarms;
+                              });
+                            },
                             selectedTime: selectedTime,
+                            selectedWeekDates: selectedWeekDates,
                             updateSelectedWeekDates: (newWeekDates) {
                               setState(() {
                                 selectedWeekDates = newWeekDates;

@@ -4,9 +4,9 @@ import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosDB.dart';
+import 'package:conquer_flutter_app/states/todosAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
 
   Future registerDB() async {
     await GetItRegister().initializeGlobalStates();
-    LabelDB labelsDB = GetIt.I.get();
+    LabelAPI labelsDB = GetIt.I.get();
     SelectedFilters selectedFilters = GetIt.I.get();
 
     await selectedFilters.fetchFiltersFromStorage();
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
       debugPrint("some call made");
       if (call.method == 'task_done') {
         await registerDB();
-        TodosDB todosdb = GetIt.I.get();
+        TodosAPI todosdb = GetIt.I.get();
         Todo? todo =
             await todosdb.getTodo(int.parse(call.arguments.toString()));
         todo?.finished = true;
@@ -98,7 +98,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   createTodo(Todo todo) async {
-    TodosDB todosdb = GetIt.I.get();
+    TodosAPI todosdb = GetIt.I.get();
     await todosdb.createTodo(todo);
   }
 
@@ -169,7 +169,7 @@ class _MyAppState extends State<MyApp> {
                                 timeType: "day", //!hardcoded value
                                 time: formattedDate(
                                     DateTime.now()), //!hardcoded value
-                                addTodo: createTodo,
+                                createTodo: createTodo,
                               );
                             });
                           },

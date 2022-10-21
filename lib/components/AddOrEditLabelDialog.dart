@@ -1,5 +1,5 @@
 import 'package:conquer_flutter_app/components/NewColorDialog.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
@@ -36,7 +36,7 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
 
   int? labelIndex;
 
-  LabelDB labelsDB = GetIt.I.get();
+  LabelAPI labelsDB = GetIt.I.get();
 
   List<Color> displayedColors = [];
 

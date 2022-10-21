@@ -2,16 +2,16 @@ import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosDB.dart';
+import 'package:conquer_flutter_app/states/todosAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LabelDB {
+class LabelAPI {
   List<Label> labels = [];
   SelectedFilters selectedFilters = GetIt.I.get();
-  TodosDB _todosdb = GetIt.I.get();
+  TodosAPI _todosdb = GetIt.I.get();
 
   List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
     List<Map<String, dynamic>> jsonLabels = [];

@@ -1,11 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
+
 class Label {
   String name;
   String color;
 
   Label(this.name, this.color);
+}
+
+class Alarm {
+  String repeatStatus;
+  String time;
+  Alarm(this.repeatStatus, this.time);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'time': time,
+      'repeatStatus': repeatStatus,
+    };
+  }
+
+  factory Alarm.fromMap(Map<String, dynamic> map) {
+    return Alarm(
+      map["time"],
+      map["repeatStatus"],
+    );
+  }
 }
 
 class Todo {

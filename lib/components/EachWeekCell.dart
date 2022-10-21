@@ -98,7 +98,7 @@ class _EachWeekCellState extends State<EachWeekCell> {
                         : "${widget.date.year.toString()} - ${(widget.date.year + 9).toString()}",
             style: thisWeekDates.contains(widget.date)
                 ? TextStyle(
-                    color: Color.fromARGB(255, 47, 15, 83),
+                    color: themeDarkPurple,
                     fontSize: 15,
                     fontFamily: 'EuclidCircular',
                     fontWeight: FontWeight.w600,

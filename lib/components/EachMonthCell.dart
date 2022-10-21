@@ -68,7 +68,7 @@ class _EachMonthCellState extends State<EachMonthCell> {
                 style: DateTime.now().month == widget.date.month &&
                         DateTime.now().year == widget.date.year
                     ? TextStyle(
-                        color: Color.fromARGB(255, 47, 15, 83),
+                        color: themeDarkPurple,
                         fontSize: 15,
                         fontFamily: 'EuclidCircular',
                         fontWeight: FontWeight.w600,

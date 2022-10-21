@@ -1,6 +1,6 @@
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/labelsDB.dart';
+import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -35,7 +35,7 @@ List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
 class _SelectLabelDialogState extends State<SelectLabelDialog> {
   int? selectedLabel;
 
-  LabelDB labelsDB = GetIt.I.get();
+  LabelAPI labelsDB = GetIt.I.get();
 
   @override
   void initState() {

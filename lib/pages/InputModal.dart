@@ -2,15 +2,18 @@ import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/components/EachWeekCell.dart';
 import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
 import 'package:conquer_flutter_app/components/SelectTimeDialog.dart';
+import 'package:conquer_flutter_app/components/SetAlarmDialog.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
+import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
 import 'package:conquer_flutter_app/states/alarmsAPI.dart';
 import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -55,12 +58,38 @@ List<DateTime> allDatesInWeek(DateTime day) {
   return allDates;
 }
 
+String figureOutTime(
+    String timeType, DateTime selectedTime, List<DateTime> selectedWeekDates) {
+  // debugPrint(formattedDate(selectedTime!));
+  switch (timeType) {
+    case "day":
+      return formattedDate(selectedTime);
+    case "week":
+      return formattedWeek(selectedWeekDates[0]);
+    case "month":
+      return formattedMonth(selectedTime);
+    case "year":
+      return formattedYear(selectedTime);
+    default:
+      return "longTerm";
+  }
+}
+
+int getRandInt(int chars) {
+  var random = Random.secure();
+  var values =
+      List<String>.generate(chars, (i) => random.nextInt(9).toString());
+  var stringList = values.join("");
+  return int.parse(stringList);
+}
+
 class _InputModalState extends State<InputModal> {
   int selectedLabel = 0;
   List<DateTime> selectedWeekDates = [];
-  DateTime? selectedTime;
-  List<Alarm>? taskAlarms = [];
-  List<Alarm> deletedTaskAlarms = [];
+  DateTime selectedTime = DateTime.now();
+  List<Alarm> alarms = [];
+  List<Alarm> createdAlarms = [];
+  List<Alarm> deletedAlarms = [];
 
   LabelAPI labelsDB = GetIt.I.get();
   AlarmsAPI alarmsDB = GetIt.I.get();
@@ -71,29 +100,338 @@ class _InputModalState extends State<InputModal> {
 
   static const platform = MethodChannel('alarm_method_channel');
 
-  Future<void> saveAlarm() async {
-    try {
-      debugPrint("$taskId");
-      final String formatted = DateFormat("d/M/y,H:m").format(DateTime.now());
-      await platform.invokeMethod("setAlarm", {
-        "repeat_status": "once",
-        "taskId": taskId.toString(),
-        "taskName": taskName.text,
-        "taskDesc": taskDesc.text,
-        "label": labelsDB.labels[selectedLabel].name,
-        "time": formatted,
-      });
-      // batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      // batteryLevel = "Failed to get battery level: '${e.message}'.";
+  bool futureTime(int hour, int minute) {
+    bool future = false;
+    DateTime currentTime = DateTime.now();
+    if (hour > currentTime.hour) {
+      future = true;
+    } else if (hour == currentTime.hour && minute > currentTime.minute) {
+      future = true;
+    }
+    return future;
+  }
+
+  // bool futureDate(int dayOfMonth, int hour, int minute) {
+  //   DateTime currentTime = DateTime.now();
+  //   return DateTime(currentTime.year, currentTime.month, dayOfMonth)
+  //           .isAfter(currentTime) ||
+  //       (DateTime(currentTime.year, currentTime.month, dayOfMonth)
+  //               .isAtSameMomentAs(currentTime) &&
+  //           futureTime(hour, minute));
+  // }
+
+  bool futureDateAndTime(DateTime date, int hour, int minute) {
+    DateTime currentTime = DateTime.now();
+    return date.isAfter(currentTime) ||
+        date.isAtSameMomentAs(justDate(currentTime)) &&
+            futureTime(hour, minute);
+  }
+
+  String amendAlarmTime(String time, String repeatStatus) {
+    String prefixDate = "";
+    DateTime currentTime = justDate(DateTime.now());
+    switch (repeatStatus) {
+      case "once":
+        //time: 3 Nov 2022, 21:00
+        List<String> splitTime = time.split(' ');
+        String day = splitTime[0];
+        String month = DateFormat("MMM").parse(splitTime[1]).month.toString();
+        String year = splitTime[2];
+        String hourTime = splitTime[3];
+        return "$day/$month/$year $hourTime";
+      case "everyDay":
+        //time: 09:00
+        DateTime nextDayTime =
+            DateTime(currentTime.year, currentTime.month, currentTime.day + 1);
+        switch (widget.timeType) {
+          case "week":
+            if (selectedWeekDates[0].isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(selectedWeekDates[0]);
+            } else {
+              prefixDate = futureTime(int.parse(time.split(":")[0]),
+                      int.parse(time.split(":")[1]))
+                  ? DateFormat("d/M/y").format(currentTime)
+                  : DateFormat("d/M/y").format(nextDayTime);
+            }
+            return "$prefixDate, $time";
+          case "month":
+            if (selectedTime.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(selectedTime);
+            } else {
+              prefixDate = futureTime(int.parse(time.split(":")[0]),
+                      int.parse(time.split(":")[1]))
+                  ? DateFormat("d/M/y").format(currentTime)
+                  : DateFormat("d/M/y").format(nextDayTime);
+            }
+            return "$prefixDate, $time";
+          case "year":
+            if (selectedTime.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(selectedTime);
+            } else {
+              prefixDate = futureTime(int.parse(time.split(":")[0]),
+                      int.parse(time.split(":")[1]))
+                  ? DateFormat("d/M/y").format(currentTime)
+                  : DateFormat("d/M/y").format(nextDayTime);
+            }
+            return "$prefixDate, $time";
+          default:
+            return futureTime(int.parse(time.split(":")[0]),
+                    int.parse(time.split(":")[1]))
+                ? "${DateFormat("d/M/y").format(currentTime)}, $time"
+                : "${DateFormat("d/M/y").format(nextDayTime)}, $time";
+        }
+      case "everyWeek":
+        //time: Mon, 09:00
+        List<String> splitStr = time.split(", ");
+        String dayOfWeek = splitStr[0];
+        String hourTime = splitStr[1];
+        DateTime nextWeekTime =
+            DateTime(currentTime.year, currentTime.month, currentTime.day + 7);
+        switch (widget.timeType) {
+          case "month":
+            var firstOfMonth =
+                DateTime(selectedTime.year, selectedTime.month, 1);
+            var firstDay = firstOfMonth.add(
+              Duration(
+                  days: (7 -
+                          (firstOfMonth.weekday -
+                              daysOfWeek.indexOf(dayOfWeek) -
+                              1)) %
+                      7),
+            );
+            if (firstDay.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(firstDay);
+            } else {
+              firstDay = currentTime.add(
+                Duration(
+                    days: (7 -
+                            (currentTime.weekday -
+                                daysOfWeek.indexOf(dayOfWeek) -
+                                1)) %
+                        7),
+              );
+              prefixDate = futureDateAndTime(
+                      justDate(firstDay),
+                      int.parse(hourTime.split(":")[0]),
+                      int.parse(hourTime.split(":")[1]))
+                  ? DateFormat("d/M/y").format(firstDay)
+                  : DateFormat("d/M/y").format(
+                      nextWeekTime); //wont work, figure out the day after current date
+            }
+            return "$prefixDate, $hourTime";
+          case "year":
+            var firstOfYear = DateTime(selectedTime.year, 1, 1);
+            var firstDay = firstOfYear.add(
+              Duration(
+                  days: (7 -
+                          (firstOfYear.weekday -
+                              daysOfWeek.indexOf(dayOfWeek) -
+                              1)) %
+                      7),
+            );
+            if (firstDay.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(firstDay);
+            } else {
+              firstDay = currentTime.add(
+                Duration(
+                    days: (7 -
+                            (currentTime.weekday -
+                                daysOfWeek.indexOf(dayOfWeek) -
+                                1)) %
+                        7),
+              );
+              prefixDate = futureDateAndTime(
+                      justDate(firstDay),
+                      int.parse(hourTime.split(":")[0]),
+                      int.parse(hourTime.split(":")[1]))
+                  ? DateFormat("d/M/y").format(firstDay)
+                  : DateFormat("d/M/y").format(
+                      nextWeekTime); //wont work, figure out the day after current date
+            }
+            return "$prefixDate, $hourTime";
+          default:
+            var firstDay = currentTime.add(
+              Duration(
+                  days: (7 -
+                          (currentTime.weekday -
+                              daysOfWeek.indexOf(dayOfWeek) -
+                              1)) %
+                      7),
+            );
+            prefixDate = futureDateAndTime(
+                    justDate(firstDay),
+                    int.parse(hourTime.split(":")[0]),
+                    int.parse(hourTime.split(":")[1]))
+                ? DateFormat("d/M/y").format(firstDay)
+                : DateFormat("d/M/y").format(
+                    nextWeekTime); //wont work, figure out the day after current date
+            return "$prefixDate, $hourTime";
+        }
+      case "everyMonth":
+        //time: 1, 09:00
+        List<String> splitStr = time.split(", ");
+        String dayOfMonth = splitStr[0];
+        String hourTime = splitStr[1];
+        DateTime nextMonthTime = DateTime(
+            currentTime.year, currentTime.month + 1, int.parse(dayOfMonth));
+        switch (widget.timeType) {
+          case "year":
+            var firstDay =
+                DateTime(selectedTime.year, 1, int.parse(dayOfMonth));
+            if (firstDay.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(firstDay);
+            } else {
+              prefixDate = futureDateAndTime(
+                justDate(DateTime(currentTime.year, currentTime.month,
+                    int.parse(dayOfMonth))),
+                int.parse(hourTime.split(":")[0]),
+                int.parse(hourTime.split(":")[1]),
+              )
+                  ? DateFormat("d/M/y").format(DateTime(currentTime.year,
+                      currentTime.month, int.parse(dayOfMonth)))
+                  : DateFormat("d/M/y").format(nextMonthTime);
+            }
+            return "$prefixDate, $hourTime";
+          default:
+            var firstDay = DateTime(
+                currentTime.year, currentTime.month, int.parse(dayOfMonth));
+            if (firstDay.isAfter(currentTime)) {
+              prefixDate = DateFormat("d/M/y").format(firstDay);
+            } else {
+              prefixDate = futureDateAndTime(
+                justDate(DateTime(currentTime.year, currentTime.month,
+                    int.parse(dayOfMonth))),
+                int.parse(hourTime.split(":")[0]),
+                int.parse(hourTime.split(":")[1]),
+              )
+                  ? DateFormat("d/M/y").format(DateTime(currentTime.year,
+                      currentTime.month + 1, int.parse(dayOfMonth)))
+                  : DateFormat("d/M/y").format(nextMonthTime);
+            }
+            return "$prefixDate, $hourTime";
+        }
+      default:
+        //every year
+        //time: 1 Jan, 09:00
+        List<String> mainSplit = time.split(", ");
+        String day = mainSplit[0].split(" ")[0];
+        String month = DateFormat("MMM")
+            .parse(mainSplit[0].split(" ")[1])
+            .month
+            .toString();
+        String hourTime = mainSplit[1];
+        DateTime nextYearTime =
+            DateTime(currentTime.year + 1, currentTime.month, currentTime.day);
+        var firstDay =
+            DateTime(currentTime.year, int.parse(month), int.parse(day));
+        if (firstDay.isAfter(currentTime)) {
+          prefixDate = DateFormat("d/M/y").format(firstDay);
+        } else {
+          prefixDate = futureDateAndTime(
+                  firstDay,
+                  int.parse(hourTime.split(":")[0]),
+                  int.parse(hourTime.split(":")[1]))
+              ? DateFormat("d/M/y").format(
+                  DateTime(currentTime.year, int.parse(month), int.parse(day)))
+              : DateFormat("d/M/y").format(nextYearTime);
+        }
+        return "$prefixDate, $hourTime";
     }
   }
 
-  int getRandInt() {
-    var random = Random.secure();
-    var values = List<String>.generate(18, (i) => random.nextInt(9).toString());
-    var stringList = values.join("");
-    return int.parse(stringList);
+  DateTime repeatingAlarmEndDate() {
+    //time format: 31/10/2022,  31/10/2022-6/11/2022, Nov 2022, 2022
+    switch (widget.timeType) {
+      case "week":
+        return selectedWeekDates[6];
+      case "month":
+        DateTime lastDate =
+            DateTime(selectedTime.year, selectedTime.month + 1, 0);
+        return lastDate;
+      case "year":
+        DateTime lastDate = DateTime(selectedTime.year, 12, 31);
+        return lastDate;
+      default:
+        return DateTime.now();
+    }
+  }
+
+  void saveAlarms() async {
+    if (widget.todo != null) {
+      //time modified
+      if (taskName.text != widget.todo!.taskName ||
+          taskDesc.text != widget.todo!.taskDesc ||
+          labelsDB.labels[selectedLabel].name != widget.todo!.labelName ||
+          figureOutTime(widget.timeType, selectedTime, selectedWeekDates) !=
+              widget.time) {
+        ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
+        List<Map> activeAlarms =
+            await activeAlarmsDB.getActiveAlarms(widget.todo!.id.toString());
+        List<int> alarmIds = activeAlarms
+            .map((alarmMap) => int.parse(alarmMap["alarmId"]))
+            .toList();
+        debugPrint("alarms to go:${activeAlarms.length} alarmIds.toString()}");
+        alarms.forEach((alarm) {
+          if (!createdAlarms.contains(alarm)) {
+            //an old alarm
+            debugPrint("an old alarm:${alarm.alarmId.toString()}");
+            alarmsDB.deleteAlarm(alarm.alarmId);
+            if (alarmIds.contains(alarm.alarmId) &&
+                (alarm.repeatStatus != "once" ||
+                    figureOutTime(
+                            widget.timeType, selectedTime, selectedWeekDates) ==
+                        widget.time)) {
+              //the alarm shouldn't have rung and repeat status shouldn't be changed or time shouldn't be changed
+              if (widget.timeType == "longTerm" ||
+                  (widget.timeType == "week" &&
+                      futureDateAndTime(selectedWeekDates[6], 0, 0)) ||
+                  (futureDateAndTime(repeatingAlarmEndDate(), 0, 0))) {
+                debugPrint('this is run');
+                alarmsDB.setAlarm(
+                  alarm,
+                  amendAlarmTime(alarm.time, alarm.repeatStatus),
+                  DateFormat("d/M/y").format(repeatingAlarmEndDate()),
+                  alarm.taskId.toString(),
+                  taskName.text,
+                  taskDesc.text,
+                  labelsDB.labels[selectedLabel].name,
+                  widget.todo!.finished,
+                );
+              }
+            }
+          }
+        });
+      }
+      createdAlarms.forEach((alarm) {
+        debugPrint("this works");
+        alarmsDB.setAlarm(
+          alarm,
+          amendAlarmTime(alarm.time, alarm.repeatStatus),
+          DateFormat("d/M/y").format(repeatingAlarmEndDate()),
+          alarm.taskId.toString(),
+          taskName.text,
+          taskDesc.text,
+          labelsDB.labels[selectedLabel].name,
+          widget.todo!.finished,
+        );
+      });
+    } else {
+      createdAlarms.forEach((alarm) {
+        alarmsDB.setAlarm(
+          alarm,
+          amendAlarmTime(alarm.time, alarm.repeatStatus),
+          DateFormat("d/M/y").format(repeatingAlarmEndDate()),
+          alarm.taskId.toString(),
+          taskName.text,
+          taskDesc.text,
+          labelsDB.labels[selectedLabel].name,
+          false,
+        );
+      });
+    }
+    deletedAlarms.forEach((alarm) {
+      alarmsDB.deleteAlarm(alarm.alarmId);
+    });
   }
 
   int findLabelIndex(String labelName) {
@@ -108,21 +446,6 @@ class _InputModalState extends State<InputModal> {
     return index;
   }
 
-  String figureOutTime() {
-    switch (widget.timeType) {
-      case "day":
-        return formattedDate(selectedTime!);
-      case "week":
-        return formattedWeek(selectedWeekDates[0]);
-      case "month":
-        return formattedMonth(selectedTime!);
-      case "year":
-        return formattedYear(selectedTime!);
-      default:
-        return "longTerm";
-    }
-  }
-
   void _saveTodo() async {
     // debugPrint(figureOutTime());
     Todo newTodo;
@@ -134,7 +457,7 @@ class _InputModalState extends State<InputModal> {
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(),
+          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
           widget.timeType,
           widget.todo!.index,
           taskId!,
@@ -147,13 +470,14 @@ class _InputModalState extends State<InputModal> {
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(),
+          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
           widget.timeType,
           0, //this is going to be changed in createTodo method
           taskId!,
         );
         await widget.createTodo(newTodo);
       }
+      saveAlarms();
       Fluttertoast.showToast(
         msg: "Task saved",
         toastLength: Toast.LENGTH_SHORT,
@@ -162,35 +486,49 @@ class _InputModalState extends State<InputModal> {
       widget.goBack();
     } else {
       Fluttertoast.showToast(
-        msg: "Task saved",
+        msg: "Give the task a name",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
       );
     }
   }
 
+  void strToTime() {
+    setState(() {
+      switch (widget.timeType) {
+        case "day":
+          selectedTime = DateFormat("d/M/y").parse(widget.time);
+          break;
+        case "week":
+          selectedTime = DateFormat("d/M/y").parse(widget.time.split("-")[0]);
+          selectedWeekDates = allDatesInWeek(selectedTime);
+          break;
+        case 'month':
+          selectedTime = DateFormat("MMM y").parse(widget.time);
+          break;
+        case "year":
+          selectedTime = DateFormat("y").parse(widget.time);
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
   void setValues() async {
-    taskId = widget.todo != null ? widget.todo!.id : getRandInt();
+    taskId = widget.todo != null ? widget.todo!.id : getRandInt(18);
     taskName.text = widget.todo != null ? widget.todo!.taskName : '';
     taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
     selectedLabel =
         widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
-    taskAlarms = await alarmsDB.getAlarms(taskId!);
-
-    setState(() {
-      switch (widget.timeType) {
-        case "week":
-          selectedWeekDates = allDatesInWeek(DateTime.now());
-          break;
-        default:
-          selectedTime = DateTime.now();
-      }
-    });
-    // debugPrint(widget.todo!.index.toString());
+    alarms = await alarmsDB.getAlarms(taskId!);
+    debugPrint(alarms.toString());
+    strToTime();
   }
 
   @override
   void initState() {
+    debugPrint(widget.time);
     setValues();
     super.initState();
   }
@@ -317,18 +655,35 @@ class _InputModalState extends State<InputModal> {
                         transitionBuilder: (ctx, a1, a2, child) {
                           var curve = Curves.easeInOut.transform(a1.value);
                           return SelectTimeDialog(
+                            // key: UniqueKey(),
                             curve: curve,
                             timeType: widget.timeType,
-                            taskAlarms: taskAlarms,
-                            updateTaskAlarms: (newAlarms) {
+                            alarms: alarms,
+                            taskId: taskId!,
+                            createdAlarms: createdAlarms,
+                            updateCreatedAlarms:
+                                (List<Alarm> newCreatedAlarms) {
                               setState(() {
-                                taskAlarms = newAlarms;
+                                debugPrint(newCreatedAlarms.toString());
+                                createdAlarms = [
+                                  ...createdAlarms,
+                                  ...newCreatedAlarms
+                                ];
+                                alarms = [...alarms, ...newCreatedAlarms];
                               });
                             },
-                            deletedTaskAlarms: deletedTaskAlarms,
-                            updateDeletedTaskAlarms: (newDeletedAlarms) {
+                            deletedAlarms: deletedAlarms,
+                            updateDeletedAlarms: (Alarm deletedAlarm) {
                               setState(() {
-                                deletedTaskAlarms = newDeletedAlarms;
+                                alarms.remove(deletedAlarm);
+                                if (createdAlarms.contains(deletedAlarm)) {
+                                  createdAlarms.remove(deletedAlarm);
+                                } else {
+                                  deletedAlarms = [
+                                    ...deletedAlarms,
+                                    deletedAlarm
+                                  ];
+                                }
                               });
                             },
                             selectedTime: selectedTime,

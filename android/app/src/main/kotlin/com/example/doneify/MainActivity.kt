@@ -40,22 +40,57 @@ class MainActivity: FlutterActivity() {
             notificationManager.createNotificationChannel(mChannel)
 
             if (call!!.method == "setAlarm") {
-                setAlarm(call.argument<String>("repeat_status")!!, call.argument<String>("time")!!, call.argument<String>("taskId")!! ,call.argument<String>("taskName")!!, call.argument<String>("taskDesc")!!, call.argument<String>("label")!!)
+                setAlarm(call.argument<String>("alarmId")!!, call.argument<String>("time")!!, call.argument<String>("repeatStatus")!!, call.argument<String>("repeatEnd")!! ,call.argument<String>("taskId")!! ,call.argument<String>("taskName")!!, call.argument<String>("taskDesc")!!, call.argument<String>("label")!!, call.argument<Boolean>("finished")!!)
+            }else if(call.method == "deleteAlarm"){
+                deleteAlarm(call.argument<String>("alarmId")!!, call.argument<String>("time")!!, call.argument<String>("repeatStatus")!!, call.argument<String>("repeatEnd")!! ,call.argument<String>("taskId")!! ,call.argument<String>("taskName")!!, call.argument<String>("taskDesc")!!, call.argument<String>("label")!!, call.argument<Boolean>("finished")!!)
             }
         }
     }
-    private fun setAlarm(repeat_status:String, time:String, taskId:String, taskName: String, taskDesc: String, label: String) {
+
+    private fun padDate(date:String):String{
+        val components:MutableList<String> = date.split('/').toMutableList()
+        components[0] = components[0].padStart(2, '0')
+        components[1]= components[1].padStart(2,'0')
+        return components.joinToString("/")
+
+    }
+    private fun setAlarm(alarmId:String,  time:String, repeatStatus:String, repeatEnd:String, taskId:String, taskName: String, taskDesc: String, label: String, finished: Boolean) {
+        Log.d("debugging", "alarm set from dart: $alarmId, $time, $repeatStatus, ${padDate(repeatEnd)}, $taskId, $taskName, $taskDesc, $label, $finished")
+
+
         val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
+            putExtra("alarmId", alarmId)
+            putExtra("time", time)
+            putExtra("repeatStatus", repeatStatus)
+            putExtra("repeatEnd", padDate(repeatEnd))
             putExtra("taskId", taskId)
             putExtra("taskName", taskName);
             putExtra("taskDesc", taskDesc);
             putExtra("label", label)
+            putExtra("finished", finished)
         }
         val pendingAlarmIntent =
-                PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(context, alarmId.toInt(), alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        var interval:Long = 0;
+        when (repeatStatus) {
+            "everyDay" -> {
+                interval = AlarmManager.INTERVAL_DAY
+            }
+            "everyWeek" -> {
+                interval = AlarmManager.INTERVAL_DAY * 7
+            }
+            "everyMonth" -> {
+                interval = AlarmManager.INTERVAL_DAY * 30
+            }
+            "everyYear" -> {
+                interval = AlarmManager.INTERVAL_DAY * 365
+            }
+        }
 
-        val date:String = time.split(",")[0]
-        val realTime:String = time.split(",")[1]
+//        D/debugging(16008): alarm set from dart: 610230325, 15/11/2022, 09:00, everyWeek, 30/11/2022, 864435482006330173, xhxj, , General, false
+//        D/debugging(16008): alarm set from dart: 2868458, 8/11/2022, 16:00, once, 8/11/2022, 705633780755677486, hsjz, , General, false
+        val date:String = time.split(", ")[0]
+        val realTime:String = time.split(", ")[1]
         val day:Int = date.split("/")[0].toInt()
         val month:Int = date.split("/")[1].toInt() - 1
         val year:Int = date.split("/")[2].toInt()
@@ -70,9 +105,38 @@ class MainActivity: FlutterActivity() {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
         }
-        Log.d("debugging", "alarm should be set")
         val alarmManager =
                 context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        alarmManager!!.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingAlarmIntent)
+        if(repeatStatus == "once"){
+            alarmManager!!.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingAlarmIntent)
+        }else{
+            alarmManager!!.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    interval,
+                    pendingAlarmIntent
+            )
+        }
+        Log.d("debugging", "alarm set successfully")
+    }
+
+    private fun deleteAlarm(alarmId:String,  time:String, repeatStatus:String, repeatEnd:String, taskId:String, taskName: String, taskDesc: String, label: String, finished:Boolean) {
+        Log.d("debugging", "alarm deleted from dart: $alarmId, $time, $repeatStatus, $repeatEnd, $taskId, $taskName, $taskDesc, $label, $finished")
+        val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
+            putExtra("alarmId", alarmId)
+            putExtra("time", time)
+            putExtra("repeatStatus", repeatStatus)
+            putExtra("repeatEnd", padDate(repeatEnd))
+            putExtra("taskId", taskId)
+            putExtra("taskName", taskName);
+            putExtra("taskDesc", taskDesc);
+            putExtra("label", label)
+            putExtra("finished", finished)
+        }
+        val pendingAlarmIntent =
+                PendingIntent.getBroadcast(context, alarmId.toInt(), alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarmManager =
+                context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        alarmManager!!.cancel(pendingAlarmIntent)
     }
 }

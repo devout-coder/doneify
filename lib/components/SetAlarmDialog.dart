@@ -1,24 +1,33 @@
+import 'package:conquer_flutter_app/components/EachWeekCell.dart';
 import 'package:conquer_flutter_app/components/MyExpansionPanel.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:sembast/timestamp.dart';
 
 class SetAlarmDialog extends StatefulWidget {
   final double curve;
   String timeType;
+  DateTime? selectedTime;
+  List<DateTime> selectedWeekDates;
+  final updateCreatedAlarms;
+  int taskId;
   SetAlarmDialog({
     Key? key,
+    required this.taskId,
     required this.curve,
     required this.timeType,
+    required this.selectedTime,
+    required this.selectedWeekDates,
+    required this.updateCreatedAlarms,
   }) : super(key: key);
 
   @override
   State<SetAlarmDialog> createState() => _SetAlarmDialogState();
 }
-
-final _tileKeys = [];
-var _selectedIndex = 0;
 
 class SwitchValue {
   String name;
@@ -27,27 +36,33 @@ class SwitchValue {
   SwitchValue(this.name, this.status);
 }
 
+List<String> daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 class _SetAlarmDialogState extends State<SetAlarmDialog> {
-  List<String> daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  List<Alarm> newAlarms = [];
+
   DateTime onceDate = DateTime.now();
-  TimeOfDay onceTime = TimeOfDay(hour: 9, minute: 00);
+  TimeOfDay onceTime = TimeOfDay(hour: DateTime.now().hour + 1, minute: 00);
+  DateTime onceFirstDate = DateTime.now();
+  DateTime onceLastDate = DateTime.now();
+
+  TimeOfDay everyDayTime = TimeOfDay(hour: 9, minute: 00);
   String everyWeekDay = "Mon";
   TimeOfDay everyWeekTime = TimeOfDay(hour: 9, minute: 00);
   TextEditingController everyMonthDay = TextEditingController();
   TimeOfDay everyMonthTime = TimeOfDay(hour: 9, minute: 00);
-  DateTime everyYearDate = DateTime.now();
+  DateTime everyYearDate = DateTime(DateTime.now().year, 1, 1);
   TimeOfDay everyYearTime = TimeOfDay(hour: 9, minute: 00);
-  TimeOfDay everyDayTime = TimeOfDay(hour: 9, minute: 00);
 
   List<SwitchValue> switchValues = [
-    SwitchValue("once", true),
+    SwitchValue("once", false),
     SwitchValue("everyDay", false),
     SwitchValue("everyWeek", false),
     SwitchValue("everyMonth", false),
     SwitchValue("everyYear", false),
   ];
 
-  void handleSwitch(String switchName, bool switchValue) {
+  void setSwitchValue(String switchName, bool switchValue) {
     setState(() {
       for (SwitchValue element in switchValues) {
         if (switchName == element.name) {
@@ -57,13 +72,27 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
     });
   }
 
+  bool getSwitchValue(String switchName) {
+    bool switchStatus = false;
+    for (SwitchValue element in switchValues) {
+      if (switchName == element.name) {
+        switchStatus = element.status;
+      }
+    }
+    return switchStatus;
+  }
+
   Future<Null> _selectDate(BuildContext context, String switchName) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: switchName == "once" ? onceDate : everyYearDate,
       initialDatePickerMode: DatePickerMode.day,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: switchName != "everyYear"
+          ? onceFirstDate
+          : DateTime(DateTime.now().year, 1, 1),
+      lastDate: switchName != "everyYear"
+          ? onceLastDate
+          : DateTime(DateTime.now().year, 12, 31),
     );
     if (picked != null) {
       setState(() {
@@ -125,6 +154,91 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
         switchName == "once";
   }
 
+  bool validDateOfMonth() {
+    return int.parse(everyMonthDay.text.split(".")[0]) > 0 &&
+        int.parse(everyMonthDay.text.split(".")[0]) <= 31;
+  }
+
+  void setFirstAndLastDate() {
+    switch (widget.timeType) {
+      case "week":
+        onceFirstDate = widget.selectedWeekDates[0];
+        onceLastDate = widget.selectedWeekDates[6];
+        break;
+      case "month":
+        onceFirstDate = widget.selectedTime!;
+        onceLastDate = DateTime(
+            widget.selectedTime!.year, widget.selectedTime!.month + 1, 0);
+        break;
+      case "year":
+        onceFirstDate = widget.selectedTime!;
+        onceLastDate = DateTime(widget.selectedTime!.year, 12, 31);
+        break;
+      case "longTerm":
+        onceFirstDate = DateTime(2022, 1, 1);
+        onceLastDate = DateTime(2100, 12, 31);
+    }
+  }
+
+  String addZero(int weirdLookingInt) {
+    return weirdLookingInt.toString().padLeft(2, "0");
+  }
+
+  bool isInPast() {
+    DateTime combinedDateTime = DateTime(onceDate.year, onceDate.month,
+        onceDate.day, onceTime.hour, onceTime.minute);
+    return (getSwitchValue("once") && combinedDateTime.isBefore(DateTime.now())) || (widget.timeType == "week" &&
+            widget.selectedWeekDates[6].isBefore(justDate(DateTime.now()))) ||
+        (widget.timeType == "month" &&
+            DateTime(widget.selectedTime!.year, widget.selectedTime!.month + 1,
+                    0)
+                .isBefore(justDate(DateTime.now()))) ||
+        (widget.timeType == "year" &&
+            DateTime(widget.selectedTime!.year, 12, 31)
+                .isBefore(justDate(DateTime.now())));
+  }
+
+  void saveAlarm(BuildContext context) {
+    // DateTime combinedDateTime = DateTime(onceDate.year, onceDate.month,
+    //     onceDate.day, onceTime.hour, onceTime.minute);
+    // if (combinedDateTime.isBefore(DateTime.now()) && getSwitchValue("once")) {
+    if (isInPast()) {
+      Fluttertoast.showToast(
+        msg: "Please select a date in the future",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    } else {
+      switchValues.forEach((element) {
+        if (element.status) {
+          String timeStr = element.name == "once"
+              ? "${DateFormat("d MMM y").format(onceDate)}, ${addZero(onceTime.hour)}:${addZero(onceTime.minute)}"
+              : element.name == "everyDay"
+                  ? "${addZero(everyDayTime.hour)}:${addZero(everyDayTime.minute)}"
+                  : element.name == "everyWeek"
+                      ? "$everyWeekDay, ${addZero(everyWeekTime.hour)}:${addZero(everyWeekTime.minute)}"
+                      : element.name == "everyMonth"
+                          ? "${everyMonthDay.text}, ${addZero(everyMonthTime.hour)}:${addZero(everyMonthTime.minute)}"
+                          : "${DateFormat("d MMM").format(everyYearDate)}, ${addZero(everyYearTime.hour)}:${addZero(everyYearTime.minute)}";
+          newAlarms
+              .add(Alarm(getRandInt(9), widget.taskId, element.name, timeStr));
+        }
+      });
+      widget.updateCreatedAlarms(newAlarms);
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void initState() {
+    // setValues();
+    setFirstAndLastDate();
+    onceDate = widget.selectedTime!;
+    everyMonthDay.text = "1";
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -144,11 +258,12 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                   color: modalDark,
                   child: SingleChildScrollView(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         MyExpansionPanelList(
                           expansionCallback: (int index, bool isExpanded) {
-                            debugPrint("expansion callback");
-                            handleSwitch(switchValues[index].name,
+                            // debugPrint("expansion callback");
+                            setSwitchValue(switchValues[index].name,
                                 !switchValues[index].status);
                           },
                           elevation: 0,
@@ -163,7 +278,8 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                         bool isExpanded) {
                                       return ListTile(
                                         onTap: () {
-                                          handleSwitch(item.name, !item.status);
+                                          setSwitchValue(
+                                              item.name, !item.status);
                                         },
                                         title: Text(item.name,
                                             style:
@@ -189,7 +305,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                 backgroundColor: Color.fromARGB(
                                                     255, 39, 37, 37)),
                                             child: Text(
-                                              '${everyDayTime.hour.toString().padLeft(2, '0')}:${everyDayTime.minute.toString().padLeft(2, '0')}',
+                                              '${addZero(everyDayTime.hour)}:${addZero(everyDayTime.minute)}',
                                               style: TextStyle(fontSize: 16),
                                             ),
                                           )
@@ -251,7 +367,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                             Color.fromARGB(255,
                                                                 39, 37, 37)),
                                                     child: Text(
-                                                      '${everyWeekTime.hour.toString().padLeft(2, '0')}:${everyWeekTime.minute.toString().padLeft(2, '0')}',
+                                                      '${addZero(everyWeekTime.hour)}:${addZero(everyWeekTime.minute)}',
                                                       style: TextStyle(
                                                           fontSize: 16),
                                                     ),
@@ -346,7 +462,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             37,
                                                                             37)),
                                                             child: Text(
-                                                              '${everyMonthTime.hour.toString().padLeft(2, '0')}:${everyYearTime.minute.toString().padLeft(2, '0')}',
+                                                              '${addZero(everyMonthTime.hour)}:${addZero(everyMonthTime.minute)}',
                                                               style: TextStyle(
                                                                   fontSize: 16),
                                                             ),
@@ -382,10 +498,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                 SizedBox(
                                                                   width: 10,
                                                                 ),
-                                                                int.parse(everyMonthDay.text.split(".")[0]) >
-                                                                            0 &&
-                                                                        int.parse(everyMonthDay.text.split(".")[0]) <
-                                                                            31
+                                                                validDateOfMonth()
                                                                     ? Container(
                                                                         width:
                                                                             250,
@@ -497,7 +610,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             37,
                                                                             37)),
                                                             child: Text(
-                                                              '${everyYearTime.hour.toString().padLeft(2, '0')}:${everyYearTime.minute.toString().padLeft(2, '0')}',
+                                                              '${addZero(everyYearTime.hour)}:${addZero(everyYearTime.minute)}',
                                                               style: TextStyle(
                                                                   fontSize: 16),
                                                             ),
@@ -509,42 +622,44 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                             MainAxisAlignment
                                                                 .center,
                                                         children: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              _selectDate(
-                                                                  context,
-                                                                  "once");
-                                                            },
-                                                            style: TextButton
-                                                                .styleFrom(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            12),
-                                                                    shape:
-                                                                        RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          new BorderRadius.circular(
-                                                                              30.0),
-                                                                    ),
-                                                                    primary: Colors
-                                                                        .white,
-                                                                    elevation:
-                                                                        2,
-                                                                    backgroundColor:
-                                                                        Color.fromARGB(
-                                                                            255,
-                                                                            39,
-                                                                            37,
-                                                                            37)),
-                                                            child: Text(
-                                                              DateFormat(
-                                                                      "d MMM y")
-                                                                  .format(
-                                                                      onceDate),
-                                                              style: TextStyle(
-                                                                  fontSize: 16),
-                                                            ),
-                                                          ),
+                                                          widget.timeType !=
+                                                                  "day"
+                                                              ? TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    _selectDate(
+                                                                        context,
+                                                                        "once");
+                                                                  },
+                                                                  style: TextButton
+                                                                      .styleFrom(
+                                                                          padding: EdgeInsets.all(
+                                                                              12),
+                                                                          shape:
+                                                                              RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                new BorderRadius.circular(30.0),
+                                                                          ),
+                                                                          primary: Colors
+                                                                              .white,
+                                                                          elevation:
+                                                                              2,
+                                                                          backgroundColor: Color.fromARGB(
+                                                                              255,
+                                                                              39,
+                                                                              37,
+                                                                              37)),
+                                                                  child: Text(
+                                                                    DateFormat(
+                                                                            "d MMM y")
+                                                                        .format(
+                                                                            onceDate),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16),
+                                                                  ),
+                                                                )
+                                                              : Container(),
                                                           SizedBox(width: 10),
                                                           TextButton(
                                                             onPressed: () {
@@ -574,7 +689,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             37,
                                                                             37)),
                                                             child: Text(
-                                                              '${onceTime.hour.toString().padLeft(2, '0')}:${onceTime.minute.toString().padLeft(2, '0')}',
+                                                              '${addZero(onceTime.hour)}:${addZero(onceTime.minute)}',
                                                               style: TextStyle(
                                                                   fontSize: 16),
                                                             ),
@@ -593,205 +708,30 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                   );
                           }).toList(),
                         ),
-                        // ExpansionTile(
-                        //   title: Container(
-                        //       child: const Text('One time',
-                        //           style: TextStyle(color: Colors.white))),
-                        //   trailing: IgnorePointer(
-                        //     child: Switch(
-                        //       // This bool value toggles the switch.
-                        //       value: switchValues["once"],
-                        //       activeColor: themePurple,
-                        //       onChanged: (bool value) {
-                        //         // This is called when the user toggles the switch.
-                        //         handleSwitch("once", value);
-                        //       },
-                        //     ),
-                        //   ),
-                        //   initiallyExpanded: switchValues["once"],
-                        //   onExpansionChanged: (bool value) {
-                        //     handleSwitch("once", value);
-                        //   },
-                        //   children: <Widget>[
-                        //     Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       children: [
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectDate(context);
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setOnceDate,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 10),
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectTime(context);
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setTime,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ],
-                        // ),
-                        // ExpansionTile(
-                        //   title: Container(
-                        //       child: const Text('Every year',
-                        //           style: TextStyle(color: Colors.white))),
-                        //   trailing: IgnorePointer(
-                        //     child: Switch(
-                        //       // This bool value toggles the switch.
-                        //       value: switchValues["everyYear"],
-                        //       activeColor: themePurple,
-                        //       onChanged: (bool value) {
-                        //         handleSwitch("everyYear", value);
-                        //       },
-                        //     ),
-                        //   ),
-                        //   initiallyExpanded: switchValues["everyYear"],
-                        //   onExpansionChanged: (bool value) {
-                        //     handleSwitch("everyYear", value);
-                        //   },
-                        //   children: <Widget>[
-                        //     Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       children: [
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectDate(
-                        //               context,
-                        //             );
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setYearDate,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 10),
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectTime(context);
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setTime,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ],
-                        // ),
-                        // ExpansionTile(
-                        //   title: Container(
-                        //       child: const Text('Every month',
-                        //           style: TextStyle(color: Colors.white))),
-                        //   trailing: IgnorePointer(
-                        //     child: Switch(
-                        //       value: switchValues["everyMonth"],
-                        //       activeColor: themePurple,
-                        //       onChanged: (bool value) {
-                        //         handleSwitch("everyMonth", value);
-                        //       },
-                        //     ),
-                        //   ),
-                        //   initiallyExpanded: switchValues["everyMonth"],
-                        //   onExpansionChanged: (bool value) {
-                        //     handleSwitch("everyMonth", value);
-                        //   },
-                        //   children: <Widget>[
-                        //     Row(
-                        //       mainAxisAlignment: MainAxisAlignment.center,
-                        //       children: [
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectDate(
-                        //               context,
-                        //             );
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setYearDate,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 10),
-                        //         TextButton(
-                        //           onPressed: () {
-                        //             _selectTime(context);
-                        //           },
-                        //           style: TextButton.styleFrom(
-                        //               padding: EdgeInsets.all(12),
-                        //               shape: RoundedRectangleBorder(
-                        //                 borderRadius:
-                        //                     new BorderRadius.circular(30.0),
-                        //               ),
-                        //               primary: Colors.white,
-                        //               elevation: 2,
-                        //               backgroundColor:
-                        //                   Color.fromARGB(255, 39, 37, 37)),
-                        //           child: Text(
-                        //             setTime,
-                        //             style: TextStyle(fontSize: 16),
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ],
-                        // )
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton(
+                              tooltip: "Close",
+                              color: Color.fromARGB(255, 202, 202, 202),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                            IconButton(
+                              tooltip: "Save Alarm",
+                              color: Color.fromARGB(255, 202, 202, 202),
+                              onPressed: !(getSwitchValue("everyMonth") &&
+                                      !validDateOfMonth())
+                                  ? () {
+                                      saveAlarm(context);
+                                    }
+                                  : null,
+                              icon: Icon(Icons.check_rounded),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

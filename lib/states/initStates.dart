@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
 import 'package:conquer_flutter_app/states/alarmsAPI.dart';
 import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -22,6 +23,7 @@ class GetItRegister {
     GetIt.I.registerLazySingleton<LabelAPI>(() => LabelAPI());
     GetIt.I.registerLazySingleton<AlarmsAPI>(() => AlarmsAPI());
     GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
+    GetIt.I.registerLazySingleton<ActiveAlarmsAPI>(() => ActiveAlarmsAPI());
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }

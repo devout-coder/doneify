@@ -82,9 +82,9 @@ class _TodosState extends State<Todos> {
       }
     });
 
-    debugPrint("todos");
-    todosTemp.forEach(
-        (element) => debugPrint("${element.taskName} ${element.index}"));
+    // debugPrint("todos");
+    // todosTemp.forEach(
+    //     (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
     // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
     // debugPrint("finished");
@@ -135,7 +135,7 @@ class _TodosState extends State<Todos> {
 
   @override
   void initState() {
-    debugPrint(widget.time + widget.timeType);
+    // debugPrint(widget.time + widget.timeType);
     loadTodos();
     super.initState();
   }

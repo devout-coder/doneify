@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
-
 class Label {
   String name;
   String color;
@@ -10,21 +9,27 @@ class Label {
 }
 
 class Alarm {
+  int alarmId;
+  int taskId;
   String repeatStatus;
   String time;
-  Alarm(this.repeatStatus, this.time);
+  Alarm(this.alarmId, this.taskId, this.repeatStatus, this.time);
 
   Map<String, dynamic> toMap() {
     return {
-      'time': time,
+      "alarmId": alarmId,
+      "taskId": taskId,
       'repeatStatus': repeatStatus,
+      'time': time,
     };
   }
 
   factory Alarm.fromMap(Map<String, dynamic> map) {
     return Alarm(
-      map["time"],
+      map["alarmId"],
+      map["taskId"],
       map["repeatStatus"],
+      map["time"],
     );
   }
 }

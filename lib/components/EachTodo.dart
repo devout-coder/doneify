@@ -8,6 +8,8 @@ import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
+import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
+import 'package:conquer_flutter_app/states/alarmsAPI.dart';
 import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -66,6 +68,45 @@ class _EachTodoState extends State<EachTodo> {
     return isCurrent;
   }
 
+  Map findInMap(List<Map> maps, String key, String value) {
+    Map reqMap = {};
+    maps.forEach((map) {
+      if (map[key] == value) {
+        reqMap = map;
+      }
+    });
+    return reqMap;
+  }
+
+  void editAlarms(bool val) async {
+    AlarmsAPI alarmsDB = GetIt.I.get();
+    List<Alarm> alarms = await alarmsDB.getAlarms(widget.todo.id);
+    ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
+    List<Map> activeAlarms =
+        await activeAlarmsDB.getActiveAlarms(widget.todo.id.toString());
+    List<int> alarmIds =
+        activeAlarms.map((alarmMap) => int.parse(alarmMap["alarmId"])).toList();
+    alarms.forEach((alarm) {
+      //an old alarm
+      alarmsDB.deleteAlarm(alarm.alarmId);
+      if (alarmIds.contains(alarm.alarmId)) {
+        //alarm which isn't deleted
+        Map activeAlarmMap =
+            findInMap(activeAlarms, "alarmId", alarm.alarmId.toString());
+        alarmsDB.setAlarm(
+          alarm,
+          activeAlarmMap["time"],
+          activeAlarmMap["repeatEnd"],
+          activeAlarmMap["taskId"],
+          activeAlarmMap["taskName"],
+          activeAlarmMap["taskDesc"],
+          activeAlarmMap["labelName"],
+          activeAlarmMap["finished"],
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -111,6 +152,7 @@ class _EachTodoState extends State<EachTodo> {
                         onChanged: (val) {
                           widget.todo.finished = val!;
                           widget.editTodo(widget.todo);
+                          editAlarms(val);
                         },
                       ),
                     ),

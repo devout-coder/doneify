@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/states/alarmsAPI.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
@@ -99,6 +100,13 @@ class TodosAPI {
       }
     });
     await _store.record(todoId).delete(_db);
+
+    AlarmsAPI alarmsdb = GetIt.I.get();
+    List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
+    toDeleteAlarms.forEach((alarm) {
+      alarmsdb.deleteAlarm(alarm.alarmId);
+    });
+
     storeDataInWidget();
   }
 

@@ -12,45 +12,49 @@ class SelectTimeDialog extends StatefulWidget {
   String timeType;
   DateTime? selectedTime;
   List<DateTime> selectedWeekDates = [];
-  List<Alarm>? taskAlarms;
-  List<Alarm> deletedTaskAlarms;
+  List<Alarm> alarms;
+  List<Alarm> deletedAlarms;
+  final Function updateDeletedAlarms;
+  int taskId;
+  List<Alarm> createdAlarms;
+  final Function updateCreatedAlarms;
   final Function updateSelectedWeekDates;
   final Function updateSelectedTime;
-  final Function updateTaskAlarms;
-  final Function updateDeletedTaskAlarms;
   SelectTimeDialog({
     Key? key,
     required this.curve,
+    required this.taskId,
     required this.timeType,
     required this.selectedTime,
     required this.selectedWeekDates,
     required this.updateSelectedWeekDates,
     required this.updateSelectedTime,
-    required this.taskAlarms,
-    required this.deletedTaskAlarms,
-    required this.updateTaskAlarms,
-    required this.updateDeletedTaskAlarms,
+    required this.alarms,
+    required this.createdAlarms,
+    required this.updateCreatedAlarms,
+    required this.deletedAlarms,
+    required this.updateDeletedAlarms,
   }) : super(key: key);
 
   @override
   State<SelectTimeDialog> createState() => _SelectTimeDialogState();
 }
 
+String startOrEndOfMonth(List<DateTime> selectedWeekDates, DateTime date) {
+  String retString = "none";
+  if (selectedWeekDates.contains(justDate(date))) {
+    DateTime reqDay = selectedWeekDates[0];
+    if (date.day == 1) {
+      retString = "start";
+    } else if (date.day == DateTime(reqDay.year, reqDay.month + 1, 0).day) {
+      retString = "end";
+    }
+  }
+  return retString;
+}
+
 class _SelectTimeDialogState extends State<SelectTimeDialog> {
   final DateRangePickerController _controller = DateRangePickerController();
-
-  String startOrEndOfMonth(DateTime date) {
-    String retString = "none";
-    if (widget.selectedWeekDates.contains(justDate(date))) {
-      DateTime reqDay = widget.selectedWeekDates[0];
-      if (date.day == 1) {
-        retString = "start";
-      } else if (date.day == DateTime(reqDay.year, reqDay.month + 1, 0).day) {
-        retString = "end";
-      }
-    }
-    return retString;
-  }
 
   bool isSelectedTime(DateTime date) {
     return (widget.timeType == "week" &&
@@ -156,8 +160,8 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                           widget.selectedTime =
                                               _controller.selectedDate;
                                         }
-                                        debugPrint(
-                                            widget.selectedTime.toString());
+                                        // debugPrint(
+                                        //     widget.selectedTime.toString());
                                       });
                                     }
                                   },
@@ -167,41 +171,43 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                       decoration: BoxDecoration(
                                         borderRadius: widget.timeType == "week"
                                             ? BorderRadius.only(
-                                                topLeft:
-                                                    widget.selectedWeekDates[
-                                                                    0] ==
-                                                                details.date ||
-                                                            startOrEndOfMonth(
-                                                                    details
-                                                                        .date) ==
-                                                                "start"
-                                                        ? Radius.circular(25)
-                                                        : Radius.circular(0),
-                                                topRight:
-                                                    widget.selectedWeekDates[
-                                                                    6] ==
-                                                                details.date ||
-                                                            startOrEndOfMonth(
-                                                                    details
-                                                                        .date) ==
-                                                                "end"
-                                                        ? Radius.circular(25)
-                                                        : Radius.circular(0),
-                                                bottomLeft:
-                                                    widget.selectedWeekDates[
-                                                                    0] ==
-                                                                details.date ||
-                                                            startOrEndOfMonth(
-                                                                    details
-                                                                        .date) ==
-                                                                "start"
-                                                        ? Radius.circular(25)
-                                                        : Radius.circular(0),
+                                                topLeft: widget.selectedWeekDates[
+                                                                0] ==
+                                                            details.date ||
+                                                        startOrEndOfMonth(
+                                                                widget
+                                                                    .selectedWeekDates,
+                                                                details.date) ==
+                                                            "start"
+                                                    ? Radius.circular(25)
+                                                    : Radius.circular(0),
+                                                topRight: widget.selectedWeekDates[
+                                                                6] ==
+                                                            details.date ||
+                                                        startOrEndOfMonth(
+                                                                widget
+                                                                    .selectedWeekDates,
+                                                                details.date) ==
+                                                            "end"
+                                                    ? Radius.circular(25)
+                                                    : Radius.circular(0),
+                                                bottomLeft: widget.selectedWeekDates[
+                                                                0] ==
+                                                            details.date ||
+                                                        startOrEndOfMonth(
+                                                                widget
+                                                                    .selectedWeekDates,
+                                                                details.date) ==
+                                                            "start"
+                                                    ? Radius.circular(25)
+                                                    : Radius.circular(0),
                                                 bottomRight:
                                                     widget.selectedWeekDates[
                                                                     6] ==
                                                                 details.date ||
                                                             startOrEndOfMonth(
+                                                                    widget
+                                                                        .selectedWeekDates,
                                                                     details
                                                                         .date) ==
                                                                 "end"
@@ -254,50 +260,80 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                     );
                                   },
                                 ),
-                                Center(
-                                  child: TextButton(
-                                    onPressed: () {
-                                      showGeneralDialog(
-                                        context: context,
-                                        barrierDismissible: true,
-                                        barrierLabel: "Select Time",
-                                        pageBuilder: (BuildContext context,
-                                            Animation<double> animation,
-                                            Animation<double>
-                                                secondaryAnimation) {
-                                          return Container();
-                                        },
-                                        transitionBuilder:
-                                            (ctx, a1, a2, child) {
-                                          var curve = Curves.easeInOut
-                                              .transform(a1.value);
-                                          return SetAlarmDialog(
-                                            curve: curve,
-                                            timeType: widget.timeType,
-                                          );
-                                        },
-                                        transitionDuration:
-                                            const Duration(milliseconds: 300),
-                                      );
-                                    },
-                                    style: TextButton.styleFrom(
-                                        padding: EdgeInsets.all(12),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              new BorderRadius.circular(30.0),
-                                        ),
-                                        primary: themeDarkPurple,
-                                        elevation: 2,
-                                        backgroundColor: themePurple),
-                                    child: Text(
-                                      "Add alarm",
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                ),
                               ],
                             )
                           : Container(),
+                      SizedBox(height: 10),
+                      Center(
+                        child: TextButton(
+                          child: Text(
+                            "Add alarm",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.all(12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0),
+                              ),
+                              primary: themeDarkPurple,
+                              elevation: 2,
+                              backgroundColor: themePurple),
+                          onPressed: () {
+                            showGeneralDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              barrierLabel: "Select Time",
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secondaryAnimation) {
+                                return Container();
+                              },
+                              transitionBuilder: (ctx, a1, a2, child) {
+                                var curve =
+                                    Curves.easeInOut.transform(a1.value);
+                                return SetAlarmDialog(
+                                  taskId: widget.taskId,
+                                  curve: curve,
+                                  timeType: widget.timeType,
+                                  updateCreatedAlarms:
+                                      widget.updateCreatedAlarms,
+                                  selectedTime: widget.selectedTime,
+                                  selectedWeekDates: widget.selectedWeekDates,
+                                );
+                              },
+                              transitionDuration:
+                                  const Duration(milliseconds: 300),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                        height: screenHeight * 0.3,
+                        child: ListView.builder(
+                            itemCount: widget.alarms.length,
+                            itemBuilder: (context, index) {
+                              return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                      "${widget.alarms[index].repeatStatus}, ${widget.alarms[index].time}"),
+                                  IconButton(
+                                    tooltip: "Delete",
+                                    color: Color.fromARGB(255, 255, 103, 103),
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.updateDeletedAlarms(
+                                            widget.alarms[index]);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                  ),
+                                ],
+                              );
+                            }),
+                      ),
                     ],
                   ),
                 )

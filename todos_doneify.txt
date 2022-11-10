@@ -1,0 +1,11 @@
+unsure about whether it works: 
+  repeating alarms
+  when alarm rings for the last time, delete it from active alarms
+
+check whether future time really works for every year tasks
+alarms shouldn't ring if the task is checked
+
+alarms should be set again on reboot
+beautify the alarm UI
+
+remove unecessary stuff for getIt registration

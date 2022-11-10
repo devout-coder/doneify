@@ -3,6 +3,7 @@ import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelsAPI.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -86,6 +87,10 @@ class _MyAppState extends State<MyApp> {
         todo = await todosdb.getTodo(int.parse(call.arguments.toString()));
         debugPrint("updated: ${todo?.toMap().toString()}");
         setState(() {});
+      } else if (call.method == "deleteActiveAlarm") {
+        debugPrint("deleted alarm in dart: ${call.arguments}");
+        ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
+        activeAlarmsDB.deleteAlarm(int.parse(call.arguments.toString()));
       }
       return Future<dynamic>.value();
     });

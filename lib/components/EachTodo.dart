@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:animations/animations.dart';
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
@@ -36,6 +38,48 @@ class EachTodo extends StatefulWidget {
   State<EachTodo> createState() => _EachTodoState();
 }
 
+Map findInMap(List<dynamic> maps, String key, String value) {
+  Map reqMap = {};
+  maps.forEach((map) {
+    if (map[key] == value) {
+      reqMap = map;
+    }
+  });
+  return reqMap;
+}
+
+Future editAlarms(int todoId, bool val) async {
+  AlarmsAPI alarmsDB = GetIt.I.get();
+  List<Alarm> alarms = await alarmsDB.getAlarms(todoId);
+
+  List alarmIds = await platform.invokeMethod('getActiveIds');
+  alarmIds = alarmIds.map((alarmId) => int.parse(alarmId)).toList();
+
+  String activeAlarmsString = await platform.invokeMethod('getAllAlarms');
+  List<dynamic> activeAlarms = jsonDecode(activeAlarmsString);
+
+  alarms.forEach((alarm) {
+    //an old alarm
+    alarmsDB.deleteAlarm(alarm.alarmId);
+    if (alarmIds.contains(alarm.alarmId)) {
+      //alarm which isn't deleted
+      Map activeAlarmMap =
+          findInMap(activeAlarms, "alarmId", alarm.alarmId.toString());
+      // debugPrint("activeAlarm : $activeAlarmMap");
+      alarmsDB.setAlarm(
+        alarm,
+        activeAlarmMap["time"],
+        activeAlarmMap["repeatEnd"],
+        activeAlarmMap["taskId"],
+        activeAlarmMap["taskName"],
+        activeAlarmMap["taskDesc"],
+        activeAlarmMap["label"],
+        val,
+      );
+    }
+  });
+}
+
 class _EachTodoState extends State<EachTodo> {
   LabelAPI labelsDB = GetIt.I.get();
 
@@ -66,45 +110,6 @@ class _EachTodoState extends State<EachTodo> {
       isCurrent = true;
     }
     return isCurrent;
-  }
-
-  Map findInMap(List<Map> maps, String key, String value) {
-    Map reqMap = {};
-    maps.forEach((map) {
-      if (map[key] == value) {
-        reqMap = map;
-      }
-    });
-    return reqMap;
-  }
-
-  void editAlarms(bool val) async {
-    AlarmsAPI alarmsDB = GetIt.I.get();
-    List<Alarm> alarms = await alarmsDB.getAlarms(widget.todo.id);
-    ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
-    List<Map> activeAlarms =
-        await activeAlarmsDB.getActiveAlarms(widget.todo.id.toString());
-    List<int> alarmIds =
-        activeAlarms.map((alarmMap) => int.parse(alarmMap["alarmId"])).toList();
-    alarms.forEach((alarm) {
-      //an old alarm
-      alarmsDB.deleteAlarm(alarm.alarmId);
-      if (alarmIds.contains(alarm.alarmId)) {
-        //alarm which isn't deleted
-        Map activeAlarmMap =
-            findInMap(activeAlarms, "alarmId", alarm.alarmId.toString());
-        alarmsDB.setAlarm(
-          alarm,
-          activeAlarmMap["time"],
-          activeAlarmMap["repeatEnd"],
-          activeAlarmMap["taskId"],
-          activeAlarmMap["taskName"],
-          activeAlarmMap["taskDesc"],
-          activeAlarmMap["labelName"],
-          activeAlarmMap["finished"],
-        );
-      }
-    });
   }
 
   @override
@@ -152,7 +157,7 @@ class _EachTodoState extends State<EachTodo> {
                         onChanged: (val) {
                           widget.todo.finished = val!;
                           widget.editTodo(widget.todo);
-                          editAlarms(val);
+                          editAlarms(widget.todo.id, val);
                         },
                       ),
                     ),

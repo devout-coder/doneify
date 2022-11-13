@@ -23,7 +23,7 @@ class GetItRegister {
     GetIt.I.registerLazySingleton<LabelAPI>(() => LabelAPI());
     GetIt.I.registerLazySingleton<AlarmsAPI>(() => AlarmsAPI());
     GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
-    GetIt.I.registerLazySingleton<ActiveAlarmsAPI>(() => ActiveAlarmsAPI());
+    // GetIt.I.registerLazySingleton<ActiveAlarmsAPI>(() => ActiveAlarmsAPI());
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }

@@ -22,6 +22,7 @@ class AlarmInterface: Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_interface)
+        val alarmId: String? = intent.getStringExtra("alarmId")
         val taskId: String? = intent.getStringExtra("taskId")
         val taskName: String? = intent.getStringExtra("taskName")
         val taskDesc: String? = intent.getStringExtra("taskDesc")
@@ -46,9 +47,7 @@ class AlarmInterface: Activity() {
             val alarmManager =
                     this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
             val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
-                putExtra("taskName", taskName);
-                putExtra("taskDesc", taskDesc);
-                putExtra("label", label);
+                putExtra("alarmId", alarmId);
             }
             val pendingAlarmIntent =
                     PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

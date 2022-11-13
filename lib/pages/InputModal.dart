@@ -83,6 +83,8 @@ int getRandInt(int chars) {
   return int.parse(stringList);
 }
 
+const platform = MethodChannel('alarm_method_channel');
+
 class _InputModalState extends State<InputModal> {
   int selectedLabel = 0;
   List<DateTime> selectedWeekDates = [];
@@ -97,8 +99,6 @@ class _InputModalState extends State<InputModal> {
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
   int? taskId;
-
-  static const platform = MethodChannel('alarm_method_channel');
 
   bool futureTime(int hour, int minute) {
     bool future = false;
@@ -321,7 +321,7 @@ class _InputModalState extends State<InputModal> {
             .toString();
         String hourTime = mainSplit[1];
         DateTime nextYearTime =
-            DateTime(currentTime.year + 1, currentTime.month, currentTime.day);
+            DateTime(currentTime.year + 1, int.parse(month), int.parse(day));
         var firstDay =
             DateTime(currentTime.year, int.parse(month), int.parse(day));
         if (firstDay.isAfter(currentTime)) {
@@ -352,7 +352,7 @@ class _InputModalState extends State<InputModal> {
         DateTime lastDate = DateTime(selectedTime.year, 12, 31);
         return lastDate;
       default:
-        return DateTime.now();
+        return DateTime(2200, 1, 1);
     }
   }
 
@@ -364,14 +364,10 @@ class _InputModalState extends State<InputModal> {
           labelsDB.labels[selectedLabel].name != widget.todo!.labelName ||
           figureOutTime(widget.timeType, selectedTime, selectedWeekDates) !=
               widget.time) {
-        ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
-        List<Map> activeAlarms =
-            await activeAlarmsDB.getActiveAlarms(widget.todo!.id.toString());
-        List<int> alarmIds = activeAlarms
-            .map((alarmMap) => int.parse(alarmMap["alarmId"]))
-            .toList();
-        debugPrint("alarms to go:${activeAlarms.length} alarmIds.toString()}");
-        alarms.forEach((alarm) {
+        List alarmIds = await platform.invokeMethod('getActiveIds');
+        alarmIds = alarmIds.map((alarmId) => int.parse(alarmId)).toList();
+        debugPrint("alarm ids of active alarms: $alarmIds");
+        alarms.forEach((alarm) async {
           if (!createdAlarms.contains(alarm)) {
             //an old alarm
             debugPrint("an old alarm:${alarm.alarmId.toString()}");
@@ -381,13 +377,13 @@ class _InputModalState extends State<InputModal> {
                     figureOutTime(
                             widget.timeType, selectedTime, selectedWeekDates) ==
                         widget.time)) {
-              //the alarm shouldn't have rung and repeat status shouldn't be changed or time shouldn't be changed
+              //the alarm shouldn't have rung and repeat status shouldn't be once or time shouldn't be changed
               if (widget.timeType == "longTerm" ||
                   (widget.timeType == "week" &&
                       futureDateAndTime(selectedWeekDates[6], 0, 0)) ||
                   (futureDateAndTime(repeatingAlarmEndDate(), 0, 0))) {
                 debugPrint('this is run');
-                alarmsDB.setAlarm(
+                await alarmsDB.setAlarm(
                   alarm,
                   amendAlarmTime(alarm.time, alarm.repeatStatus),
                   DateFormat("d/M/y").format(repeatingAlarmEndDate()),

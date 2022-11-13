@@ -7,7 +7,7 @@ import 'package:sembast/sembast.dart';
 
 class AlarmsAPI {
   final Database _db = GetIt.I.get();
-  ActiveAlarmsAPI ac = GetIt.I.get();
+  // ActiveAlarmsAPI ac = GetIt.I.get();
   final StoreRef _store = intMapStoreFactory.store("alarms");
   static const platform = MethodChannel('alarm_method_channel');
 
@@ -21,19 +21,8 @@ class AlarmsAPI {
     String labelName,
     bool finished,
   ) async {
-    debugPrint("while creating alarm id: " + alarm.taskId.toString());
+    // debugPrint("while creating alarm id: " + alarm.taskId.toString());
     await _store.record(alarm.alarmId).put(_db, alarm.toMap(), merge: true);
-    await ac.setAlarm(
-      alarm.alarmId.toString(),
-      kotlinAlarmTime,
-      alarm.repeatStatus,
-      kotlinAlarmRepeatEnd,
-      taskId,
-      taskName,
-      taskDesc,
-      labelName,
-      finished,
-    );
     try {
       await platform.invokeMethod("setAlarm", {
         "alarmId": alarm.alarmId.toString(),
@@ -67,29 +56,14 @@ class AlarmsAPI {
 
   Future deleteAlarm(int alarmId) async {
     await _store.record(alarmId).delete(_db);
-    Map? activeAlarm = await ac.getAlarm(alarmId);
     debugPrint("deleting alarm id " + alarmId.toString());
-    if (activeAlarm != null) {
-      await ac.deleteAlarm(alarmId);
-      debugPrint(
-          "deleting alarm, kotlin id ${activeAlarm["alarmId"]}, time ${activeAlarm["time"]}, ${activeAlarm["repeatStatus"]}, ${activeAlarm["repeatEnd"]}, ${activeAlarm["taskId"]}, ${activeAlarm["taskName"]}, ${activeAlarm["taskDesc"]}, ${activeAlarm["labelName"]}");
-      try {
-        await platform.invokeMethod("deleteAlarm", {
-          "alarmId": activeAlarm["alarmId"],
-          "time": activeAlarm["time"],
-          "repeatStatus": activeAlarm["repeatStatus"],
-          "repeatEnd": activeAlarm["repeatEnd"],
-          "taskId": activeAlarm["taskId"],
-          "taskName": activeAlarm["taskName"],
-          "taskDesc": activeAlarm["taskDesc"],
-          "label": activeAlarm["labelName"],
-          "finished": activeAlarm["finished"],
-        });
-      } on PlatformException catch (e) {
-        debugPrint("some fuckup happended while deleting alarm: $e");
-      }
-    } else {
-      debugPrint("alarm already gone off, nothing to delete in kotlin side.");
+    debugPrint("deleting alarm, kotlin id $alarmId");
+    try {
+      await platform.invokeMethod("deleteAlarm", {
+        "alarmId": alarmId.toString(),
+      });
+    } on PlatformException catch (e) {
+      debugPrint("some fuckup happended while deleting alarm: $e");
     }
   }
 }

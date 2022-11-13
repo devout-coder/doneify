@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
@@ -76,21 +77,16 @@ class _MyAppState extends State<MyApp> {
 
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      debugPrint("some call made");
       if (call.method == 'task_done') {
         await registerDB();
         TodosAPI todosdb = GetIt.I.get();
         Todo? todo =
             await todosdb.getTodo(int.parse(call.arguments.toString()));
-        todo?.finished = true;
-        await todosdb.updateTodo(todo!);
-        todo = await todosdb.getTodo(int.parse(call.arguments.toString()));
-        debugPrint("updated: ${todo?.toMap().toString()}");
+        todo!.finished = true;
+        await todosdb.updateTodo(todo);
+        await editAlarms(todo.id, true);
+
         setState(() {});
-      } else if (call.method == "deleteActiveAlarm") {
-        debugPrint("deleted alarm in dart: ${call.arguments}");
-        ActiveAlarmsAPI activeAlarmsDB = GetIt.I.get();
-        activeAlarmsDB.deleteAlarm(int.parse(call.arguments.toString()));
       }
       return Future<dynamic>.value();
     });

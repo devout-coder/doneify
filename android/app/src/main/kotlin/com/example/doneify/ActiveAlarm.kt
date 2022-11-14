@@ -27,8 +27,8 @@ interface ActiveAlarmDao {
     @Insert
     fun insert(activeAlarm: ActiveAlarm)
 
-    @Update
-    fun update(activeAlarm: ActiveAlarm)
+//    @Update
+//    fun update(activeAlarm: ActiveAlarm)
 
     @Delete
     fun delete(activeAlarm: ActiveAlarm)

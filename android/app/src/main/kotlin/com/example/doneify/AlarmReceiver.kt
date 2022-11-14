@@ -131,15 +131,16 @@ class AlarmReceiver : BroadcastReceiver() {
                     }
                     if (repeatStatus == "once") {
                         Thread {
-                            activeAlarmDao.delete(ActiveAlarm(alarmId = alarmId, time = time, repeatStatus = repeatStatus, repeatEnd = repeatEnd, taskId = taskId, taskName = taskName, taskDesc = taskDesc, label = label, finished = finished))
+                            activeAlarmDao.delete(reqAlarm)
                             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
                             Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
                         }.start()
                     } else {
                         //update time in active alarm
+                        activeAlarmDao.delete(reqAlarm)
                         val newTime:String = calculateFutureTime(time!!, repeatStatus!!)
                         Log.d("debugging", "new time: $newTime")
-                        activeAlarmDao.update(ActiveAlarm(alarmId = alarmId, time = newTime, repeatStatus = repeatStatus, repeatEnd = repeatEnd, taskId = taskId, taskName = taskName, taskDesc = taskDesc, label = label, finished = finished))
+                        activeAlarmDao.insert(ActiveAlarm(alarmId = alarmId, time = newTime, repeatStatus = repeatStatus, repeatEnd = repeatEnd, taskId = taskId, taskName = taskName, taskDesc = taskDesc, label = label, finished = finished))
                         val fetchedAlarm: ActiveAlarm = activeAlarmDao.getById(alarmId)[0]
                         Log.d("debugging", "in alarm receiver, changed the time of repeated alarm after it fired : $fetchedAlarm")
                     }
@@ -148,7 +149,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 //if this doesn't work try re-constructing the same intent again
 
                 Thread {
-                    activeAlarmDao.delete(ActiveAlarm(alarmId = alarmId, time = time, repeatStatus = repeatStatus, repeatEnd = repeatEnd, taskId = taskId, taskName = taskName, taskDesc = taskDesc, label = label, finished = finished))
+                    activeAlarmDao.delete(reqAlarm)
                     val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
                     Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
                 }.start()

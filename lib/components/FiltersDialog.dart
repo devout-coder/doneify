@@ -1,5 +1,5 @@
 import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
-import 'package:conquer_flutter_app/states/labelsAPI.dart';
+import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -24,7 +24,7 @@ class FiltersDialog extends StatefulWidget {
 }
 
 class _FiltersDialogState extends State<FiltersDialog> {
-  LabelAPI labelsDB = GetIt.I.get();
+  LabelDAO labelsDB = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
 
   Map<String, bool> labelsSelectedVal = {};

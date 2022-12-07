@@ -81,7 +81,7 @@ class AlarmReceiver : BroadcastReceiver() {
             val reqAlarm: ActiveAlarm?
             val db = Room.databaseBuilder(
                     context,
-                    AppDatabase::class.java, "active_alarms"
+                    AppDatabase::class.java, "db"
             ).build()
             val activeAlarmDao = db.ActiveAlarmDao()
             val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao.getById(alarmId!!)

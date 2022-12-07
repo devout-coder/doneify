@@ -34,16 +34,17 @@ class MainActivity : FlutterActivity() {
 
         val receiver = ComponentName(context, BootReceiver::class.java)
         context.packageManager.setComponentEnabledSetting(
-                receiver,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP
+            receiver,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
         )
 
 
-        val sound: Uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE.toString() + "://" + context.packageName + "/" + R.raw.rooster)
+        val sound: Uri =
+            Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE.toString() + "://" + context.packageName + "/" + R.raw.rooster)
         val attributes: AudioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                .build()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build()
         val mChannel = NotificationChannel("alarms", "Alarms", NotificationManager.IMPORTANCE_HIGH)
         mChannel.description = "This pertains to all the alarms set by the user"
         mChannel.setSound(sound, attributes)
@@ -52,8 +53,9 @@ class MainActivity : FlutterActivity() {
 
 
         methodChannel = MethodChannel(
-                flutterEngine.dartExecutor.binaryMessenger,
-                CHANNEL)
+            flutterEngine.dartExecutor.binaryMessenger,
+            CHANNEL
+        )
         methodChannel!!.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
 
             if (call!!.method == "setAlarm") {
@@ -68,43 +70,118 @@ class MainActivity : FlutterActivity() {
                 val finished: Boolean = call.argument<Boolean>("finished")!!
                 Thread {
                     val db = Room.databaseBuilder(
-                            context,
-                            AppDatabase::class.java, "active_alarms"
+                        context,
+                        AppDatabase::class.java, "db"
                     ).build()
                     val activeAlarmDao = db.ActiveAlarmDao()
-                    activeAlarmDao.insert(ActiveAlarm(alarmId = alarmId, time = time, repeatStatus = repeatStatus, repeatEnd = repeatEnd, taskId = taskId, taskName = taskName, taskDesc = taskDesc, label = label, finished = finished))
+                    activeAlarmDao.insert(
+                        ActiveAlarm(
+                            alarmId = alarmId,
+                            time = time,
+                            repeatStatus = repeatStatus,
+                            repeatEnd = repeatEnd,
+                            taskId = taskId,
+                            taskName = taskName,
+                            taskDesc = taskDesc,
+                            label = label,
+                            finished = finished
+                        )
+                    )
 
                     val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
                     Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
                 }.start()
 
-                setAlarm(this, alarmId, time, repeatStatus, repeatEnd, taskId, taskName, taskDesc, label, finished)
+                setAlarm(
+                    this,
+                    alarmId,
+                    time,
+                    repeatStatus,
+                    repeatEnd,
+                    taskId,
+                    taskName,
+                    taskDesc,
+                    label,
+                    finished
+                )
             } else if (call.method == "deleteAlarm") {
                 val alarmId: String = call.argument<String>("alarmId")!!
                 deleteAlarm(this, alarmId)
             } else if (call.method == "getActiveIds") {
                 Thread {
                     val db = Room.databaseBuilder(
-                            context,
-                            AppDatabase::class.java, "active_alarms"
+                        context,
+                        AppDatabase::class.java, "db"
                     ).build()
                     val activeAlarmDao = db.ActiveAlarmDao()
                     val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-                    val activeAlarmsIds: List<String> = activeAlarms.map { activeAlarm -> activeAlarm.alarmId }
+                    val activeAlarmsIds: List<String> =
+                        activeAlarms.map { activeAlarm -> activeAlarm.alarmId }
                     result!!.success(activeAlarmsIds)
                     Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
                 }.start()
             } else if (call.method == "getAllAlarms") {
                 Thread {
                     val db = Room.databaseBuilder(
-                            context,
-                            AppDatabase::class.java, "active_alarms"
+                        context,
+                        AppDatabase::class.java, "db"
                     ).build()
                     val activeAlarmDao = db.ActiveAlarmDao()
                     val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
 //                    val activeAlarmsMap: List<String> = activeAlarms.map { activeAlarm -> Gson().toJson(activeAlarm) }
                     result!!.success(Gson().toJson(activeAlarms))
                     Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
+                }.start()
+            } else if (call.method == "createTodo" || call.method == "updateTodo") {
+                val id: Int = call.argument<Int>("id")!!
+                val taskName: String = call.argument<String>("taskName")!!
+                val taskDesc: String = call.argument<String>("taskDesc")!!
+                val finished: Boolean = call.argument<Boolean>("finished")!!
+                val labelName: String = call.argument<String>("labelName")!!
+                val timeStamp: Int = call.argument<Int>("timeStamp")!!
+                val time: String = call.argument<String>("time")!!
+                val timeType: String = call.argument<String>("timeType")!!
+                val index: Int = call.argument<Int>("index")!!
+                val todo: Todo = Todo(
+                    id = id,
+                    taskName = taskName,
+                    taskDesc = taskDesc,
+                    finished = finished,
+                    labelName = labelName,
+                    timeStamp = timeStamp,
+                    time = time,
+                    timeType = timeType,
+                    index = index
+                )
+                Thread {
+                    val db = Room.databaseBuilder(
+                        context,
+                        AppDatabase::class.java, "db"
+                    ).build()
+                    val todoDAO = db.TodoDAO()
+                    if (call.method == "createTodo") {
+                        Log.d("debugging", "the id used is $id")
+                        todoDAO.insert(todo)
+                        val allTodos = todoDAO.getByTimeType(todo.timeType!!)
+                        Log.d("debugging", "all todos after creating this todo: $allTodos")
+                    } else {
+                        todoDAO.update(todo)
+                    }
+                }.start()
+            } else if (call.method == "deleteTodo") {
+                val id: Int = call.argument<Int>("id")!!
+                var reqTodo: Todo?
+                Thread {
+                    val db = Room.databaseBuilder(
+                        context,
+                        AppDatabase::class.java, "db"
+                    ).build()
+                    val todoDAO = db.TodoDAO()
+                    val fetchedTodos: List<Todo> = todoDAO.getById(id)
+                    if (fetchedTodos.isNotEmpty()) {
+                        reqTodo = fetchedTodos[0]
+                        todoDAO.delete(reqTodo!!)
+                    }
                 }.start()
             }
         }
@@ -119,8 +196,22 @@ fun padDate(date: String): String {
 
 }
 
-fun setAlarm(context: Context, alarmId: String, time: String, repeatStatus: String, repeatEnd: String, taskId: String, taskName: String, taskDesc: String, label: String, finished: Boolean) {
-    Log.d("debugging", "alarm set from dart: $alarmId, $time, $repeatStatus, $repeatEnd, $taskId, $taskName, $taskDesc, $label, $finished")
+fun setAlarm(
+    context: Context,
+    alarmId: String,
+    time: String,
+    repeatStatus: String,
+    repeatEnd: String,
+    taskId: String,
+    taskName: String,
+    taskDesc: String,
+    label: String,
+    finished: Boolean
+) {
+    Log.d(
+        "debugging",
+        "alarm set from dart: $alarmId, $time, $repeatStatus, $repeatEnd, $taskId, $taskName, $taskDesc, $label, $finished"
+    )
 
     val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
         putExtra("alarmId", alarmId)
@@ -134,7 +225,12 @@ fun setAlarm(context: Context, alarmId: String, time: String, repeatStatus: Stri
 //        putExtra("finished", finished)
     }
     val pendingAlarmIntent =
-            PendingIntent.getBroadcast(context, alarmId.toInt(), alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        PendingIntent.getBroadcast(
+            context,
+            alarmId.toInt(),
+            alarmIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
     var interval: Long = 0;
     when (repeatStatus) {
         "everyDay" -> {
@@ -168,15 +264,19 @@ fun setAlarm(context: Context, alarmId: String, time: String, repeatStatus: Stri
         set(Calendar.MINUTE, minute)
     }
     val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
     if (repeatStatus == "once") {
-        alarmManager!!.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingAlarmIntent)
+        alarmManager!!.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingAlarmIntent
+        )
     } else {
         alarmManager!!.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                interval,
-                pendingAlarmIntent
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            interval,
+            pendingAlarmIntent
         )
     }
     Log.d("debugging", "alarm set successfully")
@@ -186,8 +286,8 @@ fun deleteAlarm(context: Context, alarmId: String) {
     Thread {
         var reqAlarm: ActiveAlarm?
         val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "active_alarms"
+            context,
+            AppDatabase::class.java, "db"
         ).build()
         val activeAlarmDao = db.ActiveAlarmDao()
         val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao.getById(alarmId)
@@ -198,22 +298,22 @@ fun deleteAlarm(context: Context, alarmId: String) {
             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
             Log.d("debugging", "in deleteAlarm method kotlin, all active alarms: $activeAlarms")
 
-            Log.d("debugging", "alarm deleted: $alarmId, ${reqAlarm.time}, ${reqAlarm.repeatStatus}, ${reqAlarm.repeatEnd}, ${reqAlarm.taskId}, ${reqAlarm.taskName}, ${reqAlarm.taskDesc}, ${reqAlarm.label}, ${reqAlarm.finished}")
+            Log.d(
+                "debugging",
+                "alarm deleted: $alarmId, ${reqAlarm.time}, ${reqAlarm.repeatStatus}, ${reqAlarm.repeatEnd}, ${reqAlarm.taskId}, ${reqAlarm.taskName}, ${reqAlarm.taskDesc}, ${reqAlarm.label}, ${reqAlarm.finished}"
+            )
             val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
                 putExtra("alarmId", alarmId)
-//                putExtra("time", reqAlarm.time)
-//                putExtra("repeatStatus", reqAlarm.repeatStatus)
-//                putExtra("repeatEnd", reqAlarm.repeatEnd)
-//                putExtra("taskId", reqAlarm.taskId)
-//                putExtra("taskName", reqAlarm.taskName)
-//                putExtra("taskDesc", reqAlarm.taskDesc)
-//                putExtra("label", reqAlarm.label)
-//                putExtra("finished", reqAlarm.finished)
             }
             val pendingAlarmIntent =
-                    PendingIntent.getBroadcast(context, alarmId.toInt(), alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(
+                    context,
+                    alarmId.toInt(),
+                    alarmIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
             val alarmManager =
-                    context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
             alarmManager!!.cancel(pendingAlarmIntent)
         }
     }.start()

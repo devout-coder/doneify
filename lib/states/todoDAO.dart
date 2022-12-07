@@ -1,30 +1,18 @@
 import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/alarmsAPI.dart';
+import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
 
-class TodosAPI {
+class TodoDAO {
   final Database _db = GetIt.I.get();
 
   final StoreRef _store = intMapStoreFactory.store("todos");
-
-  Future storeDataInWidget() async {
-    var finder = Finder();
-    final todos = await getAllTodos(finder);
-    List<Map<String, dynamic>> storeableTodos = [];
-    todos.forEach((todo) {
-      storeableTodos.add(todo.toMap());
-    });
-    await HomeWidget.saveWidgetData<String>(
-        'todos', jsonEncode({"todos": storeableTodos}));
-    await HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
-    );
-  }
+  static const platform = MethodChannel('alarm_method_channel');
 
   Future createTodo(Todo todo) async {
     var finder = Finder(
@@ -39,7 +27,26 @@ class TodosAPI {
     final allTodos = await getAllTodos(finder);
     todo.index = allTodos.length;
     await _store.record(todo.id).put(_db, todo.toMap());
-    storeDataInWidget();
+
+    try {
+      platform.invokeMethod("createTodo", {
+        "id": todo.id,
+        "taskName": todo.taskName,
+        "taskDesc": todo.taskDesc,
+        "finished": todo.finished,
+        "labelName": todo.labelName,
+        "timeStamp": todo.timeStamp,
+        "time": todo.time,
+        "timeType": todo.timeType,
+        "index": todo.index,
+      });
+    } on PlatformException catch (e) {
+      debugPrint("some fuckup happended while creating todo: $e");
+    }
+    HomeWidget.updateWidget(
+      name: 'WidgetProvider',
+      iOSName: 'WidgetProvider',
+    );
   }
 
   Future<Todo?> getTodo(int key) async {
@@ -81,7 +88,25 @@ class TodosAPI {
       todo.index = presentTodos.length;
     }
     await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
-    storeDataInWidget();
+    try {
+      platform.invokeMethod("updateTodo", {
+        "id": todo.id,
+        "taskName": todo.taskName,
+        "taskDesc": todo.taskDesc,
+        "finished": todo.finished,
+        "labelName": todo.labelName,
+        "timeStamp": todo.timeStamp,
+        "time": todo.time,
+        "timeType": todo.timeType,
+        "index": todo.index,
+      });
+    } on PlatformException catch (e) {
+      debugPrint("some fuckup happended while updating todo: $e");
+    }
+    HomeWidget.updateWidget(
+      name: 'WidgetProvider',
+      iOSName: 'WidgetProvider',
+    );
   }
 
   Future deleteTodo(int todoId) async {
@@ -101,13 +126,23 @@ class TodosAPI {
     });
     await _store.record(todoId).delete(_db);
 
-    AlarmsAPI alarmsdb = GetIt.I.get();
+    AlarmDAO alarmsdb = GetIt.I.get();
     List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
     toDeleteAlarms.forEach((alarm) {
       alarmsdb.deleteAlarm(alarm.alarmId);
     });
 
-    storeDataInWidget();
+    try {
+      platform.invokeMethod("deleteTodo", {
+        "id": todo.id,
+      });
+    } on PlatformException catch (e) {
+      debugPrint("some fuckup happended while deleting todo: $e");
+    }
+    HomeWidget.updateWidget(
+      name: 'WidgetProvider',
+      iOSName: 'WidgetProvider',
+    );
   }
 
   Future rearrangeTodos(int oldIndex, int newIndex, String time) async {

@@ -10,9 +10,8 @@ import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
-import 'package:conquer_flutter_app/states/alarmsAPI.dart';
-import 'package:conquer_flutter_app/states/labelsAPI.dart';
+import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -49,7 +48,7 @@ Map findInMap(List<dynamic> maps, String key, String value) {
 }
 
 Future editAlarms(int todoId, bool val) async {
-  AlarmsAPI alarmsDB = GetIt.I.get();
+  AlarmDAO alarmsDB = GetIt.I.get();
   List<Alarm> alarms = await alarmsDB.getAlarms(todoId);
 
   List alarmIds = await platform.invokeMethod('getActiveIds');
@@ -81,7 +80,7 @@ Future editAlarms(int todoId, bool val) async {
 }
 
 class _EachTodoState extends State<EachTodo> {
-  LabelAPI labelsDB = GetIt.I.get();
+  LabelDAO labelsDB = GetIt.I.get();
 
   Color findLabelColor() {
     Color reqColor = Color(0xffffffff);

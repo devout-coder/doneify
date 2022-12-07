@@ -1,7 +1,7 @@
 import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosAPI.dart';
+import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
@@ -28,7 +28,7 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
 
   bool scrolledUp = false;
 
-  TodosAPI todosdb = GetIt.I.get();
+  TodoDAO todosdb = GetIt.I.get();
 
   editTodo(Todo todo) async {
     await todosdb.updateTodo(todo);

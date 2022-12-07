@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
-import 'package:conquer_flutter_app/states/alarmsAPI.dart';
-import 'package:conquer_flutter_app/states/labelsAPI.dart';
+import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosAPI.dart';
+import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,11 +18,10 @@ class GetItRegister {
         .openDatabase(join(appDocDir.path, dbPath), version: 1);
 
     GetIt.I.registerSingleton<Database>(db);
-    GetIt.I.registerLazySingleton<TodosAPI>(() => TodosAPI());
-    GetIt.I.registerLazySingleton<LabelAPI>(() => LabelAPI());
-    GetIt.I.registerLazySingleton<AlarmsAPI>(() => AlarmsAPI());
+    GetIt.I.registerLazySingleton<TodoDAO>(() => TodoDAO());
+    GetIt.I.registerLazySingleton<LabelDAO>(() => LabelDAO());
+    GetIt.I.registerLazySingleton<AlarmDAO>(() => AlarmDAO());
     GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
-    // GetIt.I.registerLazySingleton<ActiveAlarmsAPI>(() => ActiveAlarmsAPI());
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }

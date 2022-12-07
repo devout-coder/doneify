@@ -4,11 +4,10 @@ import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
-import 'package:conquer_flutter_app/states/labelsAPI.dart';
+import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todosAPI.dart';
+import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
@@ -68,7 +67,7 @@ class _MyAppState extends State<MyApp> {
 
   Future registerDB() async {
     await GetItRegister().initializeGlobalStates();
-    LabelAPI labelsDB = GetIt.I.get();
+    LabelDAO labelsDB = GetIt.I.get();
     SelectedFilters selectedFilters = GetIt.I.get();
 
     await selectedFilters.fetchFiltersFromStorage();
@@ -79,7 +78,7 @@ class _MyAppState extends State<MyApp> {
     channel.setMethodCallHandler((call) async {
       if (call.method == 'task_done') {
         await registerDB();
-        TodosAPI todosdb = GetIt.I.get();
+        TodoDAO todosdb = GetIt.I.get();
         Todo? todo =
             await todosdb.getTodo(int.parse(call.arguments.toString()));
         todo!.finished = true;
@@ -99,7 +98,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   createTodo(Todo todo) async {
-    TodosAPI todosdb = GetIt.I.get();
+    TodoDAO todosdb = GetIt.I.get();
     await todosdb.createTodo(todo);
   }
 

@@ -1,13 +1,12 @@
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
 
-class AlarmsAPI {
+class AlarmDAO {
   final Database _db = GetIt.I.get();
-  // ActiveAlarmsAPI ac = GetIt.I.get();
+  // ActiveAlarmDAO ac = GetIt.I.get();
   final StoreRef _store = intMapStoreFactory.store("alarms");
   static const platform = MethodChannel('alarm_method_channel');
 

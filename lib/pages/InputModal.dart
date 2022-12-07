@@ -9,9 +9,8 @@ import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/Month.dart';
 import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/states/activeAlarmsAPI.dart';
-import 'package:conquer_flutter_app/states/alarmsAPI.dart';
-import 'package:conquer_flutter_app/states/labelsAPI.dart';
+import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -93,8 +92,8 @@ class _InputModalState extends State<InputModal> {
   List<Alarm> createdAlarms = [];
   List<Alarm> deletedAlarms = [];
 
-  LabelAPI labelsDB = GetIt.I.get();
-  AlarmsAPI alarmsDB = GetIt.I.get();
+  LabelDAO labelsDB = GetIt.I.get();
+  AlarmDAO alarmsDB = GetIt.I.get();
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
@@ -472,6 +471,7 @@ class _InputModalState extends State<InputModal> {
           taskId!,
         );
         await widget.createTodo(newTodo);
+        debugPrint("this is run after todo is created");
       }
       saveAlarms();
       Fluttertoast.showToast(

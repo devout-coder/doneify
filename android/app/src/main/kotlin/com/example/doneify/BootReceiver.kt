@@ -15,7 +15,7 @@ class BootReceiver : BroadcastReceiver() {
             Thread{
                 val db = Room.databaseBuilder(
                         context,
-                        AppDatabase::class.java, "active_alarms"
+                        AppDatabase::class.java, "db"
                 ).build()
                 val activeAlarmDao = db.ActiveAlarmDao()
                 val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()

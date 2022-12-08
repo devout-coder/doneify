@@ -16,6 +16,10 @@ import androidx.room.Room
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -28,6 +32,8 @@ const val EXTRA_ITEM = "com.example.android.listview.EXTRA_ITEM"
 
 class WidgetProvider : HomeWidgetProvider() {
 
+    private var job: Job = Job()
+    private val scope = CoroutineScope(job + Dispatchers.Main)
 
     override fun onUpdate(
         context: Context,
@@ -76,67 +82,46 @@ class WidgetProvider : HomeWidgetProvider() {
                 )
 
                 val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
-                // Create an executor that executes tasks in the main thread.
-                val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
-                val handler: Handler = Handler(Looper.getMainLooper())
-// Create an executor that executes tasks in a background thread.
-                val backgroundExecutor = Executors.newSingleThreadScheduledExecutor()
 
-// Execute a task in the background thread.
-                backgroundExecutor.execute {
-                    // Your code logic goes here.
+                scope.launch {
                     val db = Room.databaseBuilder(
+//                    favoritesView?.showFavorites(provider.getAllProducts())
                         context,
                         AppDatabase::class.java, "db"
                     ).build()
                     val todosDAO = db.TodoDAO()
                     val todos: List<Todo> = todosDAO.getByTimeType(timeTypeHash[timeType]!!)
 
-                    // Update UI on the main thread
-                    handler.post {
-//                    mainExecutor.execute {
-                        // You code logic goes here.
-                        Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
-                        for (todo in todos) {
-                            val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
-                                setTextViewText(R.id.each_todo_container_text, todo.taskName)
-                                setCompoundButtonChecked(
-                                    R.id.each_todo_container_checkbox,
-                                    todo.finished!!
-                                )
-                                Log.d("debugging", "task name is ${todo.taskName}")
-                                val fillInIntent = Intent().apply {
-                                    Bundle().also { extras ->
-                                        extras.putInt(EXTRA_ITEM, todo.id)
-                                        putExtras(extras)
-                                    }
+                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
+                    for (todo in todos) {
+                        val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
+                            setTextViewText(R.id.each_todo_container_text, todo.taskName)
+                            setCompoundButtonChecked(
+                                R.id.each_todo_container_checkbox,
+                                todo.finished!!
+                            )
+                            Log.d("debugging", "task name is ${todo.taskName}")
+                            val fillInIntent = Intent().apply {
+                                Bundle().also { extras ->
+                                    extras.putInt(EXTRA_ITEM, todo.id)
+                                    putExtras(extras)
                                 }
-                                val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
-                                    context,
-                                    Uri.parse("myAppWidget://todo_checked/${todo.id}")
-                                )
-                                setOnCheckedChangeResponse(
-                                    R.id.each_todo_container_checkbox,
-                                    RemoteViews.RemoteResponse.fromFillInIntent(fillInIntent)
-                                )
-                                Log.d("debugging", "id received is ${todo.id}")
-                                setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
                             }
-                            todosRemoteView.addItem(todo.id.toString().toInt().toLong(), view)
+                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
+                                context,
+                                Uri.parse("myAppWidget://todo_checked/${todo.id}")
+                            )
+                            setOnCheckedChangeResponse(
+                                R.id.each_todo_container_checkbox,
+                                RemoteViews.RemoteResponse.fromFillInIntent(fillInIntent)
+                            )
+                            Log.d("debugging", "id received is ${todo.id}")
+                            setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
                         }
-                        Log.d("debugging", "update is triggered");
-//                    }
-
-                        todosRemoteView.addItem(
-                            849937,
-                            RemoteViews(context.packageName, R.layout.each_todo).apply {
-                                setTextViewText(R.id.each_todo_container_text, "random shit")
-                                setCompoundButtonChecked(
-                                    R.id.each_todo_container_checkbox,
-                                    false
-                                )
-                            })
+                        todosRemoteView.addItem(todo.id.toString().toInt().toLong(), view)
                     }
+                    Log.d("debugging", "update is triggered");
+//                    }
                 }
 
                 todosRemoteView.addItem(

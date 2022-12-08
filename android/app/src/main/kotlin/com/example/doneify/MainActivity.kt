@@ -162,8 +162,6 @@ class MainActivity : FlutterActivity() {
                     if (call.method == "createTodo") {
                         Log.d("debugging", "the id used is $id")
                         todoDAO.insert(todo)
-                        val allTodos = todoDAO.getByTimeType(todo.timeType!!)
-                        Log.d("debugging", "all todos after creating this todo: $allTodos")
                     } else {
                         todoDAO.update(todo)
                     }

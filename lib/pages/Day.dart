@@ -11,6 +11,7 @@ import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/components/FiltersDialog.dart';
+import 'package:conquer_flutter_app/states/startTodos.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -73,6 +74,7 @@ class _DayPageState extends State<DayPage> {
 
   TodoDAO todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
+  StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
   List<String> unfinishedDays = [];
@@ -95,7 +97,6 @@ class _DayPageState extends State<DayPage> {
   }
 
   loadTodos() async {
-    _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -152,7 +153,11 @@ class _DayPageState extends State<DayPage> {
 
   @override
   void initState() {
-    loadTodos();
+    _controller.selectedDate = null;
+    todos = startTodos.todos;
+    currentTodos = startTodos.currentTodos;
+    unfinishedDays = startTodos.unfinishedDays;
+    // loadTodos();
     super.initState();
   }
 

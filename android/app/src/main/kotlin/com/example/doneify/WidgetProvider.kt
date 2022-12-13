@@ -11,17 +11,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import androidx.room.Room
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
+import kotlinx.coroutines.*
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -85,12 +79,14 @@ class WidgetProvider : HomeWidgetProvider() {
 
                 scope.launch {
                     val db = Room.databaseBuilder(
-//                    favoritesView?.showFavorites(provider.getAllProducts())
                         context,
                         AppDatabase::class.java, "db"
                     ).build()
                     val todosDAO = db.TodoDAO()
-                    val todos: List<Todo> = todosDAO.getByTimeType(timeTypeHash[timeType]!!)
+                    val todosAsync = async {
+                        todosDAO.getByTimeType(timeTypeHash[timeType]!!)
+                    }
+                    val todos = todosAsync.await()
 
                     Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
                     for (todo in todos) {
@@ -121,7 +117,6 @@ class WidgetProvider : HomeWidgetProvider() {
                         todosRemoteView.addItem(todo.id.toString().toInt().toLong(), view)
                     }
                     Log.d("debugging", "update is triggered");
-//                    }
                 }
 
                 todosRemoteView.addItem(

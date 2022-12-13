@@ -7,6 +7,7 @@ import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
+import 'package:conquer_flutter_app/states/startTodos.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
@@ -69,9 +70,12 @@ class _MyAppState extends State<MyApp> {
     await GetItRegister().initializeGlobalStates();
     LabelDAO labelsDB = GetIt.I.get();
     SelectedFilters selectedFilters = GetIt.I.get();
+    StartTodos startTodos = GetIt.I.get();
 
+    //don't fuck up this order
     await selectedFilters.fetchFiltersFromStorage();
     await labelsDB.readLabelsFromStorage();
+    await startTodos.loadTodos();
   }
 
   void handleKotlinEvents() async {
@@ -182,8 +186,8 @@ class _MyAppState extends State<MyApp> {
                         );
                       }
                     } else {
-                      return const Material(
-                        child: Center(
+                      return Container(
+                        child: const Center(
                           child: CircularProgressIndicator(),
                         ),
                       );

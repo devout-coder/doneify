@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     debugPrint("In Home ${widget.launchFromWidgetTimeType}");
     if (widget.launchFromWidgetTimeType == null) {
-      currentPage = 0;
+      currentPage = 5;
     } else {
       currentPage = timeTypeMap[widget.launchFromWidgetTimeType]!;
     }
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                 MonthNavigator(),
                 YearNavigator(),
                 LongTermPage(),
-                SettingsPage()
+                SettingsNavigator()
               ],
             ),
             backgroundColor: Colors.transparent,

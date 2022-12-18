@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                 MonthNavigator(),
                 YearNavigator(),
                 LongTermPage(),
-                SettingsNavigator()
+                SettingsPage()
               ],
             ),
             backgroundColor: Colors.transparent,

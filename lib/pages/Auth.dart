@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class Auth extends StatefulWidget {
@@ -11,8 +12,10 @@ class Auth extends StatefulWidget {
 class _AuthState extends State<Auth> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(widget.type),
+    return Column(
+      children: [
+        Text(widget.type),
+      ],
     );
   }
 }

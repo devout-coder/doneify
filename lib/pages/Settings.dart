@@ -1,4 +1,5 @@
 import 'package:conquer_flutter_app/components/GradientText.dart';
+import 'package:conquer_flutter_app/components/SettingsButton.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/AccountSettings.dart';
 import 'package:conquer_flutter_app/pages/Auth.dart';
@@ -7,49 +8,63 @@ import 'package:conquer_flutter_app/pages/LabelsSettings.dart';
 import 'package:conquer_flutter_app/pages/NudgerSettings.dart';
 import 'package:flutter/material.dart';
 
-class SettingsButton extends StatefulWidget {
-  String pageName;
-  Widget page;
-  double buttonWidth;
-  SettingsButton({
-    super.key,
-    required this.buttonWidth,
-    required this.page,
-    required this.pageName,
-  });
+class SettingsNavigator extends StatefulWidget {
+  SettingsNavigator({Key? key}) : super(key: key);
 
   @override
-  State<SettingsButton> createState() => _SettingsButtonState();
+  State<SettingsNavigator> createState() => _SettingsNavigatorState();
 }
 
-class _SettingsButtonState extends State<SettingsButton> {
+class _SettingsNavigatorState extends State<SettingsNavigator> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => widget.page),
-        ); //throws error
+    return Navigator(
+      key: settingsNavigatorKey,
+      onGenerateRoute: (RouteSettings settings) {
+        if (settings.name == "/nudgerSettings") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return NudgerSettings();
+            },
+          );
+        } else if (settings.name == "/labelsSettings") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return LabelsSettingsPage();
+            },
+          );
+        } else if (settings.name == "/friendsSettings") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return FriendsSettingsPage();
+            },
+          );
+        } else if (settings.name == "/accountSettings") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return AccountSettingsPage();
+            },
+          );
+        } else if (settings.name == "/login") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return Auth(type: "login");
+            },
+          );
+        } else if (settings.name == "/signup") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return Auth(type: "signup");
+            },
+          );
+        } else {
+          return MaterialPageRoute(
+            builder: (context) {
+              return SettingsPage();
+            },
+          );
+        }
       },
-      style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all(Color.fromRGBO(217, 217, 217, 0.16))),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(widget.pageName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              )),
-          SizedBox(width: widget.buttonWidth, height: 50),
-          Icon(
-            Icons.keyboard_arrow_right,
-            size: 24.0,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -62,7 +77,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool signedUp = true;
+  bool signedUp = false;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -83,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GradientText(
-                          'Tony Stark',
+                          'Bruce Wayne',
                           style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w600,
@@ -129,10 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => Auth(type: "login")),
-                          ); //throws error
+                          Navigator.pushNamed(context, "/login");
                         },
                         child: GradientText(
                           'Log In',
@@ -157,11 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Auth(type: "signup")),
-                          ); //throws error
+                          Navigator.pushNamed(context, "/signup");
                         },
                         child: GradientText(
                           'Sign Up',
@@ -187,13 +195,13 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(height: 80),
         SettingsButton(
           buttonWidth: 205,
-          page: NudgerSettings(),
+          page: "nudgerSettings",
           pageName: "Nudger",
         ),
         SizedBox(height: 20),
         SettingsButton(
           buttonWidth: 210,
-          page: LabelsSettingsPage(),
+          page: "labelsSettings",
           pageName: "Labels",
         ),
         SizedBox(height: 20),
@@ -202,14 +210,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   SettingsButton(
                     buttonWidth: 205,
-                    page: FriendsSettingsPage(),
+                    page: "friendsSettings",
                     pageName: "Friends",
                   ),
                   SizedBox(height: 20),
                   SettingsButton(
                     buttonWidth: 185,
-                    page: AccountSettingsPage(),
-                    pageName: "Accounts",
+                    page: "accountSettings",
+                    pageName: "Account",
                   ),
                 ],
               )

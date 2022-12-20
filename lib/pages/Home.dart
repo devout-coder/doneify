@@ -1,4 +1,5 @@
 import 'package:conquer_flutter_app/globalColors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get_it/get_it.dart';
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                 MonthNavigator(),
                 YearNavigator(),
                 LongTermPage(),
-                SettingsPage()
+                SettingsNavigator()
               ],
             ),
             backgroundColor: Colors.transparent,

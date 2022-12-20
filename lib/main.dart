@@ -17,7 +17,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
 
 final channel = MethodChannel('alarm_method_channel');
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HomeWidget.registerBackgroundCallback(backgroundCallback);
   runApp(const MyApp());
@@ -95,12 +95,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
-  void initState() {
-    handleKotlinEvents();
-    super.initState();
-  }
-
   createTodo(Todo todo) async {
     TodoDAO todosdb = GetIt.I.get();
     await todosdb.createTodo(todo);
@@ -119,6 +113,12 @@ class _MyAppState extends State<MyApp> {
       });
       debugPrint("in main $timeType");
     }
+  }
+
+  @override
+  void initState() {
+    handleKotlinEvents();
+    super.initState();
   }
 
   @override

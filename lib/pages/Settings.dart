@@ -1,3 +1,5 @@
+import 'package:conquer_flutter_app/components/GradientText.dart';
+import 'package:conquer_flutter_app/components/SettingsButton.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/AccountSettings.dart';
 import 'package:conquer_flutter_app/pages/Auth.dart';
@@ -5,29 +7,6 @@ import 'package:conquer_flutter_app/pages/FriendsSettings.dart';
 import 'package:conquer_flutter_app/pages/LabelsSettings.dart';
 import 'package:conquer_flutter_app/pages/NudgerSettings.dart';
 import 'package:flutter/material.dart';
-
-class GradientText extends StatelessWidget {
-  const GradientText(
-    this.text, {
-    required this.gradient,
-    this.style,
-  });
-
-  final String text;
-  final TextStyle? style;
-  final Gradient gradient;
-
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => gradient.createShader(
-        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-      ),
-      child: Text(text, style: style),
-    );
-  }
-}
 
 class SettingsNavigator extends StatefulWidget {
   SettingsNavigator({Key? key}) : super(key: key);
@@ -42,8 +21,6 @@ class _SettingsNavigatorState extends State<SettingsNavigator> {
     return Navigator(
       key: settingsNavigatorKey,
       onGenerateRoute: (RouteSettings settings) {
-        // Cast the arguments to the correct
-        // type: ScreenArguments.
         if (settings.name == "/nudgerSettings") {
           return MaterialPageRoute(
             builder: (context) {
@@ -68,6 +45,18 @@ class _SettingsNavigatorState extends State<SettingsNavigator> {
               return AccountSettingsPage();
             },
           );
+        } else if (settings.name == "/login") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return Auth(type: "login");
+            },
+          );
+        } else if (settings.name == "/signup") {
+          return MaterialPageRoute(
+            builder: (context) {
+              return Auth(type: "signup");
+            },
+          );
         } else {
           return MaterialPageRoute(
             builder: (context) {
@@ -88,146 +77,152 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool signedUp = false;
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: 40),
-        Text(
-          "Not signed up yet",
-          style: TextStyle(
-            fontFamily: "EuclidCircular",
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: 30,
-          ),
-        ),
-        SizedBox(height: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () {
-                Navigator.of(context, rootNavigator: true).push(
-                  MaterialPageRoute(builder: (context) => Auth(type: "login")),
-                ); //throws error
-              },
-              child: GradientText(
-                'Log In',
-                style: const TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.w600,
-                ),
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 173, 133, 255),
-                    // Color(0xffC5A9FF),
-                    Color(0xffEDE4FF),
+        signedUp
+            ? Container(
+                padding: EdgeInsets.only(left: 35),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                    ),
+                    SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GradientText(
+                          'Bruce Wayne',
+                          style: TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 173, 133, 255),
+                              // Color(0xffC5A9FF),
+                              Color(0xffEDE4FF),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        Text(
+                          "ts@gmial.com",
+                          style:
+                              TextStyle(fontSize: 18, color: Color(0xff9A9A9A)),
+                        )
+                      ],
+                    )
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
+              )
+            : Column(
+                children: [
+                  Text(
+                    "Not signed up yet",
+                    style: TextStyle(
+                      fontFamily: "EuclidCircular",
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 25,
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () {
+                          Navigator.pushNamed(context, "/login");
+                        },
+                        child: GradientText(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 27,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 173, 133, 255),
+                              // Color(0xffC5A9FF),
+                              Color(0xffEDE4FF),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () {
+                          Navigator.pushNamed(context, "/signup");
+                        },
+                        child: GradientText(
+                          'Sign Up',
+                          style: const TextStyle(
+                            fontSize: 27,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 173, 133, 255),
+                              // Color(0xffC5A9FF),
+                              Color(0xffEDE4FF),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            InkWell(
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Auth(type: "signup")),
-                ); //throws error
-              },
-              child: GradientText(
-                'Sign Up',
-                style: const TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.w600,
-                ),
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 173, 133, 255),
-                    // Color(0xffC5A9FF),
-                    Color(0xffEDE4FF),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
-          ],
-        ),
         SizedBox(height: 80),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              "/nudgerSettings",
-            );
-          },
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(
-                  Color.fromRGBO(217, 217, 217, 0.16))),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Nudger',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  )),
-              SizedBox(width: 200, height: 50),
-              Icon(
-                Icons.keyboard_arrow_right,
-                size: 24.0,
-              ),
-            ],
-          ),
+        SettingsButton(
+          buttonWidth: 205,
+          page: "nudgerSettings",
+          pageName: "Nudger",
         ),
         SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              "/labelsSettings",
-            );
-          },
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(
-                  Color.fromRGBO(217, 217, 217, 0.16))),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Labels',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  )),
-              SizedBox(width: 210, height: 50),
-              Icon(
-                Icons.keyboard_arrow_right,
-                size: 24.0,
-              ),
-            ],
-          ),
+        SettingsButton(
+          buttonWidth: 210,
+          page: "labelsSettings",
+          pageName: "Labels",
         ),
+        SizedBox(height: 20),
+        signedUp
+            ? Column(
+                children: [
+                  SettingsButton(
+                    buttonWidth: 205,
+                    page: "friendsSettings",
+                    pageName: "Friends",
+                  ),
+                  SizedBox(height: 20),
+                  SettingsButton(
+                    buttonWidth: 185,
+                    page: "accountSettings",
+                    pageName: "Account",
+                  ),
+                ],
+              )
+            : Container()
       ],
     );
-    // return ListView.builder(itemBuilder: (BuildContext context, int index) {
-    //   return ListTile(
-    //     title: Text("Setting $index"),
-    //     onTap: () {
-    //       debugPrint("setting $index tapped");
-    //     },
-    //   );
-    // });
-    return Container();
   }
 }

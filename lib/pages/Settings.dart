@@ -10,66 +10,66 @@ import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-class SettingsNavigator extends StatefulWidget {
-  SettingsNavigator({Key? key}) : super(key: key);
+// class SettingsNavigator extends StatefulWidget {
+//   SettingsNavigator({Key? key}) : super(key: key);
 
-  @override
-  State<SettingsNavigator> createState() => _SettingsNavigatorState();
-}
+//   @override
+//   State<SettingsNavigator> createState() => _SettingsNavigatorState();
+// }
 
-class _SettingsNavigatorState extends State<SettingsNavigator> {
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      key: settingsNavigatorKey,
-      onGenerateRoute: (RouteSettings settings) {
-        if (settings.name == "/nudgerSettings") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return NudgerSettings();
-            },
-          );
-        } else if (settings.name == "/labelsSettings") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return LabelsSettingsPage();
-            },
-          );
-        } else if (settings.name == "/friendsSettings") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return FriendsSettingsPage();
-            },
-          );
-        } else if (settings.name == "/accountSettings") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return AccountSettingsPage();
-            },
-          );
-        } else if (settings.name == "/login") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return Auth(type: "login");
-            },
-          );
-        } else if (settings.name == "/signup") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return Auth(type: "signup");
-            },
-          );
-        } else {
-          return MaterialPageRoute(
-            builder: (context) {
-              return SettingsPage();
-            },
-          );
-        }
-      },
-    );
-  }
-}
+// class _SettingsNavigatorState extends State<SettingsNavigator> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Navigator(
+//       key: settingsNavigatorKey,
+//       onGenerateRoute: (RouteSettings settings) {
+//         if (settings.name == "/nudgerSettings") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return NudgerSettings();
+//             },
+//           );
+//         } else if (settings.name == "/labelsSettings") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return LabelsSettingsPage();
+//             },
+//           );
+//         } else if (settings.name == "/friendsSettings") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return FriendsSettingsPage();
+//             },
+//           );
+//         } else if (settings.name == "/accountSettings") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return AccountSettingsPage();
+//             },
+//           );
+//         } else if (settings.name == "/login") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return Auth(type: "login");
+//             },
+//           );
+//         } else if (settings.name == "/signup") {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return Auth(type: "signup");
+//             },
+//           );
+//         } else {
+//           return MaterialPageRoute(
+//             builder: (context) {
+//               return SettingsPage();
+//             },
+//           );
+//         }
+//       },
+//     );
+//   }
+// }
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -151,7 +151,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.pushNamed(context, "/login");
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Auth(
+                                    type: "login"); //this is giving an error
+                              },
+                            ),
+                          );
                         },
                         child: GradientText(
                           'Log In',

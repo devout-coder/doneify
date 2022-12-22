@@ -38,6 +38,7 @@ class _BottomButtonsState extends State<BottomButtons> {
             children: [
               FloatingActionButton(
                 tooltip: "Choose label",
+                heroTag: getRandInt(10),
                 onPressed: () {
                   showGeneralDialog(
                     //! select filter dialog box
@@ -81,6 +82,7 @@ class _BottomButtonsState extends State<BottomButtons> {
                 transitionDuration: const Duration(milliseconds: 500),
                 closedBuilder: (context, action) {
                   return FloatingActionButton(
+                    heroTag: getRandInt(8),
                     tooltip: "Add New Task",
                     onPressed: () {
                       action.call();

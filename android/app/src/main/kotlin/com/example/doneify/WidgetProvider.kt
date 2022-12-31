@@ -119,15 +119,6 @@ class WidgetProvider : HomeWidgetProvider() {
                     Log.d("debugging", "update is triggered");
                 }
 
-                todosRemoteView.addItem(
-                    849938,
-                    RemoteViews(context.packageName, R.layout.each_todo).apply {
-                        setTextViewText(R.id.each_todo_container_text, "random shit")
-                        setCompoundButtonChecked(
-                            R.id.each_todo_container_checkbox,
-                            false
-                        )
-                    })
                 setRemoteAdapter(
                     R.id.todos_list,
                     todosRemoteView
@@ -148,9 +139,9 @@ class WidgetProvider : HomeWidgetProvider() {
                     // broadcasting TOAST_ACTION.
                     PendingIntent.getBroadcast(
                         context,
-                        0,
+                        widgetId,
                         this,
-                        PendingIntent.FLAG_IMMUTABLE
+                       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE 
                     )
                 }
                 setPendingIntentTemplate(R.id.todos_list, pendingIntentx)

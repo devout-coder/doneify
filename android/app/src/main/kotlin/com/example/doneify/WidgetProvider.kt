@@ -6,9 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.room.Room
@@ -48,45 +47,43 @@ class WidgetProvider : HomeWidgetProvider() {
             "ApplicationListener", Context.MODE_PRIVATE
         )
         appWidgetIds.forEach { widgetId ->
-            val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
-                var timeType: String? = sharedPref.getString("timeType", "none")
-                if (timeType == "none") {
-                    timeType = "Day"
-                    setTextViewText(R.id.timeType, "Day")
-                    val editor: SharedPreferences.Editor = sharedPref.edit()
-                    editor.putString("timeType", "Day")
-                    editor.apply()
-                } else {
-                    setTextViewText(R.id.timeType, timeType)
-                }
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    Intent(context, TimeTypeDialog::class.java),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                setOnClickPendingIntent(R.id.timeType, pendingIntent)
+            CoroutineScope(Dispatchers.Main.immediate).launch {
 
-                setOnClickPendingIntent(
-                    R.id.add_button, HomeWidgetLaunchIntent.getActivity(
+                val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
+                    var timeType: String? = sharedPref.getString("timeType", "none")
+                    if (timeType == "none") {
+                        timeType = "Day"
+                        setTextViewText(R.id.timeType, "Day")
+                        val editor: SharedPreferences.Editor = sharedPref.edit()
+                        editor.putString("timeType", "Day")
+                        editor.apply()
+                    } else {
+                        setTextViewText(R.id.timeType, timeType)
+                    }
+                    val pendingIntent = PendingIntent.getActivity(
                         context,
-                        MainActivity::class.java,
-                        Uri.parse("http://add_todo/$timeType")
+                        0,
+                        Intent(context, TimeTypeDialog::class.java),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
-                )
+                    setOnClickPendingIntent(R.id.timeType, pendingIntent)
 
-                val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
+                    setOnClickPendingIntent(
+                        R.id.add_button, HomeWidgetLaunchIntent.getActivity(
+                            context,
+                            MainActivity::class.java,
+                            Uri.parse("http://add_todo/$timeType")
+                        )
+                    )
 
-                scope.launch {
+                    val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
+//                    val db: TodosRoomDB = TodosRoomDB.getDatabase(context)
                     val db = Room.databaseBuilder(
                         context,
                         AppDatabase::class.java, "db"
                     ).build()
                     val todosDAO = db.TodoDAO()
-                    val todosAsync = async {
-                        todosDAO.getByTimeType(timeTypeHash[timeType]!!)
-                    }
-                    val todos = todosAsync.await()
+                    val todos = todosDAO.getByTimeType(timeTypeHash[timeType]!!)
 
                     Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
                     for (todo in todos) {
@@ -117,37 +114,36 @@ class WidgetProvider : HomeWidgetProvider() {
                         todosRemoteView.addItem(todo.id.toString().toInt().toLong(), view)
                     }
                     Log.d("debugging", "update is triggered");
-                }
 
-                setRemoteAdapter(
-                    R.id.todos_list,
-                    todosRemoteView
-                        .build()
-                )
-
-                val editTodoIntent = HomeWidgetLaunchIntent.getActivity(
-                    context,
-                    MainActivity::class.java,
-                    Uri.parse("http://edit_todo/$timeType")
-                )
-                val pendingIntentx: PendingIntent = Intent(
-                    context,
-                    WidgetProvider::class.java
-                ).run {
-                    // Set the action for the intent.
-                    // When the user touches a particular view, it will have the effect of
-                    // broadcasting TOAST_ACTION.
-                    PendingIntent.getBroadcast(
-                        context,
-                        widgetId,
-                        this,
-                       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE 
+                    setRemoteAdapter(
+                        R.id.todos_list,
+                        todosRemoteView
+                            .build()
                     )
-                }
-                setPendingIntentTemplate(R.id.todos_list, pendingIntentx)
-            }
 
-            appWidgetManager.updateAppWidget(widgetId, views)
+                    val editTodoIntent = HomeWidgetLaunchIntent.getActivity(
+                        context,
+                        MainActivity::class.java,
+                        Uri.parse("http://edit_todo/$timeType")
+                    )
+                    val pendingIntentx: PendingIntent = Intent(
+                        context,
+                        WidgetProvider::class.java
+                    ).run {
+                        // Set the action for the intent.
+                        // When the user touches a particular view, it will have the effect of
+                        // broadcasting TOAST_ACTION.
+                        PendingIntent.getBroadcast(
+                            context,
+                            widgetId,
+                            this,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                        )
+                    }
+                    setPendingIntentTemplate(R.id.todos_list, pendingIntentx)
+                }
+                appWidgetManager.updateAppWidget(widgetId, views)
+            }
         }
 
     }

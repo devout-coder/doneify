@@ -11,23 +11,24 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
-import android.os.AsyncTask
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.room.Room
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
-import kotlin.collections.HashMap
 
 
 var methodChannel: MethodChannel? = null
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "alarm_method_channel"
+    lateinit var newFlutterEngine: FlutterEngine
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -50,6 +51,18 @@ class MainActivity : FlutterActivity() {
         mChannel.setSound(sound, attributes)
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(mChannel)
+
+
+        newFlutterEngine = FlutterEngine(this);
+        flutterEngine.navigationChannel.setInitialRoute("inputModal");
+        // Start executing Dart code to pre-warm the FlutterEngine.
+        newFlutterEngine.getDartExecutor().executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        );
+        // Cache the FlutterEngine to be used by FlutterActivity.
+        FlutterEngineCache
+            .getInstance()
+            .put("doneify", newFlutterEngine);
 
 
         methodChannel = MethodChannel(

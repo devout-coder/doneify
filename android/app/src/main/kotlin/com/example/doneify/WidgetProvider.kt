@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
@@ -15,6 +14,7 @@ import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import kotlinx.coroutines.*
+import io.flutter.embedding.android.FlutterActivity;
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -24,9 +24,6 @@ const val EXTRA_ITEM = "com.example.android.listview.EXTRA_ITEM"
 
 
 class WidgetProvider : HomeWidgetProvider() {
-
-    private var job: Job = Job()
-    private val scope = CoroutineScope(job + Dispatchers.Main)
 
     override fun onUpdate(
         context: Context,
@@ -68,13 +65,26 @@ class WidgetProvider : HomeWidgetProvider() {
                     )
                     setOnClickPendingIntent(R.id.timeType, pendingIntent)
 
-                    setOnClickPendingIntent(
-                        R.id.add_button, HomeWidgetLaunchIntent.getActivity(
-                            context,
-                            MainActivity::class.java,
-                            Uri.parse("http://add_todo/$timeType")
-                        )
+//                    setOnClickPendingIntent(
+//                        R.id.add_button, HomeWidgetLaunchIntent.getActivity(
+//                            context,
+//                            MainActivity::class.java,
+//                            Uri.parse("http://add_todo/$timeType")
+//                        )
+//                    )
+                    val flutterActivityIntent = PendingIntent.getActivity(
+                        context,
+                        0,
+//                        FlutterActivity
+//                            .withNewEngine()
+//                            .initialRoute("/inputModal")
+//                            .build(context),
+                        FlutterActivity
+                            .withCachedEngine("doneify")
+                            .build(context),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
+                    setOnClickPendingIntent(R.id.add_button, flutterActivityIntent)
 
                     val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
 //                    val db: TodosRoomDB = TodosRoomDB.getDatabase(context)

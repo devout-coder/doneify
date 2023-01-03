@@ -47,6 +47,53 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // final Future _init = GetItRegister().initializeGlobalStates();
+
+  createTodo(Todo todo) async {
+    TodoDAO todosdb = GetIt.I.get();
+    await todosdb.createTodo(todo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        fontFamily: "EuclidCircular",
+      ),
+      // initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const MainContainer(),
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/inputModal': (context) => InputModal(
+              goBack: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    key: UniqueKey(),
+                    // launchFromWidgetTimeType: launchFromWidgetTimeType,
+                    // launchFromWidgetCommand: launchFromWidgetCommand,
+                  ),
+                ),
+              ),
+              timeType: "day", //!hardcoded value
+              time: formattedDate(DateTime.now()), //!hardcoded value
+              createTodo: createTodo,
+            ),
+      },
+    );
+  }
+}
+
+class MainContainer extends StatefulWidget {
+  const MainContainer({super.key});
+
+  @override
+  State<MainContainer> createState() => _MainContainerState();
+}
+
+class _MainContainerState extends State<MainContainer> {
   String? launchFromWidgetTimeType;
   String? launchFromWidgetCommand;
 
@@ -130,71 +177,64 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        fontFamily: "EuclidCircular",
-      ),
-      home: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xff404049),
-              Color(0xff09090E),
-            ],
-          ),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xff404049),
+            Color(0xff09090E),
+          ],
         ),
-        child: Scaffold(
-          body: Center(
-              child: FutureBuilder(
-                  future: registerDB(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (launchFromWidgetCommand == "add_todo") {
-                        return Navigator(
-                          onGenerateRoute: (RouteSettings settings) {
-                            return MaterialPageRoute(builder: (context) {
-                              return InputModal(
-                                goBack: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HomePage(
-                                      key: UniqueKey(),
-                                      launchFromWidgetTimeType:
-                                          launchFromWidgetTimeType,
-                                      launchFromWidgetCommand:
-                                          launchFromWidgetCommand,
-                                    ),
+      ),
+      child: Scaffold(
+        body: Center(
+            child: FutureBuilder(
+                future: registerDB(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (launchFromWidgetCommand == "add_todo") {
+                      return Navigator(
+                        onGenerateRoute: (RouteSettings settings) {
+                          return MaterialPageRoute(builder: (context) {
+                            return InputModal(
+                              goBack: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomePage(
+                                    key: UniqueKey(),
+                                    // launchFromWidgetTimeType:
+                                    //     launchFromWidgetTimeType,
+                                    // launchFromWidgetCommand:
+                                    //     launchFromWidgetCommand,
                                   ),
                                 ),
-                                timeType: "day", //!hardcoded value
-                                time: formattedDate(
-                                    DateTime.now()), //!hardcoded value
-                                createTodo: createTodo,
-                              );
-                            });
-                          },
-                        );
-                      } else {
-                        return HomePage(
-                          key: UniqueKey(),
-                          launchFromWidgetTimeType: launchFromWidgetTimeType,
-                          launchFromWidgetCommand: launchFromWidgetCommand,
-                        );
-                      }
+                              ),
+                              timeType: "day", //!hardcoded value
+                              time: formattedDate(
+                                  DateTime.now()), //!hardcoded value
+                              createTodo: createTodo,
+                            );
+                          });
+                        },
+                      );
                     } else {
-                      return Container(
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                      return HomePage(
+                        key: UniqueKey(),
+                        // launchFromWidgetTimeType: launchFromWidgetTimeType,
+                        // launchFromWidgetCommand: launchFromWidgetCommand,
                       );
                     }
-                  })),
-          backgroundColor: Colors.transparent,
-        ),
+                  } else {
+                    return Container(
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                })),
+        backgroundColor: Colors.transparent,
       ),
     );
   }

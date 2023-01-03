@@ -17,12 +17,12 @@ import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 
 class HomePage extends StatefulWidget {
-  String? launchFromWidgetTimeType;
-  String? launchFromWidgetCommand;
+  // String? launchFromWidgetTimeType;
+  // String? launchFromWidgetCommand;
   HomePage({
     Key? key,
-    required this.launchFromWidgetTimeType,
-    required this.launchFromWidgetCommand,
+    // required this.launchFromWidgetTimeType,
+    // required this.launchFromWidgetCommand,
   }) : super(key: key);
 
   @override
@@ -42,12 +42,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    debugPrint("In Home ${widget.launchFromWidgetTimeType}");
-    if (widget.launchFromWidgetTimeType == null) {
-      currentPage = 5;
-    } else {
-      currentPage = timeTypeMap[widget.launchFromWidgetTimeType]!;
-    }
+    // debugPrint("In Home ${widget.launchFromWidgetTimeType}");
+    // if (widget.launchFromWidgetTimeType == null) {
+    //   currentPage = 5;
+    // } else {
+    //   currentPage = timeTypeMap[widget.launchFromWidgetTimeType]!;
+    // }
     // currentPage = timeType != null ? timeTypeMap[timeType]! : 0;
   }
 

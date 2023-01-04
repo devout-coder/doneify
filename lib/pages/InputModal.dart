@@ -11,6 +11,7 @@ import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
+import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -25,9 +26,10 @@ import 'package:intl/intl.dart';
 
 class InputModal extends StatefulWidget {
   final goBack;
-  Todo? todo;
-  final createTodo;
-  final editTodo;
+  // Todo? todo;
+  int? todoId;
+  final onCreate;
+  final onEdit;
   final onDelete;
   String time;
   String timeType;
@@ -36,9 +38,10 @@ class InputModal extends StatefulWidget {
     Key? key,
     // this.action,
     this.goBack,
-    this.todo,
-    this.createTodo,
-    this.editTodo,
+    // this.todo,
+    this.todoId,
+    this.onCreate,
+    this.onEdit,
     this.onDelete,
     required this.time,
     required this.timeType,
@@ -91,6 +94,8 @@ class _InputModalState extends State<InputModal> {
   List<Alarm> alarms = [];
   List<Alarm> createdAlarms = [];
   List<Alarm> deletedAlarms = [];
+
+  Todo? todo;
 
   LabelDAO labelsDB = GetIt.I.get();
   AlarmDAO alarmsDB = GetIt.I.get();
@@ -356,11 +361,11 @@ class _InputModalState extends State<InputModal> {
   }
 
   void saveAlarms() async {
-    if (widget.todo != null) {
+    if (todo != null) {
       //time modified
-      if (taskName.text != widget.todo!.taskName ||
-          taskDesc.text != widget.todo!.taskDesc ||
-          labelsDB.labels[selectedLabel].name != widget.todo!.labelName ||
+      if (taskName.text != todo!.taskName ||
+          taskDesc.text != todo!.taskDesc ||
+          labelsDB.labels[selectedLabel].name != todo!.labelName ||
           figureOutTime(widget.timeType, selectedTime, selectedWeekDates) !=
               widget.time) {
         List alarmIds = await platform.invokeMethod('getActiveIds');
@@ -390,7 +395,7 @@ class _InputModalState extends State<InputModal> {
                   taskName.text,
                   taskDesc.text,
                   labelsDB.labels[selectedLabel].name,
-                  widget.todo!.finished,
+                  todo!.finished,
                 );
               }
             }
@@ -407,7 +412,7 @@ class _InputModalState extends State<InputModal> {
           taskName.text,
           taskDesc.text,
           labelsDB.labels[selectedLabel].name,
-          widget.todo!.finished,
+          todo!.finished,
         );
       });
     } else {
@@ -445,7 +450,7 @@ class _InputModalState extends State<InputModal> {
     // debugPrint(figureOutTime());
     Todo newTodo;
     if (taskName.text != "") {
-      if (widget.todo != null) {
+      if (todo != null) {
         newTodo = Todo(
           taskName.text,
           taskDesc.text,
@@ -454,10 +459,10 @@ class _InputModalState extends State<InputModal> {
           DateTime.now().millisecondsSinceEpoch,
           figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
           widget.timeType,
-          widget.todo!.index,
+          todo!.index,
           taskId!,
         );
-        await widget.editTodo(newTodo);
+        await widget.onEdit(newTodo);
       } else {
         newTodo = Todo(
           taskName.text,
@@ -467,10 +472,10 @@ class _InputModalState extends State<InputModal> {
           DateTime.now().millisecondsSinceEpoch,
           figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
           widget.timeType,
-          0, //this is going to be changed in createTodo method
+          0, //this is going to be changed in onCreate method
           taskId!,
         );
-        await widget.createTodo(newTodo);
+        await widget.onCreate(newTodo);
         debugPrint("this is run after todo is created");
       }
       saveAlarms();
@@ -512,11 +517,14 @@ class _InputModalState extends State<InputModal> {
   }
 
   void setValues() async {
-    taskId = widget.todo != null ? widget.todo!.id : getRandInt(18);
-    taskName.text = widget.todo != null ? widget.todo!.taskName : '';
-    taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
-    selectedLabel =
-        widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
+    TodoDAO todosdb = GetIt.I.get();
+    if (widget.todoId != null) {
+      todo = await todosdb.getTodo(widget.todoId!);
+    }
+    taskId = todo != null ? todo!.id : getRandInt(18);
+    taskName.text = todo != null ? todo!.taskName : '';
+    taskDesc.text = todo != null ? todo!.taskDesc : '';
+    selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;
     alarms = await alarmsDB.getAlarms(taskId!);
     debugPrint(alarms.toString());
     strToTime();
@@ -717,7 +725,7 @@ class _InputModalState extends State<InputModal> {
                       size: 30,
                     ),
                   ),
-                  widget.todo != null
+                  todo != null
                       ? IconButton(
                           onPressed: widget.onDelete,
                           tooltip: "Delete this task",

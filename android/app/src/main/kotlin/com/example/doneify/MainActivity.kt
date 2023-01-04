@@ -24,11 +24,12 @@ import io.flutter.plugin.common.MethodChannel
 import java.util.*
 
 
-var methodChannel: MethodChannel? = null
+val CHANNEL = "alarm_method_channel"
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "alarm_method_channel"
-    lateinit var newFlutterEngine: FlutterEngine
+    var methodChannel: MethodChannel? = null
+
+    //    lateinit var newFlutterEngine: FlutterEngine
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -53,16 +54,16 @@ class MainActivity : FlutterActivity() {
         notificationManager.createNotificationChannel(mChannel)
 
 
-        newFlutterEngine = FlutterEngine(this);
-        flutterEngine.navigationChannel.setInitialRoute("inputModal");
-        // Start executing Dart code to pre-warm the FlutterEngine.
-        newFlutterEngine.getDartExecutor().executeDartEntrypoint(
-            DartExecutor.DartEntrypoint.createDefault()
-        );
-        // Cache the FlutterEngine to be used by FlutterActivity.
-        FlutterEngineCache
-            .getInstance()
-            .put("doneify", newFlutterEngine);
+//        newFlutterEngine = FlutterEngine(this);
+//        newFlutterEngine.navigationChannel.setInitialRoute("inputModal");
+//        // Start executing Dart code to pre-warm the FlutterEngine.
+//        newFlutterEngine.getDartExecutor().executeDartEntrypoint(
+//            DartExecutor.DartEntrypoint.createDefault()
+//        );
+//        // Cache the FlutterEngine to be used by FlutterActivity.
+//        FlutterEngineCache
+//            .getInstance()
+//            .put("doneify", newFlutterEngine);
 
 
         methodChannel = MethodChannel(

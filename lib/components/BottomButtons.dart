@@ -96,7 +96,7 @@ class _BottomButtonsState extends State<BottomButtons> {
                 openBuilder: (context, action) {
                   return InputModal(
                     goBack: () => action.call(),
-                    createTodo: widget.createTodo,
+                    onCreate: widget.createTodo,
                     time: widget.time, //time
                     timeType: widget.timeType,
                   );

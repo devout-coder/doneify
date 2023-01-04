@@ -80,7 +80,8 @@ class WidgetProvider : HomeWidgetProvider() {
 //                            .initialRoute("/inputModal")
 //                            .build(context),
                         FlutterActivity
-                            .withCachedEngine("doneify")
+                            .withNewEngine()
+                            .initialRoute("/createInputModal?$timeType")
                             .build(context),
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
@@ -112,7 +113,7 @@ class WidgetProvider : HomeWidgetProvider() {
                             }
                             val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
                                 context,
-                                Uri.parse("myAppWidget://todo_checked/${todo.id}")
+                                Uri.parse("myAppWidget://todo_checked/${todo.id}")//use method channel here please
                             )
                             setOnCheckedChangeResponse(
                                 R.id.each_todo_container_checkbox,

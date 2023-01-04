@@ -18,7 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 
-class AlarmInterface: Activity() {
+class AlarmInterface : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_interface)
@@ -41,26 +41,41 @@ class AlarmInterface: Activity() {
         taskDescView.text = taskDesc
         labelView.text = label
 
-        val notificationManager: NotificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        snoozeButton.setOnClickListener{
+        val notificationManager: NotificationManager =
+            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        snoozeButton.setOnClickListener {
             notificationManager.cancel(0)
             val alarmManager =
-                    this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
             val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
                 putExtra("alarmId", alarmId);
             }
             val pendingAlarmIntent =
-                    PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-            alarmManager!!.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10 * 1000, pendingAlarmIntent)
+                PendingIntent.getBroadcast(
+                    this,
+                    0,
+                    alarmIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            alarmManager!!.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + 10 * 1000,
+                pendingAlarmIntent
+            )
             notificationManager.cancel(0)
             finish()
         }
-        dismissButton.setOnClickListener{
+        dismissButton.setOnClickListener {
             notificationManager.cancel(0)
             finish()
         }
-        checkOffButton.setOnClickListener{
-            methodChannel!!.invokeMethod("task_done", "$taskId")
+        checkOffButton.setOnClickListener {
+            val flutterEngine = FlutterEngine(this);
+            val methodChannel = MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                CHANNEL
+            )
+            methodChannel.invokeMethod("task_done", "$taskId")
             notificationManager.cancel(0)
             finish()
         }

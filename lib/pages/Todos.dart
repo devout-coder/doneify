@@ -4,7 +4,6 @@ import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/components/FiltersDialog.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/material.dart';

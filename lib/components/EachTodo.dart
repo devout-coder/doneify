@@ -214,12 +214,12 @@ class _EachTodoState extends State<EachTodo> {
             openBuilder: (context, action) {
               return InputModal(
                 goBack: () => action.call(),
-                editTodo: widget.editTodo,
+                onEdit: widget.editTodo,
                 onDelete: () {
                   widget.deleteTodo(widget.todo.id);
                   action.call();
                 },
-                todo: widget.todo,
+                todoId: widget.todo.id,
                 time: widget.todo.time,
                 timeType: widget.todo.timeType,
               );

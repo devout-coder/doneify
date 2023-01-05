@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:ffi';
+import 'dart:io';
 import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
@@ -79,8 +80,17 @@ class _MyAppState extends State<MyApp> {
       ),
       onGenerateRoute: (RouteSettings settings) {
         String? entirePath = settings.name;
-        MainContainer(entirePath: entirePath ?? "/");
+        debugPrint("entire path $entirePath");
+        return MaterialPageRoute(
+          builder: (context) => MainContainer(entirePath: entirePath ?? "/"),
+        );
       },
+      // routes: {
+      //   '/': (context) => MainContainer(entirePath: "/"),
+      //   // When navigating to the "/second" route, build the SecondScreen widget.
+      //   '/createInputModal?day': (context) =>
+      //       MainContainer(entirePath: "/createInputModal?day"),
+      // },
     );
   }
 }
@@ -129,45 +139,74 @@ class _MainContainerState extends State<MainContainer> {
                 future: registerDB(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    // return HomePage(
-                    //   key: UniqueKey(),
-                    // );
+                    debugPrint("entire path ${widget.entirePath}");
                     String path = widget.entirePath.split("?")[0];
+                    int? todoId;
+                    String? time;
                     String? timeType;
-                    String? todoId;
+
                     TodoDAO todosdb = GetIt.I.get();
-                    if (path == "createInputModal") {
+                    if (path == "/createInputModal") {
                       timeType = widget.entirePath.split("?")[1];
-                    } else if (path == "editInputModal") {
-                      todoId = widget.entirePath.split("?")[1];
+                    } else if (path == "/editInputModal") {
+                      todoId = int.parse(widget.entirePath.split("?")[1]);
+                      time = widget.entirePath.split("?")[2];
+                      timeType = widget.entirePath.split("?")[3];
                     }
                     switch (path) {
-                      case 'createInputModal':
+                      case '/createInputModal':
+                        return WillPopScope(
+                          onWillPop: () async {
+                            debugPrint("going back");
+                            SystemChannels.platform
+                                .invokeMethod<void>('SystemNavigator.pop');
+                            return true;
+                          },
+                          child: InputModal(
+                            // goBack: () => Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => HomePage(
+                            //       key: UniqueKey(),
+                            //     ),
+                            //   ),
+                            // ),
+                            goBack: () {
+                              SystemChannels.platform.invokeMethod<void>(
+                                  'SystemNavigator.pop'); // debugPrint("entire path $entirePath");
+                            },
+                            timeType: timeType!,
+                            time: formattedTime(timeType, DateTime.now()),
+                            onCreate: (Todo todo) async {
+                              await todosdb.createTodo(todo);
+                            },
+                          ),
+                        );
+                      case "/editInputModal":
+                        debugPrint(
+                            "todoId $todoId time $time timeType $timeType");
                         return InputModal(
-                          goBack: () => SystemNavigator.pop(),
+                          goBack: () => SystemChannels.platform
+                              .invokeMethod('SystemNavigator.pop'),
+                          todoId: todoId!,
                           timeType: timeType!,
-                          time: formattedTime(timeType, DateTime.now()),
-                          onCreate: (Todo todo) async {
-                            await todosdb.createTodo(todo);
+                          time: time!,
+                          onEdit: (Todo todo) {
+                            todosdb.updateTodo(todo);
+                          },
+                          onDelete: () {
+                            todosdb.deleteTodo(todoId!);
+                            SystemChannels.platform
+                                .invokeMethod('SystemNavigator.pop');
                           },
                         );
-                      case "editInputModal":
-                        return InputModal(
-                          goBack: () => SystemNavigator.pop(),
-                          todoId: int.parse(todoId!),
-                          timeType: timeType!,
-                          time: formattedTime(timeType, DateTime.now()),
-                          onEdit: (Todo todo) async {
-                            await todosdb.updateTodo(todo);
-                          },
-                          onDelete: (int todoId) async {
-                            await todosdb.deleteTodo(todoId);
-                          },
-                        );
-                      default:
+                      case "/":
                         return HomePage(
-                          key: UniqueKey(),
-                        );
+                            // key: UniqueKey()
+                            );
+                      default:
+                        debugPrint("default contianer");
+                        return Container();
                     }
                   } else {
                     return Container(

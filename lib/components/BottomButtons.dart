@@ -37,6 +37,7 @@ class _BottomButtonsState extends State<BottomButtons> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               FloatingActionButton(
+                heroTag: DateTime.now(),
                 tooltip: "Choose label",
                 onPressed: () {
                   showGeneralDialog(
@@ -81,6 +82,7 @@ class _BottomButtonsState extends State<BottomButtons> {
                 transitionDuration: const Duration(milliseconds: 500),
                 closedBuilder: (context, action) {
                   return FloatingActionButton(
+                    heroTag: DateTime.now(),
                     tooltip: "Add New Task",
                     onPressed: () {
                       action.call();

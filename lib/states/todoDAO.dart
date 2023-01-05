@@ -26,11 +26,12 @@ class TodoDAO {
     );
     final allTodos = await getAllTodos(finder);
     todo.index = allTodos.length;
+    debugPrint("creating todo for system");
+    debugPrint("the id sent is ${todo.id}");
     await _store.record(todo.id).put(_db, todo.toMap());
-
     try {
       platform.invokeMethod("createTodo", {
-        "id": todo.id,
+        "id": todo.id.toString(),
         "taskName": todo.taskName,
         "taskDesc": todo.taskDesc,
         "finished": todo.finished,
@@ -90,7 +91,7 @@ class TodoDAO {
     await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
     try {
       platform.invokeMethod("updateTodo", {
-        "id": todo.id,
+        "id": todo.id.toString(),
         "taskName": todo.taskName,
         "taskDesc": todo.taskDesc,
         "finished": todo.finished,
@@ -134,7 +135,7 @@ class TodoDAO {
 
     try {
       platform.invokeMethod("deleteTodo", {
-        "id": todo.id,
+        "id": todo.id.toString(),
       });
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while deleting todo: $e");

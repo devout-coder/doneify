@@ -13,8 +13,13 @@ import androidx.room.Room
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
-import kotlinx.coroutines.*
-import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -22,6 +27,28 @@ import io.flutter.embedding.android.FlutterActivity;
 
 const val EXTRA_ITEM = "com.example.android.listview.EXTRA_ITEM"
 
+class CustomFlutterActivity : FlutterActivity() {
+
+    companion object {
+        var methodChannelInvoker: (MethodCall, MethodChannel.Result) -> Unit = { _, _ -> }
+
+        fun withCachedEngine(cachedEngineId: String): CachedEngineIntentBuilder {
+            return CachedEngineIntentBuilder(CustomFlutterActivity::class.java, cachedEngineId)
+        }
+
+        fun withNewEngine(): NewEngineIntentBuilder {
+            return NewEngineIntentBuilder(CustomFlutterActivity::class.java)
+        }
+    }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+            .setMethodCallHandler { call, result ->
+                methodChannelInvoker(call, result)
+            }
+    }
+}
 
 class WidgetProvider : HomeWidgetProvider() {
 
@@ -72,17 +99,21 @@ class WidgetProvider : HomeWidgetProvider() {
 //                            Uri.parse("http://add_todo/$timeType")
 //                        )
 //                    )
+
+                    CustomFlutterActivity.methodChannelInvoker = { call, result ->
+                        handleMethodCalls(context, call, result)
+                    }
                     val flutterActivityIntent = PendingIntent.getActivity(
                         context,
                         0,
+                        CustomFlutterActivity
+                            .withNewEngine()
+                            .initialRoute("/createInputModal?${timeTypeHash[timeType]}")
+                            .build(context),
 //                        FlutterActivity
 //                            .withNewEngine()
-//                            .initialRoute("/inputModal")
+//                            .initialRoute("/createInputModal?${timeTypeHash[timeType!!]}")
 //                            .build(context),
-                        FlutterActivity
-                            .withNewEngine()
-                            .initialRoute("/createInputModal?$timeType")
-                            .build(context),
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                     setOnClickPendingIntent(R.id.add_button, flutterActivityIntent)
@@ -106,10 +137,13 @@ class WidgetProvider : HomeWidgetProvider() {
                             )
                             Log.d("debugging", "task name is ${todo.taskName}")
                             val fillInIntent = Intent().apply {
-                                Bundle().also { extras ->
-                                    extras.putInt(EXTRA_ITEM, todo.id)
-                                    putExtras(extras)
+                                val extras = Bundle().apply {
+                                    putString("todoId", todo.id)
+                                    putString("time", todo.time);
+                                    putString("timeType", todo.timeType)
                                 }
+                                putExtras(extras);
+                                action = "editTodo"
                             }
                             val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
                                 context,
@@ -122,7 +156,7 @@ class WidgetProvider : HomeWidgetProvider() {
                             Log.d("debugging", "id received is ${todo.id}")
                             setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
                         }
-                        todosRemoteView.addItem(todo.id.toString().toInt().toLong(), view)
+                        todosRemoteView.addItem(todo.id.toLong(), view)
                     }
                     Log.d("debugging", "update is triggered");
 
@@ -160,8 +194,25 @@ class WidgetProvider : HomeWidgetProvider() {
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val viewIndex: Int = intent!!.getIntExtra(EXTRA_ITEM, 0)
-        Log.d("debugging", "an item is clicked $viewIndex")
+        if (intent!!.action == "editTodo") {
+            val todoId: String? = intent.getStringExtra("todoId")
+            val time: String? = intent.getStringExtra("time")
+            val timeType: String? = intent.getStringExtra("timeType")
+            Log.d("debugging", "an item is clicked $todoId")
+            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+                handleMethodCalls(context!!, call, result)
+            }
+
+            PendingIntent.getActivity(
+                context,
+                0,
+                CustomFlutterActivity
+                    .withNewEngine()
+                    .initialRoute("/editInputModal?$todoId?$time?$timeType")
+                    .build(context!!),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            ).send()
+        }
 //        if(context!=null){
 //            Log.d("debugging", "pending intent must be executed")
 //            HomeWidgetLaunchIntent.getActivity(

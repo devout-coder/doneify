@@ -4,21 +4,21 @@ import androidx.room.*
 
 @Entity
 data class ActiveAlarm(
-        @ColumnInfo(name = "alarmId") val alarmId: String,
-        @ColumnInfo(name = "time") val time: String?,
-        @ColumnInfo(name = "repeatStatus") val repeatStatus: String?,
-        @ColumnInfo(name = "repeatEnd") val repeatEnd: String?,
-        @ColumnInfo(name = "taskId") val taskId: String?,
-        @ColumnInfo(name = "taskName") val taskName: String?,
-        @ColumnInfo(name = "taskDesc") val taskDesc: String?,
-        @ColumnInfo(name = "label") val label: String?,
-        @ColumnInfo(name = "finished") val finished: Boolean?,
-        @PrimaryKey(autoGenerate = true) val id: Int? = null,
+    @ColumnInfo(name = "alarmId") val alarmId: String,
+    @ColumnInfo(name = "time") val time: String?,
+    @ColumnInfo(name = "repeatStatus") val repeatStatus: String?,
+    @ColumnInfo(name = "repeatEnd") val repeatEnd: String?,
+    @ColumnInfo(name = "taskId") val taskId: String?,
+    @ColumnInfo(name = "taskName") val taskName: String?,
+    @ColumnInfo(name = "taskDesc") val taskDesc: String?,
+    @ColumnInfo(name = "label") val label: String?,
+    @ColumnInfo(name = "finished") val finished: Boolean?,
+    @PrimaryKey(autoGenerate = true) val id: Int? = null,
 )
 
 @Entity
 data class Todo(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: String,
 //    @ColumnInfo(name = "id") val taskId: String?,
     @ColumnInfo(name = "taskName") val taskName: String?,
     @ColumnInfo(name = "taskDesc") val taskDesc: String?,
@@ -29,7 +29,7 @@ data class Todo(
     @ColumnInfo(name = "timeType") val timeType: String?,
     @ColumnInfo(name = "index") val index: Int?,
 
-)
+    )
 
 @Dao
 interface ActiveAlarmDao {
@@ -55,7 +55,7 @@ interface TodoDAO {
     suspend fun getByTimeType(timeType: String): List<Todo>
 
     @Query("SELECT * FROM Todo WHERE id LIKE :id")
-    fun getById(id: Int): List<Todo>
+    fun getById(id: String): List<Todo>
 
     @Insert
     fun insert(todo: Todo)

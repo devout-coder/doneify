@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    debugPrint("home rendered");
     // debugPrint("In Home ${widget.launchFromWidgetTimeType}");
     // if (widget.launchFromWidgetTimeType == null) {
     //   currentPage = 5;

@@ -386,7 +386,6 @@ class _InputModalState extends State<InputModal> {
                   (widget.timeType == "week" &&
                       futureDateAndTime(selectedWeekDates[6], 0, 0)) ||
                   (futureDateAndTime(repeatingAlarmEndDate(), 0, 0))) {
-                debugPrint('this is run');
                 await alarmsDB.setAlarm(
                   alarm,
                   amendAlarmTime(alarm.time, alarm.repeatStatus),
@@ -403,7 +402,6 @@ class _InputModalState extends State<InputModal> {
         });
       }
       createdAlarms.forEach((alarm) {
-        debugPrint("this works");
         alarmsDB.setAlarm(
           alarm,
           amendAlarmTime(alarm.time, alarm.repeatStatus),
@@ -476,7 +474,6 @@ class _InputModalState extends State<InputModal> {
           taskId!,
         );
         await widget.onCreate(newTodo);
-        debugPrint("this is run after todo is created");
       }
       saveAlarms();
       Fluttertoast.showToast(
@@ -526,13 +523,11 @@ class _InputModalState extends State<InputModal> {
     taskDesc.text = todo != null ? todo!.taskDesc : '';
     selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;
     alarms = await alarmsDB.getAlarms(taskId!);
-    debugPrint(alarms.toString());
     strToTime();
   }
 
   @override
   void initState() {
-    debugPrint(widget.time);
     setValues();
     super.initState();
   }
@@ -668,7 +663,7 @@ class _InputModalState extends State<InputModal> {
                             updateCreatedAlarms:
                                 (List<Alarm> newCreatedAlarms) {
                               setState(() {
-                                debugPrint(newCreatedAlarms.toString());
+                                // debugPrint(newCreatedAlarms.toString());
                                 createdAlarms = [
                                   ...createdAlarms,
                                   ...newCreatedAlarms
@@ -727,7 +722,9 @@ class _InputModalState extends State<InputModal> {
                   ),
                   todo != null
                       ? IconButton(
-                          onPressed: widget.onDelete,
+                          onPressed: () {
+                            widget.onDelete(widget.todoId);
+                          },
                           tooltip: "Delete this task",
                           icon: const Icon(
                             Icons.delete,

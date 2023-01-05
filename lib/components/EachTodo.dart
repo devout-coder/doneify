@@ -220,8 +220,8 @@ class _EachTodoState extends State<EachTodo> {
                   action.call();
                 },
                 todoId: widget.todo.id,
-                time: widget.todo.time,
-                timeType: widget.todo.timeType,
+                // time: widget.todo.time,
+                // timeType: widget.todo.timeType,
               );
             },
           )

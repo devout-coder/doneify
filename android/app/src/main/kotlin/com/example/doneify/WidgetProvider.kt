@@ -196,8 +196,9 @@ class WidgetProvider : HomeWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent!!.action == "editTodo") {
             val todoId: String? = intent.getStringExtra("todoId")
-            val time: String? = intent.getStringExtra("time")
-            val timeType: String? = intent.getStringExtra("timeType")
+//            val time: String? = intent.getStringExtra("time")
+//            val timeType: String? = intent.getStringExtra("timeType")
+//            val route = "/editInputModal?$todoId?$time?$timeType"
             Log.d("debugging", "an item is clicked $todoId")
             CustomFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
@@ -208,7 +209,7 @@ class WidgetProvider : HomeWidgetProvider() {
                 0,
                 CustomFlutterActivity
                     .withNewEngine()
-                    .initialRoute("/editInputModal?$todoId?$time?$timeType")
+                    .initialRoute("/editInputModal?$todoId")
                     .build(context!!),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             ).send()

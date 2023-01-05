@@ -150,8 +150,8 @@ class _MainContainerState extends State<MainContainer> {
                       timeType = widget.entirePath.split("?")[1];
                     } else if (path == "/editInputModal") {
                       todoId = int.parse(widget.entirePath.split("?")[1]);
-                      time = widget.entirePath.split("?")[2];
-                      timeType = widget.entirePath.split("?")[3];
+                      // time = widget.entirePath.split("?")[2];
+                      // timeType = widget.entirePath.split("?")[3];
                     }
                     switch (path) {
                       case '/createInputModal':
@@ -183,14 +183,14 @@ class _MainContainerState extends State<MainContainer> {
                           ),
                         );
                       case "/editInputModal":
-                        debugPrint(
-                            "todoId $todoId time $time timeType $timeType");
+                        // debugPrint(
+                        //     "todoId $todoId time $time timeType $timeType");
                         return InputModal(
                           goBack: () => SystemChannels.platform
                               .invokeMethod('SystemNavigator.pop'),
                           todoId: todoId!,
-                          timeType: timeType!,
-                          time: time!,
+                          // timeType: timeType!,
+                          // time: time!,
                           onEdit: (Todo todo) {
                             todosdb.updateTodo(todo);
                           },

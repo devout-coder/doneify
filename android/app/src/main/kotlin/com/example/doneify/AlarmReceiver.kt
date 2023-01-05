@@ -133,7 +133,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         Thread {
                             activeAlarmDao.delete(reqAlarm)
                             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-                            Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
+                            // Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
                         }.start()
                     } else {
                         //update time in active alarm
@@ -151,7 +151,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 Thread {
                     activeAlarmDao.delete(reqAlarm)
                     val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-                    Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
+                    // Log.d("debugging", "in alarm receiver, all active alarms: $activeAlarms")
                 }.start()
 
                 val pendingAlarmIntent =

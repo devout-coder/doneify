@@ -61,7 +61,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             )
 
             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-            Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
+            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
 
         setAlarm(
@@ -90,7 +90,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             val activeAlarmsIds: List<String> =
                 activeAlarms.map { activeAlarm -> activeAlarm.alarmId }
             result!!.success(activeAlarmsIds)
-            Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
+            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
     } else if (call.method == "getAllAlarms") {
         Thread {
@@ -102,11 +102,11 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
 //                    val activeAlarmsMap: List<String> = activeAlarms.map { activeAlarm -> Gson().toJson(activeAlarm) }
             result!!.success(Gson().toJson(activeAlarms))
-            Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
+            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
     } else if (call.method == "createTodo" || call.method == "updateTodo") {
         val id: String = call.argument<String>("id")!!
-        Log.d("debugging", "in method call receiver: id = $id")
+        // Log.d("debugging", "in method call receiver: id = $id")
         val taskName: String = call.argument<String>("taskName")!!
         val taskDesc: String = call.argument<String>("taskDesc")!!
         val finished: Boolean = call.argument<Boolean>("finished")!!
@@ -315,7 +315,7 @@ fun deleteAlarm(context: Context, alarmId: String) {
             activeAlarmDao.delete(reqAlarm)
 
             val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-            Log.d("debugging", "in deleteAlarm method kotlin, all active alarms: $activeAlarms")
+            // Log.d("debugging", "in deleteAlarm method kotlin, all active alarms: $activeAlarms")
 
             Log.d(
                 "debugging",

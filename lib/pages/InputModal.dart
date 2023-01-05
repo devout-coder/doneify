@@ -31,8 +31,8 @@ class InputModal extends StatefulWidget {
   final onCreate;
   final onEdit;
   final onDelete;
-  String time;
-  String timeType;
+  String? time;
+  String? timeType;
 
   InputModal({
     Key? key,
@@ -43,8 +43,8 @@ class InputModal extends StatefulWidget {
     this.onCreate,
     this.onEdit,
     this.onDelete,
-    required this.time,
-    required this.timeType,
+    this.time,
+    this.timeType,
   }) : super(key: key);
 
   @override
@@ -103,6 +103,8 @@ class _InputModalState extends State<InputModal> {
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
   int? taskId;
+  String? time;
+  String? timeType;
 
   bool futureTime(int hour, int minute) {
     bool future = false;
@@ -147,7 +149,7 @@ class _InputModalState extends State<InputModal> {
         //time: 09:00
         DateTime nextDayTime =
             DateTime(currentTime.year, currentTime.month, currentTime.day + 1);
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "week":
             if (selectedWeekDates[0].isAfter(currentTime)) {
               prefixDate = DateFormat("d/M/y").format(selectedWeekDates[0]);
@@ -191,7 +193,7 @@ class _InputModalState extends State<InputModal> {
         String hourTime = splitStr[1];
         DateTime nextWeekTime =
             DateTime(currentTime.year, currentTime.month, currentTime.day + 7);
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "month":
             var firstOfMonth =
                 DateTime(selectedTime.year, selectedTime.month, 1);
@@ -278,7 +280,7 @@ class _InputModalState extends State<InputModal> {
         String hourTime = splitStr[1];
         DateTime nextMonthTime = DateTime(
             currentTime.year, currentTime.month + 1, int.parse(dayOfMonth));
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "year":
             var firstDay =
                 DateTime(selectedTime.year, 1, int.parse(dayOfMonth));
@@ -345,7 +347,7 @@ class _InputModalState extends State<InputModal> {
 
   DateTime repeatingAlarmEndDate() {
     //time format: 31/10/2022,  31/10/2022-6/11/2022, Nov 2022, 2022
-    switch (widget.timeType) {
+    switch (timeType!) {
       case "week":
         return selectedWeekDates[6];
       case "month":
@@ -366,8 +368,7 @@ class _InputModalState extends State<InputModal> {
       if (taskName.text != todo!.taskName ||
           taskDesc.text != todo!.taskDesc ||
           labelsDB.labels[selectedLabel].name != todo!.labelName ||
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates) !=
-              widget.time) {
+          figureOutTime(timeType!, selectedTime, selectedWeekDates) != time) {
         List alarmIds = await platform.invokeMethod('getActiveIds');
         alarmIds = alarmIds.map((alarmId) => int.parse(alarmId)).toList();
         debugPrint("alarm ids of active alarms: $alarmIds");
@@ -378,12 +379,11 @@ class _InputModalState extends State<InputModal> {
             alarmsDB.deleteAlarm(alarm.alarmId);
             if (alarmIds.contains(alarm.alarmId) &&
                 (alarm.repeatStatus != "once" ||
-                    figureOutTime(
-                            widget.timeType, selectedTime, selectedWeekDates) ==
-                        widget.time)) {
+                    figureOutTime(timeType!, selectedTime, selectedWeekDates) ==
+                        time)) {
               //the alarm shouldn't have rung and repeat status shouldn't be once or time shouldn't be changed
-              if (widget.timeType == "longTerm" ||
-                  (widget.timeType == "week" &&
+              if (timeType! == "longTerm" ||
+                  (timeType! == "week" &&
                       futureDateAndTime(selectedWeekDates[6], 0, 0)) ||
                   (futureDateAndTime(repeatingAlarmEndDate(), 0, 0))) {
                 await alarmsDB.setAlarm(
@@ -455,8 +455,8 @@ class _InputModalState extends State<InputModal> {
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
-          widget.timeType,
+          figureOutTime(timeType!, selectedTime, selectedWeekDates),
+          timeType!,
           todo!.index,
           taskId!,
         );
@@ -468,8 +468,8 @@ class _InputModalState extends State<InputModal> {
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
-          widget.timeType,
+          figureOutTime(timeType!, selectedTime, selectedWeekDates),
+          timeType!,
           0, //this is going to be changed in onCreate method
           taskId!,
         );
@@ -493,19 +493,19 @@ class _InputModalState extends State<InputModal> {
 
   void strToTime() {
     setState(() {
-      switch (widget.timeType) {
+      switch (timeType!) {
         case "day":
-          selectedTime = DateFormat("d/M/y").parse(widget.time);
+          selectedTime = DateFormat("d/M/y").parse(time!);
           break;
         case "week":
-          selectedTime = DateFormat("d/M/y").parse(widget.time.split("-")[0]);
+          selectedTime = DateFormat("d/M/y").parse(time!.split("-")[0]);
           selectedWeekDates = allDatesInWeek(selectedTime);
           break;
         case 'month':
-          selectedTime = DateFormat("MMM y").parse(widget.time);
+          selectedTime = DateFormat("MMM y").parse(time!);
           break;
         case "year":
-          selectedTime = DateFormat("y").parse(widget.time);
+          selectedTime = DateFormat("y").parse(time!);
           break;
         default:
           break;
@@ -515,6 +515,7 @@ class _InputModalState extends State<InputModal> {
 
   void setValues() async {
     TodoDAO todosdb = GetIt.I.get();
+    debugPrint("todoId: ${widget.todoId.toString()}");
     if (widget.todoId != null) {
       todo = await todosdb.getTodo(widget.todoId!);
     }
@@ -522,6 +523,8 @@ class _InputModalState extends State<InputModal> {
     taskName.text = todo != null ? todo!.taskName : '';
     taskDesc.text = todo != null ? todo!.taskDesc : '';
     selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;
+    time = todo != null ? todo!.time : widget.time;
+    timeType = todo != null ? todo!.timeType : widget.timeType;
     alarms = await alarmsDB.getAlarms(taskId!);
     strToTime();
   }
@@ -656,7 +659,7 @@ class _InputModalState extends State<InputModal> {
                           return SelectTimeDialog(
                             // key: UniqueKey(),
                             curve: curve,
-                            timeType: widget.timeType,
+                            timeType: timeType!,
                             alarms: alarms,
                             taskId: taskId!,
                             createdAlarms: createdAlarms,
@@ -722,9 +725,7 @@ class _InputModalState extends State<InputModal> {
                   ),
                   todo != null
                       ? IconButton(
-                          onPressed: () {
-                            widget.onDelete(widget.todoId);
-                          },
+                          onPressed: widget.onDelete,
                           tooltip: "Delete this task",
                           icon: const Icon(
                             Icons.delete,

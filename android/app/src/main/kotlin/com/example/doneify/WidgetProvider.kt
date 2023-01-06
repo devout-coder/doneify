@@ -114,7 +114,7 @@ class WidgetProvider : HomeWidgetProvider() {
 //                            .withNewEngine()
 //                            .initialRoute("/createInputModal?${timeTypeHash[timeType!!]}")
 //                            .build(context),
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                     )
                     setOnClickPendingIntent(R.id.add_button, flutterActivityIntent)
 

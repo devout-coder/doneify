@@ -39,7 +39,7 @@
             android:exported="true"
             android:launchMode="singleInstance"
             android:taskAffinity=".TimeTypeDialog"
-            android:theme="@style/Theme.AppCompat.Translucent" />
+            android:theme="@style/Dialog" />
         <activity
             android:name=".AlarmInterface"
             android:autoRemoveFromRecents="true"
@@ -48,13 +48,17 @@
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
             android:taskAffinity=".AlarmInterface"
-            android:theme="@style/Theme.AppCompat.Translucent"
+            android:theme="@style/Dialog"
             android:turnScreenOn="true" />
         <activity
             android:name=".CustomFlutterActivity"
+            android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="true"
             android:hardwareAccelerated="true"
-            android:theme="@style/LaunchTheme"
+            android:launchMode="singleInstance"
+            android:taskAffinity=".CustomFlutterActivity"
+            android:theme="@style/Modal"
             android:windowSoftInputMode="adjustResize" />
 
         <receiver

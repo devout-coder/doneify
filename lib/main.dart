@@ -49,6 +49,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
+      debugPrint("call received");
       if (call.method == 'task_done') {
         await registerDB();
         TodoDAO todosdb = GetIt.I.get();
@@ -80,7 +81,6 @@ class _MyAppState extends State<MyApp> {
       ),
       onGenerateRoute: (RouteSettings settings) {
         String? entirePath = settings.name;
-        debugPrint("entire path $entirePath");
         return MaterialPageRoute(
           builder: (context) => MainContainer(entirePath: entirePath ?? "/"),
         );
@@ -163,14 +163,6 @@ class _MainContainerState extends State<MainContainer> {
                             return true;
                           },
                           child: InputModal(
-                            // goBack: () => Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => HomePage(
-                            //       key: UniqueKey(),
-                            //     ),
-                            //   ),
-                            // ),
                             goBack: () {
                               SystemChannels.platform.invokeMethod<void>(
                                   'SystemNavigator.pop'); // debugPrint("entire path $entirePath");
@@ -185,20 +177,28 @@ class _MainContainerState extends State<MainContainer> {
                       case "/editInputModal":
                         // debugPrint(
                         //     "todoId $todoId time $time timeType $timeType");
-                        return InputModal(
-                          goBack: () => SystemChannels.platform
-                              .invokeMethod('SystemNavigator.pop'),
-                          todoId: todoId!,
-                          // timeType: timeType!,
-                          // time: time!,
-                          onEdit: (Todo todo) {
-                            todosdb.updateTodo(todo);
-                          },
-                          onDelete: () {
-                            todosdb.deleteTodo(todoId!);
+                        return WillPopScope(
+                          onWillPop: () async {
+                            debugPrint("going back");
                             SystemChannels.platform
-                                .invokeMethod('SystemNavigator.pop');
+                                .invokeMethod<void>('SystemNavigator.pop');
+                            return true;
                           },
+                          child: InputModal(
+                            goBack: () {
+                              SystemChannels.platform
+                                  .invokeMethod<void>('SystemNavigator.pop');
+                            },
+                            todoId: todoId!,
+                            onEdit: (Todo todo) {
+                              todosdb.updateTodo(todo);
+                            },
+                            onDelete: () {
+                              todosdb.deleteTodo(todoId!);
+                              SystemChannels.platform
+                                  .invokeMethod<void>('SystemNavigator.pop');
+                            },
+                          ),
                         );
                       case "/":
                         return HomePage(

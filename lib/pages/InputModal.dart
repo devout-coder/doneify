@@ -26,7 +26,7 @@ import 'package:intl/intl.dart';
 
 class InputModal extends StatefulWidget {
   final goBack;
-  // Todo? todo;
+  Todo? todo;
   int? todoId;
   final onCreate;
   final onEdit;
@@ -38,7 +38,7 @@ class InputModal extends StatefulWidget {
     Key? key,
     // this.action,
     this.goBack,
-    // this.todo,
+    this.todo,
     this.todoId,
     this.onCreate,
     this.onEdit,
@@ -513,11 +513,15 @@ class _InputModalState extends State<InputModal> {
     });
   }
 
-  void setValues() async {
+  Future setValues() async {
+    //todoId: edit todo widgeet
+    // todo: edit todo each todo
     TodoDAO todosdb = GetIt.I.get();
-    debugPrint("todoId: ${widget.todoId.toString()}");
-    if (widget.todoId != null) {
+    if (widget.todo != null) {
+      todo = widget.todo;
+    } else if (widget.todoId != null) {
       todo = await todosdb.getTodo(widget.todoId!);
+      debugPrint("fetched todo: $todo");
     }
     taskId = todo != null ? todo!.id : getRandInt(18);
     taskName.text = todo != null ? todo!.taskName : '';
@@ -526,12 +530,15 @@ class _InputModalState extends State<InputModal> {
     time = todo != null ? todo!.time : widget.time;
     timeType = todo != null ? todo!.timeType : widget.timeType;
     alarms = await alarmsDB.getAlarms(taskId!);
+    debugPrint("fetched alarms $alarms");
     strToTime();
   }
 
+  Future? init;
   @override
   void initState() {
-    setValues();
+    // setValues();
+    init = setValues();
     super.initState();
   }
 
@@ -542,56 +549,29 @@ class _InputModalState extends State<InputModal> {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      color: themePurple,
-      height: screenHeight,
-      padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 30,
-          ),
-          TextFormField(
-            //! taskName text field
-            controller: taskName,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 35,
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: const InputDecoration(
-              hintText: "Task Name",
-              border: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          LayoutBuilder(
-            //! task description text field
-            builder: (context, constraints) => Container(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).viewInsets.bottom != 0
-                      ? screenHeight * 0.7 - 250
-                      : screenHeight * 0.65),
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  child: TextFormField(
-                    controller: taskDesc,
+    return FutureBuilder(
+        future: init,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Container(
+              color: themePurple,
+              height: screenHeight,
+              padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  TextFormField(
+                    //! taskName text field
+                    controller: taskName,
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 35,
+                      fontWeight: FontWeight.w600,
                     ),
-                    maxLines: null,
-                    // minLines: 15,
                     decoration: const InputDecoration(
-                      hintText: "Task Description",
+                      hintText: "Task Name",
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -599,156 +579,207 @@ class _InputModalState extends State<InputModal> {
                       disabledBorder: InputBorder.none,
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            //! bottom icon row
-            child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.label,
-                      size: 30,
-                    ),
-                    tooltip: "Add label",
-                    onPressed: () => {
-                      showGeneralDialog(
-                        //! add label dialog box
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: "Select Label",
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation) {
-                          return Container();
-                        },
-                        transitionBuilder: (ctx, a1, a2, child) {
-                          var curve = Curves.easeInOut.transform(a1.value);
-                          return SelectLabelDialog(
-                            curve: curve,
-                            selectedLabel: selectedLabel,
-                            updateSelectedLabel: (newLabel) {
-                              setState(() {
-                                selectedLabel = newLabel;
-                              });
-                            },
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 300),
-                      )
-                    },
+                  const SizedBox(
+                    height: 30,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      showGeneralDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: "Select Time",
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation) {
-                          return Container();
-                        },
-                        transitionBuilder: (ctx, a1, a2, child) {
-                          var curve = Curves.easeInOut.transform(a1.value);
-                          return SelectTimeDialog(
-                            // key: UniqueKey(),
-                            curve: curve,
-                            timeType: timeType!,
-                            alarms: alarms,
-                            taskId: taskId!,
-                            createdAlarms: createdAlarms,
-                            updateCreatedAlarms:
-                                (List<Alarm> newCreatedAlarms) {
-                              setState(() {
-                                // debugPrint(newCreatedAlarms.toString());
-                                createdAlarms = [
-                                  ...createdAlarms,
-                                  ...newCreatedAlarms
-                                ];
-                                alarms = [...alarms, ...newCreatedAlarms];
-                              });
-                            },
-                            deletedAlarms: deletedAlarms,
-                            updateDeletedAlarms: (Alarm deletedAlarm) {
-                              setState(() {
-                                alarms.remove(deletedAlarm);
-                                if (createdAlarms.contains(deletedAlarm)) {
-                                  createdAlarms.remove(deletedAlarm);
-                                } else {
-                                  deletedAlarms = [
-                                    ...deletedAlarms,
-                                    deletedAlarm
-                                  ];
-                                }
-                              });
-                            },
-                            selectedTime: selectedTime,
-                            selectedWeekDates: selectedWeekDates,
-                            updateSelectedWeekDates: (newWeekDates) {
-                              setState(() {
-                                selectedWeekDates = newWeekDates;
-                              });
-                            },
-                            updateSelectedTime: (newTime) {
-                              setState(() {
-                                selectedTime = newTime;
-                              });
-                            },
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 300),
-                      );
-                      // saveReminder();
-                      // widget.goBack();
-                    },
-                    tooltip: "Add reminder",
-                    icon: const Icon(
-                      Icons.access_alarm,
-                      size: 30,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      // action.call();
-                    },
-                    tooltip: "Share task with friends",
-                    icon: const Icon(
-                      Icons.people,
-                      size: 30,
-                    ),
-                  ),
-                  todo != null
-                      ? IconButton(
-                          onPressed: widget.onDelete,
-                          tooltip: "Delete this task",
-                          icon: const Icon(
-                            Icons.delete,
-                            size: 30,
+                  LayoutBuilder(
+                    //! task description text field
+                    builder: (context, constraints) => Container(
+                      constraints: BoxConstraints(
+                          maxHeight:
+                              MediaQuery.of(context).viewInsets.bottom != 0
+                                  ? screenHeight * 0.7 - 250
+                                  : screenHeight * 0.65),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          child: TextFormField(
+                            controller: taskDesc,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: null,
+                            // minLines: 15,
+                            decoration: const InputDecoration(
+                              hintText: "Task Description",
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                            ),
                           ),
-                        )
-                      : SizedBox(),
-                  IconButton(
-                    onPressed: () {
-                      _saveTodo();
-                    },
-                    tooltip: "Save this task",
-                    icon: const Icon(
-                      Icons.save,
-                      size: 30,
+                        ),
+                      ),
                     ),
                   ),
+                  Expanded(
+                    //! bottom icon row
+                    child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.label,
+                              size: 30,
+                            ),
+                            tooltip: "Add label",
+                            onPressed: () => {
+                              showGeneralDialog(
+                                //! add label dialog box
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Select Label",
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return Container();
+                                },
+                                transitionBuilder: (ctx, a1, a2, child) {
+                                  var curve =
+                                      Curves.easeInOut.transform(a1.value);
+                                  return SelectLabelDialog(
+                                    curve: curve,
+                                    selectedLabel: selectedLabel,
+                                    updateSelectedLabel: (newLabel) {
+                                      setState(() {
+                                        selectedLabel = newLabel;
+                                      });
+                                    },
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              )
+                            },
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              showGeneralDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Select Time",
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return Container();
+                                },
+                                transitionBuilder: (ctx, a1, a2, child) {
+                                  var curve =
+                                      Curves.easeInOut.transform(a1.value);
+                                  return SelectTimeDialog(
+                                    // key: UniqueKey(),
+                                    curve: curve,
+                                    timeType: timeType!,
+                                    alarms: alarms,
+                                    taskId: taskId!,
+                                    createdAlarms: createdAlarms,
+                                    updateCreatedAlarms:
+                                        (List<Alarm> newCreatedAlarms) {
+                                      setState(() {
+                                        // debugPrint(newCreatedAlarms.toString());
+                                        createdAlarms = [
+                                          ...createdAlarms,
+                                          ...newCreatedAlarms
+                                        ];
+                                        alarms = [
+                                          ...alarms,
+                                          ...newCreatedAlarms
+                                        ];
+                                      });
+                                    },
+                                    deletedAlarms: deletedAlarms,
+                                    updateDeletedAlarms: (Alarm deletedAlarm) {
+                                      setState(() {
+                                        alarms.remove(deletedAlarm);
+                                        if (createdAlarms
+                                            .contains(deletedAlarm)) {
+                                          createdAlarms.remove(deletedAlarm);
+                                        } else {
+                                          deletedAlarms = [
+                                            ...deletedAlarms,
+                                            deletedAlarm
+                                          ];
+                                        }
+                                      });
+                                    },
+                                    selectedTime: selectedTime,
+                                    selectedWeekDates: selectedWeekDates,
+                                    updateSelectedWeekDates: (newWeekDates) {
+                                      setState(() {
+                                        selectedWeekDates = newWeekDates;
+                                      });
+                                    },
+                                    updateSelectedTime: (newTime) {
+                                      setState(() {
+                                        selectedTime = newTime;
+                                      });
+                                    },
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              );
+                              // saveReminder();
+                              // widget.goBack();
+                            },
+                            tooltip: "Add reminder",
+                            icon: const Icon(
+                              Icons.access_alarm,
+                              size: 30,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // action.call();
+                            },
+                            tooltip: "Share task with friends",
+                            icon: const Icon(
+                              Icons.people,
+                              size: 30,
+                            ),
+                          ),
+                          todo != null
+                              ? IconButton(
+                                  onPressed: widget.onDelete,
+                                  tooltip: "Delete this task",
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 30,
+                                  ),
+                                )
+                              : SizedBox(),
+                          IconButton(
+                            onPressed: () {
+                              _saveTodo();
+                            },
+                            tooltip: "Save this task",
+                            icon: const Icon(
+                              Icons.save,
+                              size: 30,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
-            ),
-          )
-        ],
-      ),
-    );
+            );
+          } else {
+            return Container(
+              color: themePurple,
+              height: screenHeight,
+              padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
   }
 }

@@ -6,6 +6,7 @@ import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -49,12 +50,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      debugPrint("call received");
+      debugPrint(
+          "call received method ${call.method} argument ${call.arguments}");
       if (call.method == 'task_done') {
         await registerDB();
+        debugPrint("loaded stuff");
         TodoDAO todosdb = GetIt.I.get();
-        Todo? todo =
-            await todosdb.getTodo(int.parse(call.arguments.toString()));
+        Todo? todo = await todosdb.getTodo(int.parse(call.arguments));
+        debugPrint("fetched todo $todo");
         todo!.finished = true;
         await todosdb.updateTodo(todo);
         await editAlarms(todo.id, true);
@@ -85,12 +88,6 @@ class _MyAppState extends State<MyApp> {
           builder: (context) => MainContainer(entirePath: entirePath ?? "/"),
         );
       },
-      // routes: {
-      //   '/': (context) => MainContainer(entirePath: "/"),
-      //   // When navigating to the "/second" route, build the SecondScreen widget.
-      //   '/createInputModal?day': (context) =>
-      //       MainContainer(entirePath: "/createInputModal?day"),
-      // },
     );
   }
 }
@@ -104,21 +101,22 @@ class MainContainer extends StatefulWidget {
 }
 
 class _MainContainerState extends State<MainContainer> {
-  // MaterialColor purple = const MaterialColor(
-  //   0xffe55f48, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
-  //   <int, Color>{
-  //     50: themePurple, //10%
-  //     100: const Color(0xffa78ae6), //20%
-  //     200: const Color(0xff957acc), //30%
-  //     300: const Color(0xff826bb3), //40%
-  //     400: const Color(0xff705c99), //50%
-  //     500: const Color(0xff5d4d80), //60%
-  //     600: const Color(0xff4a3d66), //70%kj
-  //     700: const Color(0xff382e4c), //80%
-  //     800: const Color(0xff382e4c), //90%
-  //     900: const Color(0xff382e4c), //100%
-  //   },
-  // );
+  String? path;
+  String? timeType;
+  int? todoId;
+
+  @override
+  void initState() {
+    debugPrint("entire path ${widget.entirePath}");
+    path = widget.entirePath.split("?")[0];
+
+    if (path == "/createInputModal") {
+      timeType = widget.entirePath.split("?")[1];
+    } else if (path == "/editInputModal") {
+      todoId = int.parse(widget.entirePath.split("?")[1]);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,20 +137,7 @@ class _MainContainerState extends State<MainContainer> {
                 future: registerDB(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    debugPrint("entire path ${widget.entirePath}");
-                    String path = widget.entirePath.split("?")[0];
-                    int? todoId;
-                    String? time;
-                    String? timeType;
-
                     TodoDAO todosdb = GetIt.I.get();
-                    if (path == "/createInputModal") {
-                      timeType = widget.entirePath.split("?")[1];
-                    } else if (path == "/editInputModal") {
-                      todoId = int.parse(widget.entirePath.split("?")[1]);
-                      // time = widget.entirePath.split("?")[2];
-                      // timeType = widget.entirePath.split("?")[3];
-                    }
                     switch (path) {
                       case '/createInputModal':
                         return WillPopScope(
@@ -168,9 +153,10 @@ class _MainContainerState extends State<MainContainer> {
                                   'SystemNavigator.pop'); // debugPrint("entire path $entirePath");
                             },
                             timeType: timeType!,
-                            time: formattedTime(timeType, DateTime.now()),
+                            time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
                               await todosdb.createTodo(todo);
+                              setState(() {});
                             },
                           ),
                         );
@@ -190,23 +176,25 @@ class _MainContainerState extends State<MainContainer> {
                                   .invokeMethod<void>('SystemNavigator.pop');
                             },
                             todoId: todoId!,
-                            onEdit: (Todo todo) {
-                              todosdb.updateTodo(todo);
+                            onEdit: (Todo todo) async {
+                              await todosdb.updateTodo(todo);
+                              setState(() {});
                             },
-                            onDelete: () {
+                            onDelete: () async {
                               todosdb.deleteTodo(todoId!);
+                              setState(() {});
                               SystemChannels.platform
                                   .invokeMethod<void>('SystemNavigator.pop');
                             },
                           ),
                         );
                       case "/":
+                        return HomePage(key: UniqueKey());
+                      default:
+                        debugPrint("default contianer");
                         return HomePage(
                             // key: UniqueKey()
                             );
-                      default:
-                        debugPrint("default contianer");
-                        return Container();
                     }
                   } else {
                     return Container(

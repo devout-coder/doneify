@@ -219,9 +219,10 @@ class _EachTodoState extends State<EachTodo> {
                   widget.deleteTodo(widget.todo.id);
                   action.call();
                 },
-                todoId: widget.todo.id,
-                // time: widget.todo.time,
-                // timeType: widget.todo.timeType,
+                // todoId: widget.todo.id,
+                todo: widget.todo,
+                time: widget.todo.time,
+                timeType: widget.todo.timeType,
               );
             },
           )

@@ -51,6 +51,7 @@ class TodoDAO {
   }
 
   Future<Todo?> getTodo(int key) async {
+    debugPrint("tryna fetch a todo");
     final snapshot = await _store.record(key).getSnapshot(_db);
     return Future<Todo?>.value(
         snapshot != null ? Todo.fromMap(snapshot.value) : null);

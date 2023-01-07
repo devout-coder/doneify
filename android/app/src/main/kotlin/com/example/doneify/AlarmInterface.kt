@@ -14,8 +14,10 @@ import android.widget.TextView
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 
 class AlarmInterface : Activity() {
@@ -71,6 +73,12 @@ class AlarmInterface : Activity() {
         }
         checkOffButton.setOnClickListener {
             val flutterEngine = FlutterEngine(this);
+            flutterEngine
+                .dartExecutor
+                .executeDartEntrypoint(
+                    DartExecutor.DartEntrypoint.createDefault()
+                )
+            GeneratedPluginRegistrant.registerWith(flutterEngine);
             val methodChannel = MethodChannel(
                 flutterEngine.dartExecutor.binaryMessenger,
                 CHANNEL

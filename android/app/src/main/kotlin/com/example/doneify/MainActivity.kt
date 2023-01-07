@@ -105,6 +105,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
     } else if (call.method == "createTodo" || call.method == "updateTodo") {
+        methodChannel!!.invokeMethod("callBack", "data1")
         val id: String = call.argument<String>("id")!!
         // Log.d("debugging", "in method call receiver: id = $id")
         val taskName: String = call.argument<String>("taskName")!!
@@ -157,8 +158,9 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
     }
 }
 
+var methodChannel: MethodChannel? = null
+
 class MainActivity : FlutterActivity() {
-    var methodChannel: MethodChannel? = null
 
 //    lateinit var newFlutterEngine: FlutterEngine
 

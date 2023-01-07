@@ -15,8 +15,10 @@ import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -136,14 +138,17 @@ class WidgetProvider : HomeWidgetProvider() {
                                 todo.finished!!
                             )
                             Log.d("debugging", "task name is ${todo.taskName}")
-                            val fillInIntent = Intent().apply {
-                                val extras = Bundle().apply {
-                                    putString("todoId", todo.id)
-                                    putString("time", todo.time);
-                                    putString("timeType", todo.timeType)
-                                }
+
+                            val extras = Bundle().apply {
+                                putString("todoId", todo.id)
+                            }
+                            val editIntent = Intent().apply {
                                 putExtras(extras);
                                 action = "editTodo"
+                            }
+                            val checkIntent = Intent().apply {
+                                putExtras(extras);
+                                action = "checkTodo"
                             }
                             val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
                                 context,
@@ -151,10 +156,9 @@ class WidgetProvider : HomeWidgetProvider() {
                             )
                             setOnCheckedChangeResponse(
                                 R.id.each_todo_container_checkbox,
-                                RemoteViews.RemoteResponse.fromFillInIntent(fillInIntent)
+                                RemoteViews.RemoteResponse.fromFillInIntent(checkIntent)
                             )
-                            Log.d("debugging", "id received is ${todo.id}")
-                            setOnClickFillInIntent(R.id.each_todo_container_text, fillInIntent)
+                            setOnClickFillInIntent(R.id.each_todo_container_text, editIntent)
                         }
                         todosRemoteView.addItem(todo.id.toLong(), view)
                     }
@@ -196,9 +200,6 @@ class WidgetProvider : HomeWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent!!.action == "editTodo") {
             val todoId: String? = intent.getStringExtra("todoId")
-//            val time: String? = intent.getStringExtra("time")
-//            val timeType: String? = intent.getStringExtra("timeType")
-//            val route = "/editInputModal?$todoId?$time?$timeType"
             Log.d("debugging", "an item is clicked $todoId")
             CustomFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
@@ -213,6 +214,21 @@ class WidgetProvider : HomeWidgetProvider() {
                     .build(context!!),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             ).send()
+        } else if (intent.action == "checkTodo") {
+            val todoId: String? = intent.getStringExtra("todoId")
+            Log.d("debugging", "checked todo: $todoId")
+            val flutterEngine = FlutterEngine(context!!);
+            flutterEngine
+                .dartExecutor
+                .executeDartEntrypoint(
+                    DartExecutor.DartEntrypoint.createDefault()
+                )
+            GeneratedPluginRegistrant.registerWith(flutterEngine);
+            val methodChannel = MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                CHANNEL
+            )
+            methodChannel.invokeMethod("task_done", todoId)
         }
 //        if(context!=null){
 //            Log.d("debugging", "pending intent must be executed")

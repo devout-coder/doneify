@@ -47,6 +47,7 @@ dependencies:
   provider: ^6.0.3
   syncfusion_flutter_datepicker: ^20.2.44
   home_widget: ^0.1.6
+  restart_app: ^1.1.1
 
 dev_dependencies:
   flutter_test:

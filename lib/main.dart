@@ -19,13 +19,16 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
+import 'package:restart_app/restart_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final channel = MethodChannel('alarm_method_channel');
+
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // HomeWidget.registerBackgroundCallback(
   //     backgroundCallback); //replace this with method channel
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 Future registerDB() async {
@@ -42,12 +45,23 @@ Future registerDB() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_MyAppState>()?.restartApp();
+  }
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
       debugPrint(
@@ -77,6 +91,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: key,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
@@ -85,7 +100,12 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: (RouteSettings settings) {
         String? entirePath = settings.name;
         return MaterialPageRoute(
-          builder: (context) => MainContainer(entirePath: entirePath ?? "/"),
+          builder: (context) => MainContainer(
+            entirePath: entirePath ?? "/",
+            restartApp: () {
+              restartApp();
+            },
+          ),
         );
       },
     );
@@ -94,20 +114,23 @@ class _MyAppState extends State<MyApp> {
 
 class MainContainer extends StatefulWidget {
   String entirePath;
-  MainContainer({super.key, required this.entirePath});
+  final restartApp;
+  MainContainer(
+      {super.key, required this.entirePath, required this.restartApp});
 
   @override
   State<MainContainer> createState() => _MainContainerState();
 }
 
-class _MainContainerState extends State<MainContainer> {
+class _MainContainerState extends State<MainContainer>
+    with WidgetsBindingObserver {
   String? path;
   String? timeType;
   int? todoId;
 
   @override
   void initState() {
-    debugPrint("entire path ${widget.entirePath}");
+    // debugPrint("entire path ${widget.entirePath}");
     path = widget.entirePath.split("?")[0];
 
     if (path == "/createInputModal") {
@@ -116,6 +139,40 @@ class _MainContainerState extends State<MainContainer> {
       todoId = int.parse(widget.entirePath.split("?")[1]);
     }
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    print("Dispose");
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        // print('appLifeCycleState inactive');
+        break;
+      case AppLifecycleState.resumed:
+        // String received = await platform.invokeMethod('get_edited_from_widget');
+        // debugPrint("received in main $received");
+        // if (received == "true") {
+        // platform.invokeMethod("edited_from_widget", {"val": false});
+        Restart.restartApp();
+        // }
+
+        break;
+      case AppLifecycleState.paused:
+        // print('appLifeCycleState paused');
+        break;
+      case AppLifecycleState.detached:
+        // print('appLifeCycleState detached');
+        break;
+    }
   }
 
   @override
@@ -152,6 +209,7 @@ class _MainContainerState extends State<MainContainer> {
                               SystemChannels.platform.invokeMethod<void>(
                                   'SystemNavigator.pop'); // debugPrint("entire path $entirePath");
                             },
+                            loadedFromWidget: true,
                             timeType: timeType!,
                             time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
@@ -176,12 +234,17 @@ class _MainContainerState extends State<MainContainer> {
                                   .invokeMethod<void>('SystemNavigator.pop');
                             },
                             todoId: todoId!,
+                            loadedFromWidget: true,
                             onEdit: (Todo todo) async {
                               await todosdb.updateTodo(todo);
                               setState(() {});
                             },
                             onDelete: () async {
-                              todosdb.deleteTodo(todoId!);
+                              // debugPrint(
+                              //     "this gets run even if i don't want it to");
+                              // platform.invokeMethod(
+                              //     "edited_from_widget", {"val": true});
+                              await todosdb.deleteTodo(todoId!);
                               setState(() {});
                               SystemChannels.platform
                                   .invokeMethod<void>('SystemNavigator.pop');

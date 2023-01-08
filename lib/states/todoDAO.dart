@@ -26,10 +26,9 @@ class TodoDAO {
     );
     final allTodos = await getAllTodos(finder);
     todo.index = allTodos.length;
-    debugPrint("creating todo for system");
-    debugPrint("the id sent is ${todo.id}");
     await _store.record(todo.id).put(_db, todo.toMap());
     try {
+      debugPrint("creating todo for system ${todo.id}");
       platform.invokeMethod("createTodo", {
         "id": todo.id.toString(),
         "taskName": todo.taskName,
@@ -51,7 +50,7 @@ class TodoDAO {
   }
 
   Future<Todo?> getTodo(int key) async {
-    debugPrint("tryna fetch a todo");
+    debugPrint("tryna fetch a todo id: $key");
     final snapshot = await _store.record(key).getSnapshot(_db);
     return Future<Todo?>.value(
         snapshot != null ? Todo.fromMap(snapshot.value) : null);
@@ -65,6 +64,7 @@ class TodoDAO {
   }
 
   Future updateTodo(Todo todo) async {
+    debugPrint("updating todo id: ${todo.id}");
     Todo? prevTodo = await getTodo(todo.id);
     if (prevTodo!.time != todo.time) {
       var finder = Finder(
@@ -91,6 +91,7 @@ class TodoDAO {
     }
     await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
     try {
+      debugPrint("updating todo for system ${todo.id}");
       platform.invokeMethod("updateTodo", {
         "id": todo.id.toString(),
         "taskName": todo.taskName,
@@ -113,6 +114,7 @@ class TodoDAO {
 
   Future deleteTodo(int todoId) async {
     Todo? todo = await getTodo(todoId);
+    debugPrint("deleting todo id: $todoId");
     var finder = Finder(
       filter: Filter.equals(
         'time',
@@ -120,21 +122,27 @@ class TodoDAO {
       ),
     );
     final presentTodos = await getAllTodos(finder);
-    presentTodos.forEach((element) {
+    presentTodos.forEach((element) async {
       if (element.index > todo.index) {
         element.index--;
-        updateTodo(element);
+        debugPrint("wrking flawlessly till before update");
+        await updateTodo(element);
+        debugPrint("wrking flawlessly till here update");
       }
     });
+    debugPrint("working flawlessly till here now");
     await _store.record(todoId).delete(_db);
+    debugPrint("working flawlessly till here");
 
     AlarmDAO alarmsdb = GetIt.I.get();
     List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
     toDeleteAlarms.forEach((alarm) {
       alarmsdb.deleteAlarm(alarm.alarmId);
     });
+    debugPrint("working flawllessly till after alarms");
 
     try {
+      debugPrint("deleting todo for system ${todo.id}");
       platform.invokeMethod("deleteTodo", {
         "id": todo.id.toString(),
       });

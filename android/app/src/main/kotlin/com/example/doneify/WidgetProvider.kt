@@ -67,7 +67,7 @@ class WidgetProvider : HomeWidgetProvider() {
         timeTypeHash.put("Year", "year")
         timeTypeHash.put("Long Term", "longTerm")
 
-        Log.d("debugging", "widget loaded")
+//        Log.d("debugging", "widget loaded")
 
         val sharedPref: SharedPreferences = context.getSharedPreferences(
             "ApplicationListener", Context.MODE_PRIVATE
@@ -129,7 +129,7 @@ class WidgetProvider : HomeWidgetProvider() {
                     val todosDAO = db.TodoDAO()
                     val todos = todosDAO.getByTimeType(timeTypeHash[timeType]!!)
 
-                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
+//                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
                     for (todo in todos) {
                         val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
                             setTextViewText(R.id.each_todo_container_text, todo.taskName)
@@ -162,7 +162,7 @@ class WidgetProvider : HomeWidgetProvider() {
                         }
                         todosRemoteView.addItem(todo.id.toLong(), view)
                     }
-                    Log.d("debugging", "update is triggered");
+//                    Log.d("debugging", "update is triggered");
 
                     setRemoteAdapter(
                         R.id.todos_list,

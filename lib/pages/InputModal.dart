@@ -33,6 +33,7 @@ class InputModal extends StatefulWidget {
   final onDelete;
   String? time;
   String? timeType;
+  bool? loadedFromWidget;
 
   InputModal({
     Key? key,
@@ -45,6 +46,7 @@ class InputModal extends StatefulWidget {
     this.onDelete,
     this.time,
     this.timeType,
+    this.loadedFromWidget,
   }) : super(key: key);
 
   @override
@@ -371,7 +373,7 @@ class _InputModalState extends State<InputModal> {
           figureOutTime(timeType!, selectedTime, selectedWeekDates) != time) {
         List alarmIds = await platform.invokeMethod('getActiveIds');
         alarmIds = alarmIds.map((alarmId) => int.parse(alarmId)).toList();
-        debugPrint("alarm ids of active alarms: $alarmIds");
+        // debugPrint("alarm ids of active alarms: $alarmIds");
         alarms.forEach((alarm) async {
           if (!createdAlarms.contains(alarm)) {
             //an old alarm
@@ -448,6 +450,12 @@ class _InputModalState extends State<InputModal> {
     // debugPrint(figureOutTime());
     Todo newTodo;
     if (taskName.text != "") {
+      // if (widget.loadedFromWidget != null) {
+      //   if (widget.loadedFromWidget!) {
+      //     debugPrint("this was loaded from widget");
+      //     platform.invokeMethod("edited_from_widget", {"val": true});
+      //   }
+      // }
       if (todo != null) {
         newTodo = Todo(
           taskName.text,
@@ -521,7 +529,7 @@ class _InputModalState extends State<InputModal> {
       todo = widget.todo;
     } else if (widget.todoId != null) {
       todo = await todosdb.getTodo(widget.todoId!);
-      debugPrint("fetched todo: $todo");
+      // debugPrint("fetched todo: $todo");
     }
     taskId = todo != null ? todo!.id : getRandInt(18);
     taskName.text = todo != null ? todo!.taskName : '';
@@ -530,7 +538,7 @@ class _InputModalState extends State<InputModal> {
     time = todo != null ? todo!.time : widget.time;
     timeType = todo != null ? todo!.timeType : widget.timeType;
     alarms = await alarmsDB.getAlarms(taskId!);
-    debugPrint("fetched alarms $alarms");
+    // debugPrint("fetched alarms $alarms");
     strToTime();
   }
 

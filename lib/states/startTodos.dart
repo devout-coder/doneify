@@ -2,6 +2,7 @@ import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,7 @@ class StartTodos {
   }
 
   loadTodos() async {
+    // debugPrint("todos loaded");
     TodoDAO todosdb = GetIt.I.get();
     var finder = Finder(
       filter: Filter.equals(

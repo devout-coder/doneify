@@ -4,10 +4,7 @@ import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
@@ -104,9 +101,37 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             result!!.success(Gson().toJson(activeAlarms))
             // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
-    } else if (call.method == "createTodo" || call.method == "updateTodo") {
-        methodChannel!!.invokeMethod("callBack", "data1")
+    }
+//    else if (call.method == "edited_from_widget") {
+//        val value: Boolean = call.argument<Boolean>("val")!!
+//        Log.d("debugging", "kotlin side: value received in edited widget: $value")
+//        val savedVal: String?
+//        if (value == true) {
+//            savedVal = "true"
+//        } else {
+//            savedVal = "false"
+//        }
+//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
+//        with(sharedPref.edit()) {
+//            putString("widget", savedVal)
+//            apply()
+//        }
+//
+//        val sharedPrf = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
+//        val fetched = sharedPrf.getString("widget", "null")
+//        Log.d("debugging", "kotlin side: verifying value saved: $fetched")
+////        }
+//    }
+//    else if (call.method == "get_edited_from_widget") {
+//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
+//        val fetched = sharedPref.getString("widget", "null")
+//        Log.d("debugging", "kotlin side: value fetched from edited widget: $fetched")
+//        result!!.success(fetched)
+//    }
+    else if (call.method == "createTodo" || call.method == "updateTodo") {
+//        methodChannel!!.invokeMethod("callBack", "data1")
         val id: String = call.argument<String>("id")!!
+        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
         // Log.d("debugging", "in method call receiver: id = $id")
         val taskName: String = call.argument<String>("taskName")!!
         val taskDesc: String = call.argument<String>("taskDesc")!!
@@ -142,6 +167,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         }.start()
     } else if (call.method == "deleteTodo") {
         val id: String = call.argument<String>("id")!!
+        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
         var reqTodo: Todo?
         Thread {
             val db = Room.databaseBuilder(

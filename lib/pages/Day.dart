@@ -157,7 +157,7 @@ class _DayPageState extends State<DayPage> {
     todos = startTodos.todos;
     currentTodos = startTodos.currentTodos;
     unfinishedDays = startTodos.unfinishedDays;
-    // loadTodos();
+    // debugPrint("todos: $todos");
     super.initState();
   }
 

@@ -102,23 +102,21 @@ class WidgetProvider : HomeWidgetProvider() {
 //                        )
 //                    )
 
-                    CustomFlutterActivity.methodChannelInvoker = { call, result ->
-                        handleMethodCalls(context, call, result)
+                    val extras = Bundle().apply {
+                        putString("timeType", timeTypeHash[timeType])
                     }
-                    val flutterActivityIntent = PendingIntent.getActivity(
+                    val addIntent = Intent(context, WidgetProvider::class.java).apply {
+                        putExtras(extras)
+                        action = "createTodo"
+                    }
+                    val addPendingIntent = PendingIntent.getBroadcast(
                         context,
-                        0,
-                        CustomFlutterActivity
-                            .withNewEngine()
-                            .initialRoute("/createInputModal?${timeTypeHash[timeType]}")
-                            .build(context),
-//                        FlutterActivity
-//                            .withNewEngine()
-//                            .initialRoute("/createInputModal?${timeTypeHash[timeType!!]}")
-//                            .build(context),
+                        widgetId,
+                        addIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                     )
-                    setOnClickPendingIntent(R.id.add_button, flutterActivityIntent)
+
+                    setOnClickPendingIntent(R.id.add_button, addPendingIntent)
 
                     val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
 //                    val db: TodosRoomDB = TodosRoomDB.getDatabase(context)
@@ -150,10 +148,10 @@ class WidgetProvider : HomeWidgetProvider() {
                                 putExtras(extras);
                                 action = "checkTodo"
                             }
-                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
-                                context,
-                                Uri.parse("myAppWidget://todo_checked/${todo.id}")//use method channel here please
-                            )
+//                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
+//                                context,
+//                                Uri.parse("myAppWidget://todo_checked/${todo.id}")//use method channel here please
+//                            )
                             setOnCheckedChangeResponse(
                                 R.id.each_todo_container_checkbox,
                                 RemoteViews.RemoteResponse.fromFillInIntent(checkIntent)
@@ -204,13 +202,27 @@ class WidgetProvider : HomeWidgetProvider() {
             CustomFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
             }
-
             PendingIntent.getActivity(
                 context,
                 0,
                 CustomFlutterActivity
                     .withNewEngine()
                     .initialRoute("/editInputModal?$todoId")
+                    .build(context!!),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            ).send()
+        } else if (intent.action == "createTodo") {
+            val timeType: String? = intent.getStringExtra("timeType")
+            Log.d("debugging", "tryna create todo with timetype: $timeType")
+            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+                handleMethodCalls(context!!, call, result)
+            }
+            PendingIntent.getActivity(
+                context,
+                0,
+                CustomFlutterActivity
+                    .withNewEngine()
+                    .initialRoute("/createInputModal?$timeType")
                     .build(context!!),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             ).send()

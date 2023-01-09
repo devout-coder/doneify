@@ -240,6 +240,10 @@ class WidgetProvider : HomeWidgetProvider() {
                 flutterEngine.dartExecutor.binaryMessenger,
                 CHANNEL
             )
+
+            methodChannel.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
+                handleMethodCalls(context, call, result)
+            }
             methodChannel.invokeMethod("task_done", todoId)
         }
 //        if(context!=null){

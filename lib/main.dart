@@ -18,8 +18,11 @@ import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:restart_app/restart_app.dart';
+import 'package:sembast/sembast_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final channel = MethodChannel('alarm_method_channel');
@@ -67,16 +70,53 @@ class _MyAppState extends State<MyApp> {
       debugPrint(
           "call received method ${call.method} argument ${call.arguments}");
       if (call.method == 'task_done') {
-        await registerDB();
-        debugPrint("loaded stuff");
-        TodoDAO todosdb = GetIt.I.get();
-        Todo? todo = await todosdb.getTodo(int.parse(call.arguments));
-        debugPrint("fetched todo $todo");
-        todo!.finished = true;
-        await todosdb.updateTodo(todo);
-        await editAlarms(todo.id, true);
+        String dbPath = 'conquer.db';
+        final appDocDir = await getApplicationDocumentsDirectory();
+        Database db = await databaseFactoryIo
+            .openDatabase(join(appDocDir.path, dbPath), version: 1);
+        debugPrint("opened new db");
 
-        setState(() {});
+        int todoId = int.parse(call.arguments);
+
+        final StoreRef store = intMapStoreFactory.store("todos");
+        debugPrint("fetched store");
+        final snapshot = await store.record(todoId).getSnapshot(db);
+        debugPrint("got a todo");
+        Todo todo = Todo.fromMap(snapshot!.value);
+        todo.finished = true;
+        await store.record(todoId).put(db, todo.toMap(), merge: true);
+        debugPrint("updated todo record in storage");
+
+        try {
+          debugPrint("updating todo for system ${todo.id}");
+          platform.invokeMethod("updateTodo", {
+            "id": todo.id.toString(),
+            "taskName": todo.taskName,
+            "taskDesc": todo.taskDesc,
+            "finished": todo.finished,
+            "labelName": todo.labelName,
+            "timeStamp": todo.timeStamp,
+            "time": todo.time,
+            "timeType": todo.timeType,
+            "index": todo.index,
+          });
+        } on PlatformException catch (e) {
+          debugPrint("some fuckup happended while updating todo: $e");
+        }
+        HomeWidget.updateWidget(
+          name: 'WidgetProvider',
+          iOSName: 'WidgetProvider',
+        );
+        // await registerDB();
+        // debugPrint("loaded stuff");
+        // TodoDAO todosdb = GetIt.I.get();
+        // Todo? todo = await todosdb.getTodo(int.parse(call.arguments));
+        // debugPrint("fetched todo $todo");
+        // todo!.finished = true;
+        // await todosdb.updateTodo(todo);
+        // await editAlarms(todo.id, true);
+
+        // setState(() {});
       }
       return Future<dynamic>.value();
     });

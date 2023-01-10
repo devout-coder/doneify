@@ -11,6 +11,7 @@ import 'package:conquer_flutter_app/pages/Week.dart';
 import 'package:conquer_flutter_app/pages/Year.dart';
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
+import 'package:conquer_flutter_app/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -26,22 +27,26 @@ import 'package:intl/intl.dart';
 class InputModal extends StatefulWidget {
   final goBack;
   Todo? todo;
-  final createTodo;
-  final editTodo;
+  int? todoId;
+  final onCreate;
+  final onEdit;
   final onDelete;
-  String time;
-  String timeType;
+  String? time;
+  String? timeType;
+  bool? loadedFromWidget;
 
   InputModal({
     Key? key,
     // this.action,
     this.goBack,
     this.todo,
-    this.createTodo,
-    this.editTodo,
+    this.todoId,
+    this.onCreate,
+    this.onEdit,
     this.onDelete,
-    required this.time,
-    required this.timeType,
+    this.time,
+    this.timeType,
+    this.loadedFromWidget,
   }) : super(key: key);
 
   @override
@@ -92,12 +97,16 @@ class _InputModalState extends State<InputModal> {
   List<Alarm> createdAlarms = [];
   List<Alarm> deletedAlarms = [];
 
+  Todo? todo;
+
   LabelDAO labelsDB = GetIt.I.get();
   AlarmDAO alarmsDB = GetIt.I.get();
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
   int? taskId;
+  String? time;
+  String? timeType;
 
   bool futureTime(int hour, int minute) {
     bool future = false;
@@ -142,7 +151,7 @@ class _InputModalState extends State<InputModal> {
         //time: 09:00
         DateTime nextDayTime =
             DateTime(currentTime.year, currentTime.month, currentTime.day + 1);
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "week":
             if (selectedWeekDates[0].isAfter(currentTime)) {
               prefixDate = DateFormat("d/M/y").format(selectedWeekDates[0]);
@@ -186,7 +195,7 @@ class _InputModalState extends State<InputModal> {
         String hourTime = splitStr[1];
         DateTime nextWeekTime =
             DateTime(currentTime.year, currentTime.month, currentTime.day + 7);
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "month":
             var firstOfMonth =
                 DateTime(selectedTime.year, selectedTime.month, 1);
@@ -273,7 +282,7 @@ class _InputModalState extends State<InputModal> {
         String hourTime = splitStr[1];
         DateTime nextMonthTime = DateTime(
             currentTime.year, currentTime.month + 1, int.parse(dayOfMonth));
-        switch (widget.timeType) {
+        switch (timeType!) {
           case "year":
             var firstDay =
                 DateTime(selectedTime.year, 1, int.parse(dayOfMonth));
@@ -340,7 +349,7 @@ class _InputModalState extends State<InputModal> {
 
   DateTime repeatingAlarmEndDate() {
     //time format: 31/10/2022,  31/10/2022-6/11/2022, Nov 2022, 2022
-    switch (widget.timeType) {
+    switch (timeType!) {
       case "week":
         return selectedWeekDates[6];
       case "month":
@@ -356,16 +365,15 @@ class _InputModalState extends State<InputModal> {
   }
 
   void saveAlarms() async {
-    if (widget.todo != null) {
+    if (todo != null) {
       //time modified
-      if (taskName.text != widget.todo!.taskName ||
-          taskDesc.text != widget.todo!.taskDesc ||
-          labelsDB.labels[selectedLabel].name != widget.todo!.labelName ||
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates) !=
-              widget.time) {
+      if (taskName.text != todo!.taskName ||
+          taskDesc.text != todo!.taskDesc ||
+          labelsDB.labels[selectedLabel].name != todo!.labelName ||
+          figureOutTime(timeType!, selectedTime, selectedWeekDates) != time) {
         List alarmIds = await platform.invokeMethod('getActiveIds');
         alarmIds = alarmIds.map((alarmId) => int.parse(alarmId)).toList();
-        debugPrint("alarm ids of active alarms: $alarmIds");
+        // debugPrint("alarm ids of active alarms: $alarmIds");
         alarms.forEach((alarm) async {
           if (!createdAlarms.contains(alarm)) {
             //an old alarm
@@ -373,15 +381,13 @@ class _InputModalState extends State<InputModal> {
             alarmsDB.deleteAlarm(alarm.alarmId);
             if (alarmIds.contains(alarm.alarmId) &&
                 (alarm.repeatStatus != "once" ||
-                    figureOutTime(
-                            widget.timeType, selectedTime, selectedWeekDates) ==
-                        widget.time)) {
+                    figureOutTime(timeType!, selectedTime, selectedWeekDates) ==
+                        time)) {
               //the alarm shouldn't have rung and repeat status shouldn't be once or time shouldn't be changed
-              if (widget.timeType == "longTerm" ||
-                  (widget.timeType == "week" &&
+              if (timeType! == "longTerm" ||
+                  (timeType! == "week" &&
                       futureDateAndTime(selectedWeekDates[6], 0, 0)) ||
                   (futureDateAndTime(repeatingAlarmEndDate(), 0, 0))) {
-                debugPrint('this is run');
                 await alarmsDB.setAlarm(
                   alarm,
                   amendAlarmTime(alarm.time, alarm.repeatStatus),
@@ -390,7 +396,7 @@ class _InputModalState extends State<InputModal> {
                   taskName.text,
                   taskDesc.text,
                   labelsDB.labels[selectedLabel].name,
-                  widget.todo!.finished,
+                  todo!.finished,
                 );
               }
             }
@@ -398,7 +404,6 @@ class _InputModalState extends State<InputModal> {
         });
       }
       createdAlarms.forEach((alarm) {
-        debugPrint("this works");
         alarmsDB.setAlarm(
           alarm,
           amendAlarmTime(alarm.time, alarm.repeatStatus),
@@ -407,7 +412,7 @@ class _InputModalState extends State<InputModal> {
           taskName.text,
           taskDesc.text,
           labelsDB.labels[selectedLabel].name,
-          widget.todo!.finished,
+          todo!.finished,
         );
       });
     } else {
@@ -445,19 +450,25 @@ class _InputModalState extends State<InputModal> {
     // debugPrint(figureOutTime());
     Todo newTodo;
     if (taskName.text != "") {
-      if (widget.todo != null) {
+      // if (widget.loadedFromWidget != null) {
+      //   if (widget.loadedFromWidget!) {
+      //     debugPrint("this was loaded from widget");
+      //     platform.invokeMethod("edited_from_widget", {"val": true});
+      //   }
+      // }
+      if (todo != null) {
         newTodo = Todo(
           taskName.text,
           taskDesc.text,
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
-          widget.timeType,
-          widget.todo!.index,
+          figureOutTime(timeType!, selectedTime, selectedWeekDates),
+          timeType!,
+          todo!.index,
           taskId!,
         );
-        await widget.editTodo(newTodo);
+        await widget.onEdit(newTodo);
       } else {
         newTodo = Todo(
           taskName.text,
@@ -465,13 +476,12 @@ class _InputModalState extends State<InputModal> {
           false,
           labelsDB.labels[selectedLabel].name,
           DateTime.now().millisecondsSinceEpoch,
-          figureOutTime(widget.timeType, selectedTime, selectedWeekDates),
-          widget.timeType,
-          0, //this is going to be changed in createTodo method
+          figureOutTime(timeType!, selectedTime, selectedWeekDates),
+          timeType!,
+          0, //this is going to be changed in onCreate method
           taskId!,
         );
-        await widget.createTodo(newTodo);
-        debugPrint("this is run after todo is created");
+        await widget.onCreate(newTodo);
       }
       saveAlarms();
       Fluttertoast.showToast(
@@ -491,19 +501,19 @@ class _InputModalState extends State<InputModal> {
 
   void strToTime() {
     setState(() {
-      switch (widget.timeType) {
+      switch (timeType!) {
         case "day":
-          selectedTime = DateFormat("d/M/y").parse(widget.time);
+          selectedTime = DateFormat("d/M/y").parse(time!);
           break;
         case "week":
-          selectedTime = DateFormat("d/M/y").parse(widget.time.split("-")[0]);
+          selectedTime = DateFormat("d/M/y").parse(time!.split("-")[0]);
           selectedWeekDates = allDatesInWeek(selectedTime);
           break;
         case 'month':
-          selectedTime = DateFormat("MMM y").parse(widget.time);
+          selectedTime = DateFormat("MMM y").parse(time!);
           break;
         case "year":
-          selectedTime = DateFormat("y").parse(widget.time);
+          selectedTime = DateFormat("y").parse(time!);
           break;
         default:
           break;
@@ -511,21 +521,32 @@ class _InputModalState extends State<InputModal> {
     });
   }
 
-  void setValues() async {
-    taskId = widget.todo != null ? widget.todo!.id : getRandInt(18);
-    taskName.text = widget.todo != null ? widget.todo!.taskName : '';
-    taskDesc.text = widget.todo != null ? widget.todo!.taskDesc : '';
-    selectedLabel =
-        widget.todo != null ? findLabelIndex(widget.todo!.labelName) : 0;
+  Future setValues() async {
+    //todoId: edit todo widgeet
+    // todo: edit todo each todo
+    TodoDAO todosdb = GetIt.I.get();
+    if (widget.todo != null) {
+      todo = widget.todo;
+    } else if (widget.todoId != null) {
+      todo = await todosdb.getTodo(widget.todoId!);
+      // debugPrint("fetched todo: $todo");
+    }
+    taskId = todo != null ? todo!.id : getRandInt(18);
+    taskName.text = todo != null ? todo!.taskName : '';
+    taskDesc.text = todo != null ? todo!.taskDesc : '';
+    selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;
+    time = todo != null ? todo!.time : widget.time;
+    timeType = todo != null ? todo!.timeType : widget.timeType;
     alarms = await alarmsDB.getAlarms(taskId!);
-    debugPrint(alarms.toString());
+    // debugPrint("fetched alarms $alarms");
     strToTime();
   }
 
+  Future? init;
   @override
   void initState() {
-    debugPrint(widget.time);
-    setValues();
+    // setValues();
+    init = setValues();
     super.initState();
   }
 
@@ -536,56 +557,29 @@ class _InputModalState extends State<InputModal> {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      color: themePurple,
-      height: screenHeight,
-      padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 30,
-          ),
-          TextFormField(
-            //! taskName text field
-            controller: taskName,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 35,
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: const InputDecoration(
-              hintText: "Task Name",
-              border: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          LayoutBuilder(
-            //! task description text field
-            builder: (context, constraints) => Container(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).viewInsets.bottom != 0
-                      ? screenHeight * 0.7 - 250
-                      : screenHeight * 0.65),
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  child: TextFormField(
-                    controller: taskDesc,
+    return FutureBuilder(
+        future: init,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Container(
+              color: themePurple,
+              height: screenHeight,
+              padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  TextFormField(
+                    //! taskName text field
+                    controller: taskName,
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 35,
+                      fontWeight: FontWeight.w600,
                     ),
-                    maxLines: null,
-                    // minLines: 15,
                     decoration: const InputDecoration(
-                      hintText: "Task Description",
+                      hintText: "Task Name",
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -593,156 +587,207 @@ class _InputModalState extends State<InputModal> {
                       disabledBorder: InputBorder.none,
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            //! bottom icon row
-            child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.label,
-                      size: 30,
-                    ),
-                    tooltip: "Add label",
-                    onPressed: () => {
-                      showGeneralDialog(
-                        //! add label dialog box
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: "Select Label",
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation) {
-                          return Container();
-                        },
-                        transitionBuilder: (ctx, a1, a2, child) {
-                          var curve = Curves.easeInOut.transform(a1.value);
-                          return SelectLabelDialog(
-                            curve: curve,
-                            selectedLabel: selectedLabel,
-                            updateSelectedLabel: (newLabel) {
-                              setState(() {
-                                selectedLabel = newLabel;
-                              });
-                            },
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 300),
-                      )
-                    },
+                  const SizedBox(
+                    height: 30,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      showGeneralDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: "Select Time",
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secondaryAnimation) {
-                          return Container();
-                        },
-                        transitionBuilder: (ctx, a1, a2, child) {
-                          var curve = Curves.easeInOut.transform(a1.value);
-                          return SelectTimeDialog(
-                            // key: UniqueKey(),
-                            curve: curve,
-                            timeType: widget.timeType,
-                            alarms: alarms,
-                            taskId: taskId!,
-                            createdAlarms: createdAlarms,
-                            updateCreatedAlarms:
-                                (List<Alarm> newCreatedAlarms) {
-                              setState(() {
-                                debugPrint(newCreatedAlarms.toString());
-                                createdAlarms = [
-                                  ...createdAlarms,
-                                  ...newCreatedAlarms
-                                ];
-                                alarms = [...alarms, ...newCreatedAlarms];
-                              });
-                            },
-                            deletedAlarms: deletedAlarms,
-                            updateDeletedAlarms: (Alarm deletedAlarm) {
-                              setState(() {
-                                alarms.remove(deletedAlarm);
-                                if (createdAlarms.contains(deletedAlarm)) {
-                                  createdAlarms.remove(deletedAlarm);
-                                } else {
-                                  deletedAlarms = [
-                                    ...deletedAlarms,
-                                    deletedAlarm
-                                  ];
-                                }
-                              });
-                            },
-                            selectedTime: selectedTime,
-                            selectedWeekDates: selectedWeekDates,
-                            updateSelectedWeekDates: (newWeekDates) {
-                              setState(() {
-                                selectedWeekDates = newWeekDates;
-                              });
-                            },
-                            updateSelectedTime: (newTime) {
-                              setState(() {
-                                selectedTime = newTime;
-                              });
-                            },
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 300),
-                      );
-                      // saveReminder();
-                      // widget.goBack();
-                    },
-                    tooltip: "Add reminder",
-                    icon: const Icon(
-                      Icons.access_alarm,
-                      size: 30,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      // action.call();
-                    },
-                    tooltip: "Share task with friends",
-                    icon: const Icon(
-                      Icons.people,
-                      size: 30,
-                    ),
-                  ),
-                  widget.todo != null
-                      ? IconButton(
-                          onPressed: widget.onDelete,
-                          tooltip: "Delete this task",
-                          icon: const Icon(
-                            Icons.delete,
-                            size: 30,
+                  LayoutBuilder(
+                    //! task description text field
+                    builder: (context, constraints) => Container(
+                      constraints: BoxConstraints(
+                          maxHeight:
+                              MediaQuery.of(context).viewInsets.bottom != 0
+                                  ? screenHeight * 0.7 - 250
+                                  : screenHeight * 0.65),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          child: TextFormField(
+                            controller: taskDesc,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: null,
+                            // minLines: 15,
+                            decoration: const InputDecoration(
+                              hintText: "Task Description",
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                            ),
                           ),
-                        )
-                      : SizedBox(),
-                  IconButton(
-                    onPressed: () {
-                      _saveTodo();
-                    },
-                    tooltip: "Save this task",
-                    icon: const Icon(
-                      Icons.save,
-                      size: 30,
+                        ),
+                      ),
                     ),
                   ),
+                  Expanded(
+                    //! bottom icon row
+                    child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.label,
+                              size: 30,
+                            ),
+                            tooltip: "Add label",
+                            onPressed: () => {
+                              showGeneralDialog(
+                                //! add label dialog box
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Select Label",
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return Container();
+                                },
+                                transitionBuilder: (ctx, a1, a2, child) {
+                                  var curve =
+                                      Curves.easeInOut.transform(a1.value);
+                                  return SelectLabelDialog(
+                                    curve: curve,
+                                    selectedLabel: selectedLabel,
+                                    updateSelectedLabel: (newLabel) {
+                                      setState(() {
+                                        selectedLabel = newLabel;
+                                      });
+                                    },
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              )
+                            },
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              showGeneralDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: "Select Time",
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation) {
+                                  return Container();
+                                },
+                                transitionBuilder: (ctx, a1, a2, child) {
+                                  var curve =
+                                      Curves.easeInOut.transform(a1.value);
+                                  return SelectTimeDialog(
+                                    // key: UniqueKey(),
+                                    curve: curve,
+                                    timeType: timeType!,
+                                    alarms: alarms,
+                                    taskId: taskId!,
+                                    createdAlarms: createdAlarms,
+                                    updateCreatedAlarms:
+                                        (List<Alarm> newCreatedAlarms) {
+                                      setState(() {
+                                        // debugPrint(newCreatedAlarms.toString());
+                                        createdAlarms = [
+                                          ...createdAlarms,
+                                          ...newCreatedAlarms
+                                        ];
+                                        alarms = [
+                                          ...alarms,
+                                          ...newCreatedAlarms
+                                        ];
+                                      });
+                                    },
+                                    deletedAlarms: deletedAlarms,
+                                    updateDeletedAlarms: (Alarm deletedAlarm) {
+                                      setState(() {
+                                        alarms.remove(deletedAlarm);
+                                        if (createdAlarms
+                                            .contains(deletedAlarm)) {
+                                          createdAlarms.remove(deletedAlarm);
+                                        } else {
+                                          deletedAlarms = [
+                                            ...deletedAlarms,
+                                            deletedAlarm
+                                          ];
+                                        }
+                                      });
+                                    },
+                                    selectedTime: selectedTime,
+                                    selectedWeekDates: selectedWeekDates,
+                                    updateSelectedWeekDates: (newWeekDates) {
+                                      setState(() {
+                                        selectedWeekDates = newWeekDates;
+                                      });
+                                    },
+                                    updateSelectedTime: (newTime) {
+                                      setState(() {
+                                        selectedTime = newTime;
+                                      });
+                                    },
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              );
+                              // saveReminder();
+                              // widget.goBack();
+                            },
+                            tooltip: "Add reminder",
+                            icon: const Icon(
+                              Icons.access_alarm,
+                              size: 30,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // action.call();
+                            },
+                            tooltip: "Share task with friends",
+                            icon: const Icon(
+                              Icons.people,
+                              size: 30,
+                            ),
+                          ),
+                          todo != null
+                              ? IconButton(
+                                  onPressed: widget.onDelete,
+                                  tooltip: "Delete this task",
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 30,
+                                  ),
+                                )
+                              : SizedBox(),
+                          IconButton(
+                            onPressed: () {
+                              _saveTodo();
+                            },
+                            tooltip: "Save this task",
+                            icon: const Icon(
+                              Icons.save,
+                              size: 30,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
-            ),
-          )
-        ],
-      ),
-    );
+            );
+          } else {
+            return Container(
+              color: themePurple,
+              height: screenHeight,
+              padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
   }
 }

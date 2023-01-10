@@ -40,7 +40,7 @@ class AlarmDAO {
   }
 
   Future<List<Alarm>> getAlarms(int taskId) async {
-    debugPrint("while getting alarms id: " + taskId.toString());
+    // debugPrint("while getting alarms id: " + taskId.toString());
     var finder = Finder(
       filter: Filter.equals(
         'taskId',

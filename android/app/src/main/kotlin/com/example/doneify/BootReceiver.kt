@@ -19,7 +19,7 @@ class BootReceiver : BroadcastReceiver() {
                 ).build()
                 val activeAlarmDao = db.ActiveAlarmDao()
                 val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-                Log.d("debugging", "in boot receiver, all active alarms: $activeAlarms")
+                // Log.d("debugging", "in boot receiver, all active alarms: $activeAlarms")
                 for (alarm in activeAlarms) {
                     setAlarm(context, alarm.alarmId, alarm.time!!, alarm.repeatStatus!!, alarm.repeatEnd!!, alarm.taskId!!, alarm.taskName!!, alarm.taskDesc!!, alarm.label!!, alarm.finished!!)
                 }

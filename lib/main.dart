@@ -1,41 +1,49 @@
+import 'dart:developer';
 import 'dart:ffi';
+import 'dart:io';
 import 'package:conquer_flutter_app/components/EachTodo.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/startTodos.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:conquer_flutter_app/timeFuncs.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
+import 'package:restart_app/restart_app.dart';
+import 'package:sembast/sembast_io.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final channel = MethodChannel('alarm_method_channel');
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  HomeWidget.registerBackgroundCallback(backgroundCallback);
-  runApp(const MyApp());
+  // WidgetsFlutterBinding.ensureInitialized();
+  // HomeWidget.registerBackgroundCallback(
+  //     backgroundCallback); //replace this with method channel
+  runApp(MyApp());
 }
 
-dynamic backgroundCallback(Uri? uri) async {
-  debugPrint(uri.toString());
-  // if (uri.host == 'todo_checked') {
-  // debugPrint(uri.toString());
-  // await HomeWidget.getWidgetData<int>('_counter', defaultValue: 0)
-  //     .then((value) {
-  //   _counter = value;
-  //   _counter++;
-  // });
-  // await HomeWidget.saveWidgetData<int>('_counter', _counter);
-  // await HomeWidget.updateWidget(
-  //     name: 'AppWidgetProvider', iOSName: 'AppWidgetProvider');
-  // }
+Future registerDB() async {
+  await GetItRegister().initializeGlobalStates();
+  LabelDAO labelsDB = GetIt.I.get();
+  SelectedFilters selectedFilters = GetIt.I.get();
+  StartTodos startTodos = GetIt.I.get();
+
+  //don't fuck up this order
+  await selectedFilters.fetchFiltersFromStorage();
+  await labelsDB.readLabelsFromStorage();
+  await startTodos.loadTodos();
 }
 
 class MyApp extends StatefulWidget {
@@ -46,86 +54,57 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // final Future _init = GetItRegister().initializeGlobalStates();
-  String? launchFromWidgetTimeType;
-  String? launchFromWidgetCommand;
-
-  MaterialColor purple = const MaterialColor(
-    0xffe55f48, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
-    <int, Color>{
-      50: themePurple, //10%
-      100: const Color(0xffa78ae6), //20%
-      200: const Color(0xff957acc), //30%
-      300: const Color(0xff826bb3), //40%
-      400: const Color(0xff705c99), //50%
-      500: const Color(0xff5d4d80), //60%
-      600: const Color(0xff4a3d66), //70%kj
-      700: const Color(0xff382e4c), //80%
-      800: const Color(0xff382e4c), //90%
-      900: const Color(0xff382e4c), //100%
-    },
-  );
-
-  Future registerDB() async {
-    await GetItRegister().initializeGlobalStates();
-    LabelDAO labelsDB = GetIt.I.get();
-    SelectedFilters selectedFilters = GetIt.I.get();
-    StartTodos startTodos = GetIt.I.get();
-
-    //don't fuck up this order
-    await selectedFilters.fetchFiltersFromStorage();
-    await labelsDB.readLabelsFromStorage();
-    await startTodos.loadTodos();
-  }
-
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
+      debugPrint(
+          "call received method ${call.method} argument ${call.arguments}");
       if (call.method == 'task_done') {
-        await registerDB();
-        TodoDAO todosdb = GetIt.I.get();
-        Todo? todo =
-            await todosdb.getTodo(int.parse(call.arguments.toString()));
-        todo!.finished = true;
-        await todosdb.updateTodo(todo);
-        await editAlarms(todo.id, true);
+        String dbPath = 'conquer.db';
+        final appDocDir = await getApplicationDocumentsDirectory();
+        Database db = await databaseFactoryIo
+            .openDatabase(join(appDocDir.path, dbPath), version: 1);
+        debugPrint("opened new db");
 
-        setState(() {});
+        int todoId = int.parse(call.arguments);
+
+        final StoreRef store = intMapStoreFactory.store("todos");
+        // debugPrint("fetched store");
+        final snapshot = await store.record(todoId).getSnapshot(db);
+        // debugPrint("got a todo");
+        Todo todo = Todo.fromMap(snapshot!.value);
+        todo.finished = true;
+        await store.record(todoId).put(db, todo.toMap(), merge: true);
+        // debugPrint("updated todo record in storage");
+
+        try {
+          debugPrint("updating todo for system ${todo.id}");
+          platform.invokeMethod("updateTodo", {
+            "id": todo.id.toString(),
+            "taskName": todo.taskName,
+            "taskDesc": todo.taskDesc,
+            "finished": todo.finished,
+            "labelName": todo.labelName,
+            "timeStamp": todo.timeStamp,
+            "time": todo.time,
+            "timeType": todo.timeType,
+            "index": todo.index,
+          });
+        } on PlatformException catch (e) {
+          debugPrint("some fuckup happended while updating todo: $e");
+        }
+        HomeWidget.updateWidget(
+          name: 'WidgetProvider',
+          iOSName: 'WidgetProvider',
+        );
       }
       return Future<dynamic>.value();
     });
-  }
-
-  createTodo(Todo todo) async {
-    TodoDAO todosdb = GetIt.I.get();
-    await todosdb.createTodo(todo);
-  }
-
-  void _launchedFromWidget(Uri? uri) {
-    if (uri != null) {
-      String parsedURI = uri.toString().split("://")[1];
-      String command = parsedURI.split("/")[0];
-      String timeType = parsedURI.split("/")[1];
-      debugPrint(command);
-      debugPrint(timeType);
-      setState(() {
-        launchFromWidgetCommand = command;
-        launchFromWidgetTimeType = timeType;
-      });
-      debugPrint("in main $timeType");
-    }
   }
 
   @override
   void initState() {
     handleKotlinEvents();
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
-    HomeWidget.widgetClicked.listen(_launchedFromWidget);
   }
 
   @override
@@ -136,65 +115,169 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.deepPurple,
         fontFamily: "EuclidCircular",
       ),
-      home: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xff404049),
-              Color(0xff09090E),
-            ],
+      onGenerateRoute: (RouteSettings settings) {
+        String? entirePath = settings.name;
+        return MaterialPageRoute(
+          builder: (context) => MainContainer(
+            entirePath: entirePath ?? "/",
           ),
+        );
+      },
+    );
+  }
+}
+
+class MainContainer extends StatefulWidget {
+  String entirePath;
+  MainContainer({super.key, required this.entirePath});
+
+  @override
+  State<MainContainer> createState() => _MainContainerState();
+}
+
+class _MainContainerState extends State<MainContainer>
+    with WidgetsBindingObserver {
+  String? path;
+  String? timeType;
+  int? todoId;
+
+  @override
+  void initState() {
+    // debugPrint("entire path ${widget.entirePath}");
+    path = widget.entirePath.split("?")[0];
+
+    if (path == "/createInputModal") {
+      timeType = widget.entirePath.split("?")[1];
+    } else if (path == "/editInputModal") {
+      todoId = int.parse(widget.entirePath.split("?")[1]);
+    }
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    print("Dispose");
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        // print('appLifeCycleState inactive');
+        break;
+      case AppLifecycleState.resumed:
+        // String received = await platform.invokeMethod('get_edited_from_widget');
+        // debugPrint("received in main $received");
+        // if (received == "true") {
+        // platform.invokeMethod("edited_from_widget", {"val": false});
+        Restart.restartApp();
+        // }
+
+        break;
+      case AppLifecycleState.paused:
+        // print('appLifeCycleState paused');
+        break;
+      case AppLifecycleState.detached:
+        // print('appLifeCycleState detached');
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xff404049),
+            Color(0xff09090E),
+          ],
         ),
-        child: Scaffold(
-          body: Center(
-              child: FutureBuilder(
-                  future: registerDB(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (launchFromWidgetCommand == "add_todo") {
-                        return Navigator(
-                          onGenerateRoute: (RouteSettings settings) {
-                            return MaterialPageRoute(builder: (context) {
-                              return InputModal(
-                                goBack: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HomePage(
-                                      key: UniqueKey(),
-                                      launchFromWidgetTimeType:
-                                          launchFromWidgetTimeType,
-                                      launchFromWidgetCommand:
-                                          launchFromWidgetCommand,
-                                    ),
-                                  ),
-                                ),
-                                timeType: "day", //!hardcoded value
-                                time: formattedDate(
-                                    DateTime.now()), //!hardcoded value
-                                createTodo: createTodo,
-                              );
-                            });
+      ),
+      child: Scaffold(
+        body: Center(
+            child: FutureBuilder(
+                future: registerDB(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    TodoDAO todosdb = GetIt.I.get();
+                    switch (path) {
+                      case '/createInputModal':
+                        return WillPopScope(
+                          onWillPop: () async {
+                            debugPrint("going back");
+                            SystemChannels.platform
+                                .invokeMethod<void>('SystemNavigator.pop');
+                            return false;
                           },
+                          child: InputModal(
+                            goBack: () {
+                              SystemChannels.platform.invokeMethod<void>(
+                                  'SystemNavigator.pop'); // debugPrint("entire path $entirePath");
+                            },
+                            loadedFromWidget: true,
+                            timeType: timeType!,
+                            time: formattedTime(timeType!, DateTime.now()),
+                            onCreate: (Todo todo) async {
+                              await todosdb.createTodo(todo);
+                            },
+                          ),
                         );
-                      } else {
+                      case "/editInputModal":
+                        // debugPrint(
+                        //     "todoId $todoId time $time timeType $timeType");
+                        return WillPopScope(
+                          onWillPop: () async {
+                            debugPrint("going back");
+                            SystemChannels.platform
+                                .invokeMethod<void>('SystemNavigator.pop');
+                            return false;
+                          },
+                          child: InputModal(
+                            goBack: () {
+                              SystemChannels.platform
+                                  .invokeMethod<void>('SystemNavigator.pop');
+                            },
+                            todoId: todoId!,
+                            loadedFromWidget: true,
+                            onEdit: (Todo todo) async {
+                              await todosdb.updateTodo(todo);
+                            },
+                            onDelete: () async {
+                              // debugPrint(
+                              //     "this gets run even if i don't want it to");
+                              // platform.invokeMethod(
+                              //     "edited_from_widget", {"val": true});
+                              await todosdb.deleteTodo(todoId!);
+                              SystemChannels.platform
+                                  .invokeMethod<void>('SystemNavigator.pop');
+                            },
+                          ),
+                        );
+                      case "/":
+                        return HomePage(key: UniqueKey());
+                      default:
+                        debugPrint("default contianer");
                         return HomePage(
-                          key: UniqueKey(),
-                          launchFromWidgetTimeType: launchFromWidgetTimeType,
-                          launchFromWidgetCommand: launchFromWidgetCommand,
-                        );
-                      }
-                    } else {
-                      return Container(
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
+                            // key: UniqueKey()
+                            );
                     }
-                  })),
-          backgroundColor: Colors.transparent,
-        ),
+                  } else {
+                    return Container(
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                })),
+        backgroundColor: Colors.transparent,
       ),
     );
   }

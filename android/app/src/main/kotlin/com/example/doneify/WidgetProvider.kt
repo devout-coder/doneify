@@ -129,36 +129,38 @@ class WidgetProvider : HomeWidgetProvider() {
 
 //                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
                     for (todo in todos) {
-                        val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
-                            setTextViewText(R.id.each_todo_container_text, todo.taskName)
-                            setCompoundButtonChecked(
-                                R.id.each_todo_container_checkbox,
-                                todo.finished!!
-                            )
-                            Log.d("debugging", "task name is ${todo.taskName}")
+                        if (!todo.finished!!) {
+                            val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
+                                setTextViewText(R.id.each_todo_container_text, todo.taskName)
+                                setCompoundButtonChecked(
+                                    R.id.each_todo_container_checkbox,
+                                    todo.finished
+                                )
+                                Log.d("debugging", "task name is ${todo.taskName}")
 
-                            val extras = Bundle().apply {
-                                putString("todoId", todo.id)
-                            }
-                            val editIntent = Intent().apply {
-                                putExtras(extras);
-                                action = "editTodo"
-                            }
-                            val checkIntent = Intent().apply {
-                                putExtras(extras);
-                                action = "checkTodo"
-                            }
+                                val extras = Bundle().apply {
+                                    putString("todoId", todo.id)
+                                }
+                                val editIntent = Intent().apply {
+                                    putExtras(extras);
+                                    action = "editTodo"
+                                }
+                                val checkIntent = Intent().apply {
+                                    putExtras(extras);
+                                    action = "checkTodo"
+                                }
 //                            val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
 //                                context,
 //                                Uri.parse("myAppWidget://todo_checked/${todo.id}")//use method channel here please
 //                            )
-                            setOnCheckedChangeResponse(
-                                R.id.each_todo_container_checkbox,
-                                RemoteViews.RemoteResponse.fromFillInIntent(checkIntent)
-                            )
-                            setOnClickFillInIntent(R.id.each_todo_container_text, editIntent)
+                                setOnCheckedChangeResponse(
+                                    R.id.each_todo_container_checkbox,
+                                    RemoteViews.RemoteResponse.fromFillInIntent(checkIntent)
+                                )
+                                setOnClickFillInIntent(R.id.each_todo_container_text, editIntent)
+                            }
+                            todosRemoteView.addItem(todo.id.toLong(), view)
                         }
-                        todosRemoteView.addItem(todo.id.toLong(), view)
                     }
 //                    Log.d("debugging", "update is triggered");
 
@@ -168,12 +170,12 @@ class WidgetProvider : HomeWidgetProvider() {
                             .build()
                     )
 
-                    val editTodoIntent = HomeWidgetLaunchIntent.getActivity(
-                        context,
-                        MainActivity::class.java,
-                        Uri.parse("http://edit_todo/$timeType")
-                    )
-                    val pendingIntentx: PendingIntent = Intent(
+//                    val editTodoIntent = HomeWidgetLaunchIntent.getActivity(
+//                        context,
+//                        MainActivity::class.java,
+//                        Uri.parse("http://edit_todo/$timeType")
+//                    )
+                    val pendingIntentTemplate: PendingIntent = Intent(
                         context,
                         WidgetProvider::class.java
                     ).run {
@@ -187,7 +189,7 @@ class WidgetProvider : HomeWidgetProvider() {
                             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                         )
                     }
-                    setPendingIntentTemplate(R.id.todos_list, pendingIntentx)
+                    setPendingIntentTemplate(R.id.todos_list, pendingIntentTemplate)
                 }
                 appWidgetManager.updateAppWidget(widgetId, views)
             }

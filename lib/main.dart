@@ -48,23 +48,12 @@ Future registerDB() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
-  static void restartApp(BuildContext context) {
-    context.findAncestorStateOfType<_MyAppState>()?.restartApp();
-  }
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  Key key = UniqueKey();
-
-  void restartApp() {
-    setState(() {
-      key = UniqueKey();
-    });
-  }
-
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
       debugPrint(
@@ -79,13 +68,13 @@ class _MyAppState extends State<MyApp> {
         int todoId = int.parse(call.arguments);
 
         final StoreRef store = intMapStoreFactory.store("todos");
-        debugPrint("fetched store");
+        // debugPrint("fetched store");
         final snapshot = await store.record(todoId).getSnapshot(db);
-        debugPrint("got a todo");
+        // debugPrint("got a todo");
         Todo todo = Todo.fromMap(snapshot!.value);
         todo.finished = true;
         await store.record(todoId).put(db, todo.toMap(), merge: true);
-        debugPrint("updated todo record in storage");
+        // debugPrint("updated todo record in storage");
 
         try {
           debugPrint("updating todo for system ${todo.id}");
@@ -107,16 +96,6 @@ class _MyAppState extends State<MyApp> {
           name: 'WidgetProvider',
           iOSName: 'WidgetProvider',
         );
-        // await registerDB();
-        // debugPrint("loaded stuff");
-        // TodoDAO todosdb = GetIt.I.get();
-        // Todo? todo = await todosdb.getTodo(int.parse(call.arguments));
-        // debugPrint("fetched todo $todo");
-        // todo!.finished = true;
-        // await todosdb.updateTodo(todo);
-        // await editAlarms(todo.id, true);
-
-        // setState(() {});
       }
       return Future<dynamic>.value();
     });
@@ -131,7 +110,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      key: key,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
@@ -142,9 +120,6 @@ class _MyAppState extends State<MyApp> {
         return MaterialPageRoute(
           builder: (context) => MainContainer(
             entirePath: entirePath ?? "/",
-            restartApp: () {
-              restartApp();
-            },
           ),
         );
       },
@@ -154,9 +129,7 @@ class _MyAppState extends State<MyApp> {
 
 class MainContainer extends StatefulWidget {
   String entirePath;
-  final restartApp;
-  MainContainer(
-      {super.key, required this.entirePath, required this.restartApp});
+  MainContainer({super.key, required this.entirePath});
 
   @override
   State<MainContainer> createState() => _MainContainerState();
@@ -242,7 +215,7 @@ class _MainContainerState extends State<MainContainer>
                             debugPrint("going back");
                             SystemChannels.platform
                                 .invokeMethod<void>('SystemNavigator.pop');
-                            return true;
+                            return false;
                           },
                           child: InputModal(
                             goBack: () {
@@ -254,7 +227,6 @@ class _MainContainerState extends State<MainContainer>
                             time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
                               await todosdb.createTodo(todo);
-                              setState(() {});
                             },
                           ),
                         );
@@ -266,7 +238,7 @@ class _MainContainerState extends State<MainContainer>
                             debugPrint("going back");
                             SystemChannels.platform
                                 .invokeMethod<void>('SystemNavigator.pop');
-                            return true;
+                            return false;
                           },
                           child: InputModal(
                             goBack: () {
@@ -277,7 +249,6 @@ class _MainContainerState extends State<MainContainer>
                             loadedFromWidget: true,
                             onEdit: (Todo todo) async {
                               await todosdb.updateTodo(todo);
-                              setState(() {});
                             },
                             onDelete: () async {
                               // debugPrint(
@@ -285,7 +256,6 @@ class _MainContainerState extends State<MainContainer>
                               // platform.invokeMethod(
                               //     "edited_from_widget", {"val": true});
                               await todosdb.deleteTodo(todoId!);
-                              setState(() {});
                               SystemChannels.platform
                                   .invokeMethod<void>('SystemNavigator.pop');
                             },

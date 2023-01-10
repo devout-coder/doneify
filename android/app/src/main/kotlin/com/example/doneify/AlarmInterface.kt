@@ -83,6 +83,10 @@ class AlarmInterface : Activity() {
                 flutterEngine.dartExecutor.binaryMessenger,
                 CHANNEL
             )
+
+            methodChannel.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
+                handleMethodCalls(this, call, result)
+            }
             methodChannel.invokeMethod("task_done", "$taskId")
             notificationManager.cancel(0)
             finish()

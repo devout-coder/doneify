@@ -27,6 +27,10 @@ val CHANNEL = "alarm_method_channel"
 
 fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel.Result?) {
 
+    val db: AppDB = AppDB.getDatabase(context)
+    val activeAlarmDao = db.activeAlarmDAO()
+    val todoDAO = db.todoDAO()
+
     if (call!!.method == "setAlarm") {
         val alarmId: String = call.argument<String>("alarmId")!!
         val time: String = call.argument<String>("time")!!
@@ -38,12 +42,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         val label: String = call.argument<String>("label")!!
         val finished: Boolean = call.argument<Boolean>("finished")!!
         Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            activeAlarmDao.insert(
+            activeAlarmDao!!.insert(
                 ActiveAlarm(
                     alarmId = alarmId,
                     time = time,
@@ -78,12 +77,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         deleteAlarm(context, alarmId)
     } else if (call.method == "getActiveIds") {
         Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
+            val activeAlarms: List<ActiveAlarm> = activeAlarmDao!!.getAll()
             val activeAlarmsIds: List<String> =
                 activeAlarms.map { activeAlarm -> activeAlarm.alarmId }
             result!!.success(activeAlarmsIds)
@@ -91,12 +85,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         }.start()
     } else if (call.method == "getAllAlarms") {
         Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
+            val activeAlarms: List<ActiveAlarm> = activeAlarmDao!!.getAll()
 //                    val activeAlarmsMap: List<String> = activeAlarms.map { activeAlarm -> Gson().toJson(activeAlarm) }
             result!!.success(Gson().toJson(activeAlarms))
             // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
@@ -153,16 +142,11 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             index = index
         )
         Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val todoDAO = db.TodoDAO()
             if (call.method == "createTodo") {
                 Log.d("debugging", "the id used is $id")
-                todoDAO.insert(todo)
+                todoDAO!!.insert(todo)
             } else {
-                todoDAO.update(todo)
+                todoDAO!!.update(todo)
             }
         }.start()
     } else if (call.method == "deleteTodo") {
@@ -170,12 +154,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
         var reqTodo: Todo?
         Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val todoDAO = db.TodoDAO()
-            val fetchedTodos: List<Todo> = todoDAO.getById(id)
+            val fetchedTodos: List<Todo> = todoDAO!!.getById(id)
             if (fetchedTodos.isNotEmpty()) {
                 reqTodo = fetchedTodos[0]
                 todoDAO.delete(reqTodo!!)
@@ -332,12 +311,9 @@ fun setAlarm(
 fun deleteAlarm(context: Context, alarmId: String) {
     Thread {
         var reqAlarm: ActiveAlarm?
-        val db = Room.databaseBuilder(
-            context,
-            AppDatabase::class.java, "db"
-        ).build()
-        val activeAlarmDao = db.ActiveAlarmDao()
-        val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao.getById(alarmId)
+        val db: AppDB = AppDB.getDatabase(context)
+        val activeAlarmDao = db.activeAlarmDAO()
+        val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao!!.getById(alarmId)
         if (fetchedAlarms.isNotEmpty()) {
             reqAlarm = fetchedAlarms[0]
             activeAlarmDao.delete(reqAlarm)

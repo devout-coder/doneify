@@ -12,16 +12,28 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             Log.d("debugging", "boot received")
 
-            Thread{
-                val db = Room.databaseBuilder(
-                        context,
-                        AppDatabase::class.java, "db"
-                ).build()
-                val activeAlarmDao = db.ActiveAlarmDao()
-                val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
+            Thread {
+                val db: AppDB = AppDB.getDatabase(context)
+//                    val db = Room.databaseBuilder(
+//                        context,
+//                        AppDatabase::class.java, "db"
+//                    ).build()
+                val activeAlarmDao = db.activeAlarmDAO()
+                val activeAlarms: List<ActiveAlarm> = activeAlarmDao!!.getAll()
                 // Log.d("debugging", "in boot receiver, all active alarms: $activeAlarms")
                 for (alarm in activeAlarms) {
-                    setAlarm(context, alarm.alarmId, alarm.time!!, alarm.repeatStatus!!, alarm.repeatEnd!!, alarm.taskId!!, alarm.taskName!!, alarm.taskDesc!!, alarm.label!!, alarm.finished!!)
+                    setAlarm(
+                        context,
+                        alarm.alarmId,
+                        alarm.time!!,
+                        alarm.repeatStatus!!,
+                        alarm.repeatEnd!!,
+                        alarm.taskId!!,
+                        alarm.taskName!!,
+                        alarm.taskDesc!!,
+                        alarm.label!!,
+                        alarm.finished!!
+                    )
                 }
             }.start()
         }

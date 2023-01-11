@@ -1,5 +1,6 @@
 package com.example.doneify
 
+import android.content.Context
 import androidx.room.*
 
 @Entity
@@ -32,7 +33,7 @@ data class Todo(
     )
 
 @Dao
-interface ActiveAlarmDao {
+interface ActiveAlarmDAO {
     @Query("SELECT * FROM ActiveAlarm")
     fun getAll(): List<ActiveAlarm>
 
@@ -67,8 +68,33 @@ interface TodoDAO {
     fun delete(todo: Todo)
 }
 
-@Database(entities = [ActiveAlarm::class, Todo::class], version = 1)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun ActiveAlarmDao(): ActiveAlarmDao
-    abstract fun TodoDAO(): TodoDAO
+//@Database(entities = [ActiveAlarm::class, Todo::class], version = 1)
+//abstract class AppDatabase : RoomDatabase() {
+//    abstract fun ActiveAlarmDao(): ActiveAlarmDao
+//    abstract fun TodoDAO(): TodoDAO
+//}
+
+@Database(entities = [Todo::class, ActiveAlarm::class], version = 1, exportSchema = false)
+abstract class AppDB : RoomDatabase() {
+    abstract fun todoDAO(): TodoDAO?
+    abstract fun activeAlarmDAO(): ActiveAlarmDAO?
+
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDB? = null
+        fun getDatabase(context: Context): AppDB {
+
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDB::class.java,
+                    "db"
+                ).build()
+                INSTANCE = instance
+                // return instance
+                instance
+            }
+        }
+    }
 }

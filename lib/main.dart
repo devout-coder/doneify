@@ -96,6 +96,8 @@ class _MyAppState extends State<MyApp> {
           name: 'WidgetProvider',
           iOSName: 'WidgetProvider',
         );
+      } else if (call.method == "event") {
+        debugPrint("in main ${call.arguments}");
       }
       return Future<dynamic>.value();
     });
@@ -175,7 +177,7 @@ class _MainContainerState extends State<MainContainer>
         // debugPrint("received in main $received");
         // if (received == "true") {
         // platform.invokeMethod("edited_from_widget", {"val": false});
-        Restart.restartApp();
+        // Restart.restartApp();
         // }
 
         break;

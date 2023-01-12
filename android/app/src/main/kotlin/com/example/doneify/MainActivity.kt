@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 
 val CHANNEL = "alarm_method_channel"
@@ -171,6 +172,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
 
         val receiver = ComponentName(context, BootReceiver::class.java)
         context.packageManager.setComponentEnabledSetting(

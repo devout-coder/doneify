@@ -91,34 +91,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             result!!.success(Gson().toJson(activeAlarms))
             // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
         }.start()
-    }
-//    else if (call.method == "edited_from_widget") {
-//        val value: Boolean = call.argument<Boolean>("val")!!
-//        Log.d("debugging", "kotlin side: value received in edited widget: $value")
-//        val savedVal: String?
-//        if (value == true) {
-//            savedVal = "true"
-//        } else {
-//            savedVal = "false"
-//        }
-//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        with(sharedPref.edit()) {
-//            putString("widget", savedVal)
-//            apply()
-//        }
-//
-//        val sharedPrf = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        val fetched = sharedPrf.getString("widget", "null")
-//        Log.d("debugging", "kotlin side: verifying value saved: $fetched")
-////        }
-//    }
-//    else if (call.method == "get_edited_from_widget") {
-//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        val fetched = sharedPref.getString("widget", "null")
-//        Log.d("debugging", "kotlin side: value fetched from edited widget: $fetched")
-//        result!!.success(fetched)
-//    }
-    else if (call.method == "createTodo" || call.method == "updateTodo") {
+    } else if (call.method == "createTodo" || call.method == "updateTodo") {
 //        methodChannel!!.invokeMethod("callBack", "data1")
         val id: String = call.argument<String>("id")!!
         Log.d("debugging", "kotlin side: tryna ${call.method}, $id")

@@ -16,6 +16,7 @@ import 'package:conquer_flutter_app/timeFuncs.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:path/path.dart';
@@ -44,6 +45,11 @@ Future registerDB() async {
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
   await startTodos.loadTodos();
+
+  // FlutterAccessibilityService.accessStream.listen((event) {
+  //   debugPrint("inside listen");
+  //   //use only isActive and isFocussed event
+  // });
 }
 
 class MyApp extends StatefulWidget {
@@ -56,8 +62,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      debugPrint(
-          "call received method ${call.method} argument ${call.arguments}");
+      // debugPrint(
+      //     "call received method ${call.method} argument ${call.arguments}");
       if (call.method == 'task_done') {
         String dbPath = 'conquer.db';
         final appDocDir = await getApplicationDocumentsDirectory();
@@ -97,7 +103,11 @@ class _MyAppState extends State<MyApp> {
           iOSName: 'WidgetProvider',
         );
       } else if (call.method == "event") {
-        debugPrint("in main ${call.arguments}");
+        debugPrint("received accesibility event ${call.arguments}");
+        //use only isActive and isFocussed event
+      } else if (call.method == "reset_accessibility") {
+        debugPrint("accesibility is gonna be reset");
+        FlutterAccessibilityService.accessStream.listen((event) {});
       }
       return Future<dynamic>.value();
     });

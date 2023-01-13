@@ -52,34 +52,23 @@ class _NudgerConfirmationModalState extends State<NudgerConfirmationModal> {
 
                         debugPrint("status fo accessibility enablity: $status");
 
-                        /// request accessibility permission
-                        /// it will open the accessibility settings page and return `true` once the permission granted.
-                        await FlutterAccessibilityService
-                            .requestAccessibilityPermission();
+                        if (!status) {
+                          bool didEnable = await FlutterAccessibilityService
+                              .requestAccessibilityPermission();
+                          debugPrint(
+                              "after returning from settings: $didEnable");
+                        }
 
-                        /// stream the incoming Accessibility events
                         FlutterAccessibilityService.accessStream
                             .listen((event) {
-                          debugPrint("Current Event: $event");
+                          debugPrint("inside listen");
                           //use only isActive and isFocussed event
-
-                          /*
-  Current Event: AccessibilityEvent: (
-     Action Type: 0
-     Event Time: 2022-04-11 14:19:56.556834
-     Package Name: com.facebook.katana
-     Event Type: EventType.typeWindowContentChanged
-     Captured Text: events you may like
-     content Change Types: ContentChangeTypes.contentChangeTypeSubtree
-     Movement Granularity: 0
-     Is Active: true
-     is focused: true
-     in Pip: false
-     window Type: WindowType.typeApplication
-     Screen bounds: left: 0 - right: 720 - top: 0 - bottom: 1544 - width: 720 - height: 1544
-)
-  */
                         });
+
+                        /// request accessibility permission
+                        /// it will open the accessibility settings page and return `true` once the permission granted.
+
+                        /// stream the incoming Accessibility events
                       },
                       child: Text(
                         "Fine, take me to settings",

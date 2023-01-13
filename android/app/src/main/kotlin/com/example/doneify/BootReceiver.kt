@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.room.Room
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 class BootReceiver : BroadcastReceiver() {
 
@@ -12,6 +17,21 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
             Log.d("debugging", "boot received")
 
+            val flutterEngine = FlutterEngine(context);
+            flutterEngine
+                .dartExecutor
+                .executeDartEntrypoint(
+                    DartExecutor.DartEntrypoint.createDefault()
+                )
+//            GeneratedPluginRegistrant.registerWith(flutterEngine);
+            val methodChannel = MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                "alarm_method_channel"
+            )
+//            methodChannel.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
+//                handleMethodCalls(context, call, result)
+//            }
+            methodChannel.invokeMethod("reset_accessibility", "")
             Thread {
                 val db: AppDB = AppDB.getDatabase(context)
 //                    val db = Room.databaseBuilder(

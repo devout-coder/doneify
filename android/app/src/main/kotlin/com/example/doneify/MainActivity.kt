@@ -1,30 +1,72 @@
 package com.example.doneify
 
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
+import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.NonNull
-import androidx.room.Room
+import androidx.annotation.Nullable
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.*
 import io.flutter.plugins.GeneratedPluginRegistrant
+import java.util.*
 
 
 val CHANNEL = "alarm_method_channel"
+
+const val REQUEST_CODE_FOR_ACCESSIBILITY = 167
+
+fun isAccessibilitySettingsOn(mContext: Context): Boolean {
+    var accessibilityEnabled = 0
+    val service = mContext.packageName + "/" + NudgerAccessibilityService::class.java.canonicalName
+    try {
+        accessibilityEnabled = Settings.Secure.getInt(
+            mContext.applicationContext.contentResolver,
+            Settings.Secure.ACCESSIBILITY_ENABLED
+        )
+    } catch (e: Settings.SettingNotFoundException) {
+    }
+    val mStringColonSplitter = TextUtils.SimpleStringSplitter(':')
+    if (accessibilityEnabled == 1) {
+        val settingValue = Settings.Secure.getString(
+            mContext.applicationContext.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        )
+        if (settingValue != null) {
+            mStringColonSplitter.setString(settingValue)
+            while (mStringColonSplitter.hasNext()) {
+                val accessibilityService = mStringColonSplitter.next()
+                if (accessibilityService.equals(service, ignoreCase = true)) {
+                    return true
+                }
+            }
+        }
+    } else {
+    }
+    return false
+}
+
+var pendingResult: MethodChannel.Result? = null
+
+fun handleNudgerCall(
+    activity: Activity,
+    context: Context,
+    call: MethodCall?,
+    result: MethodChannel.Result?
+) {
+    if (call!!.method == "requestAccessibilityPermission") {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        activity.startActivityForResult(intent, REQUEST_CODE_FOR_ACCESSIBILITY)
+        pendingResult = result
+    }
+}
 
 fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel.Result?) {
 
@@ -32,7 +74,9 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
     val activeAlarmDao = db.activeAlarmDAO()
     val todoDAO = db.todoDAO()
 
-    if (call!!.method == "setAlarm") {
+    if (call!!.method == "getAccessibilityStatus") {
+        result!!.success(isAccessibilitySettingsOn(context))
+    } else if (call.method == "setAlarm") {
         val alarmId: String = call.argument<String>("alarmId")!!
         val time: String = call.argument<String>("time")!!
         val repeatStatus: String = call.argument<String>("repeatStatus")!!
@@ -185,6 +229,19 @@ class MainActivity : FlutterActivity() {
         )
         methodChannel!!.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
             handleMethodCalls(context, call, result)
+            handleNudgerCall(this, context, call, result)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
+        if (requestCode == REQUEST_CODE_FOR_ACCESSIBILITY) {
+            if (resultCode == RESULT_OK) {
+                pendingResult?.success(true)
+            } else if (resultCode == RESULT_CANCELED) {
+                pendingResult?.success(isAccessibilitySettingsOn(context))
+            } else {
+                pendingResult?.success(false)
+            }
         }
     }
 }

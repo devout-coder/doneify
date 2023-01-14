@@ -2,6 +2,7 @@ import 'package:conquer_flutter_app/components/NudgerConfirmationDialog.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NudgerSettings extends StatefulWidget {
   const NudgerSettings({super.key});

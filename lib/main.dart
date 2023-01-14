@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:conquer_flutter_app/components/EachTodo.dart';
+import 'package:conquer_flutter_app/dartMethodCalls.dart';
 import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
@@ -16,7 +17,6 @@ import 'package:conquer_flutter_app/timeFuncs.dart';
 import 'package:flutter/material.dart';
 import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:path/path.dart';
@@ -46,6 +46,11 @@ Future registerDB() async {
   await labelsDB.readLabelsFromStorage();
   await startTodos.loadTodos();
 
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setStringList(
+      "blacklistedApps", ["com.yodo1.crossyroad", "com.instagram.android"]);
+  prefs.setString("currentBlacklisted", "");
+
   // FlutterAccessibilityService.accessStream.listen((event) {
   //   debugPrint("inside listen");
   //   //use only isActive and isFocussed event
@@ -64,51 +69,7 @@ class _MyAppState extends State<MyApp> {
     channel.setMethodCallHandler((call) async {
       // debugPrint(
       //     "call received method ${call.method} argument ${call.arguments}");
-      if (call.method == 'task_done') {
-        String dbPath = 'conquer.db';
-        final appDocDir = await getApplicationDocumentsDirectory();
-        Database db = await databaseFactoryIo
-            .openDatabase(join(appDocDir.path, dbPath), version: 1);
-        debugPrint("opened new db");
-
-        int todoId = int.parse(call.arguments);
-
-        final StoreRef store = intMapStoreFactory.store("todos");
-        // debugPrint("fetched store");
-        final snapshot = await store.record(todoId).getSnapshot(db);
-        // debugPrint("got a todo");
-        Todo todo = Todo.fromMap(snapshot!.value);
-        todo.finished = true;
-        await store.record(todoId).put(db, todo.toMap(), merge: true);
-        // debugPrint("updated todo record in storage");
-
-        try {
-          debugPrint("updating todo for system ${todo.id}");
-          platform.invokeMethod("updateTodo", {
-            "id": todo.id.toString(),
-            "taskName": todo.taskName,
-            "taskDesc": todo.taskDesc,
-            "finished": todo.finished,
-            "labelName": todo.labelName,
-            "timeStamp": todo.timeStamp,
-            "time": todo.time,
-            "timeType": todo.timeType,
-            "index": todo.index,
-          });
-        } on PlatformException catch (e) {
-          debugPrint("some fuckup happended while updating todo: $e");
-        }
-        HomeWidget.updateWidget(
-          name: 'WidgetProvider',
-          iOSName: 'WidgetProvider',
-        );
-      } else if (call.method == "event") {
-        debugPrint("received accesibility event ${call.arguments}");
-        //use only isActive and isFocussed event
-      } else if (call.method == "reset_accessibility") {
-        debugPrint("accesibility is gonna be reset");
-        FlutterAccessibilityService.accessStream.listen((event) {});
-      }
+      kotlinMethodCallHandler(call);
       return Future<dynamic>.value();
     });
   }

@@ -1,6 +1,6 @@
+import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 
 class NudgerConfirmationModal extends StatefulWidget {
   final double curve;
@@ -47,28 +47,25 @@ class _NudgerConfirmationModalState extends State<NudgerConfirmationModal> {
                     ),
                     TextButton(
                       onPressed: () async {
-                        final bool status = await FlutterAccessibilityService
-                            .isAccessibilityPermissionEnabled();
+                        //   final bool status = await FlutterAccessibilityService
+                        //       .isAccessibilityPermissionEnabled();
+                        final bool status = await platform
+                            .invokeMethod("getAccessibilityStatus");
 
-                        debugPrint("status fo accessibility enablity: $status");
+                        debugPrint("status of accessibility enablity: $status");
 
                         if (!status) {
-                          bool didEnable = await FlutterAccessibilityService
-                              .requestAccessibilityPermission();
+                          bool didEnable = await platform
+                              .invokeMethod("requestAccessibilityPermission");
                           debugPrint(
                               "after returning from settings: $didEnable");
                         }
 
-                        FlutterAccessibilityService.accessStream
-                            .listen((event) {
-                          debugPrint("inside listen");
-                          //use only isActive and isFocussed event
-                        });
-
-                        /// request accessibility permission
-                        /// it will open the accessibility settings page and return `true` once the permission granted.
-
-                        /// stream the incoming Accessibility events
+                        // FlutterAccessibilityService.accessStream
+                        //     .listen((event) {
+                        //   debugPrint("inside listen");
+                        //   //use only isActive and isFocussed event
+                        // });
                       },
                       child: Text(
                         "Fine, take me to settings",

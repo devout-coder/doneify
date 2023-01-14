@@ -76,15 +76,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_accessibility_service:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: b8af55129adc86eb5d12be8998d66a082a987e8a
-      url: "https://github.com/devout-coder/flutter_accessibility_service.git"
-    source: git
-    version: "0.2.2"
   flutter_colorpicker:
     dependency: "direct main"
     description:

@@ -10,6 +10,7 @@ import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
+import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:conquer_flutter_app/states/startTodos.dart';
 import 'package:conquer_flutter_app/states/todoDAO.dart';
@@ -46,15 +47,8 @@ Future registerDB() async {
   await labelsDB.readLabelsFromStorage();
   await startTodos.loadTodos();
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setStringList(
-      "blacklistedApps", ["com.yodo1.crossyroad", "com.instagram.android"]);
-  prefs.setString("currentBlacklisted", "");
-
-  // FlutterAccessibilityService.accessStream.listen((event) {
-  //   debugPrint("inside listen");
-  //   //use only isActive and isFocussed event
-  // });
+  NudgerStates nudgerStates = GetIt.I.get();
+  nudgerStates.fetchNudgerStates();
 }
 
 class MyApp extends StatefulWidget {

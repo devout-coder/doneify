@@ -65,6 +65,9 @@
             android:name=".AlarmReceiver"
             android:exported="true"></receiver>
         <receiver
+            android:name=".NudgerAlarmReceiver"
+            android:exported="true"></receiver>
+        <receiver
             android:name=".BootReceiver"
             android:enabled="false"
             android:exported="true">

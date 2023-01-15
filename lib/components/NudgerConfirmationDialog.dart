@@ -1,12 +1,17 @@
 import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 
 class NudgerConfirmationModal extends StatefulWidget {
   final double curve;
-  const NudgerConfirmationModal({
+  Function turnOn;
+  NudgerConfirmationModal({
     super.key,
     required this.curve,
+    required this.turnOn,
   });
 
   @override
@@ -15,6 +20,8 @@ class NudgerConfirmationModal extends StatefulWidget {
 }
 
 class _NudgerConfirmationModalState extends State<NudgerConfirmationModal> {
+  NudgerStates nudgerStates = GetIt.I.get();
+
   @override
   Widget build(BuildContext context) {
     return Transform.scale(
@@ -34,9 +41,11 @@ class _NudgerConfirmationModalState extends State<NudgerConfirmationModal> {
                     ),
                     SizedBox(height: 15),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                       child: Text(
-                        "I can trust big tech but not you",
+                        "No, I can trust big tech but not you",
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
@@ -47,25 +56,21 @@ class _NudgerConfirmationModalState extends State<NudgerConfirmationModal> {
                     ),
                     TextButton(
                       onPressed: () async {
-                        //   final bool status = await FlutterAccessibilityService
-                        //       .isAccessibilityPermissionEnabled();
-                        final bool status = await platform
-                            .invokeMethod("getAccessibilityStatus");
-
-                        debugPrint("status of accessibility enablity: $status");
-
-                        if (!status) {
-                          bool didEnable = await platform
-                              .invokeMethod("requestAccessibilityPermission");
-                          debugPrint(
-                              "after returning from settings: $didEnable");
+                        bool didEnable =
+                            await nudgerStates.requestAccessibilityPermission();
+                        debugPrint("after returning from settings: $didEnable");
+                        if (didEnable) {
+                          Navigator.pop(context);
+                          await widget.turnOn();
+                        } else {
+                          Navigator.pop(context);
+                          Fluttertoast.showToast(
+                            msg:
+                                "Nudger couldn't be turned on cause you didn't provide Doneify accessibility permission",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                          );
                         }
-
-                        // FlutterAccessibilityService.accessStream
-                        //     .listen((event) {
-                        //   debugPrint("inside listen");
-                        //   //use only isActive and isFocussed event
-                        // });
                       },
                       child: Text(
                         "Fine, take me to settings",

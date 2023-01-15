@@ -6,7 +6,9 @@ import 'package:conquer_flutter_app/pages/Auth.dart';
 import 'package:conquer_flutter_app/pages/FriendsSettings.dart';
 import 'package:conquer_flutter_app/pages/LabelsSettings.dart';
 import 'package:conquer_flutter_app/pages/NudgerSettings.dart';
+import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class SettingsNavigator extends StatefulWidget {
   SettingsNavigator({Key? key}) : super(key: key);
@@ -78,6 +80,11 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool signedUp = false;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -195,14 +202,32 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(height: 80),
         SettingsButton(
           buttonWidth: 205,
-          page: "nudgerSettings",
-          pageName: "Nudger",
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              "/nudgerSettings",
+            );
+          },
+          title: "Nudger",
+          icon: Icon(
+            Icons.keyboard_arrow_right,
+            size: 24.0,
+          ),
         ),
         SizedBox(height: 20),
         SettingsButton(
           buttonWidth: 210,
-          page: "labelsSettings",
-          pageName: "Labels",
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              "/labelsSettings",
+            );
+          },
+          title: "Labels",
+          icon: Icon(
+            Icons.keyboard_arrow_right,
+            size: 24.0,
+          ),
         ),
         SizedBox(height: 20),
         signedUp
@@ -210,14 +235,32 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   SettingsButton(
                     buttonWidth: 205,
-                    page: "friendsSettings",
-                    pageName: "Friends",
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        "/friendsSettings",
+                      );
+                    },
+                    title: "Friends",
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 24.0,
+                    ),
                   ),
                   SizedBox(height: 20),
                   SettingsButton(
                     buttonWidth: 185,
-                    page: "accountSettings",
-                    pageName: "Account",
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        "/accountSettings",
+                      );
+                    },
+                    title: "Account",
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 24.0,
+                    ),
                   ),
                 ],
               )

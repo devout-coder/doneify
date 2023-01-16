@@ -13,6 +13,8 @@ import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+List<String> times = ["Day", "Week", "Month", "Year", "Long Term"];
+
 class NudgerSettings extends StatefulWidget {
   const NudgerSettings({super.key});
 
@@ -26,6 +28,9 @@ class _NudgerSettingsState extends State<NudgerSettings> {
   bool nudgerSwitch = false;
   bool accessibilityTurnedOn = false;
   bool nudgerTurnedOn = false;
+  String time = "Day";
+  bool presentTodos = true;
+  final duration = TextEditingController();
   // bool loading = false;
 
   void handleSwitch() {
@@ -80,6 +85,7 @@ class _NudgerSettingsState extends State<NudgerSettings> {
   @override
   void initState() {
     checkSwitch();
+    duration.text = "5";
     super.initState();
   }
 
@@ -88,6 +94,7 @@ class _NudgerSettingsState extends State<NudgerSettings> {
     double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: () {
@@ -141,6 +148,140 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                       icon: Icon(
                         Icons.keyboard_arrow_down,
                         size: 24.0,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    Container(
+                      width: screenWidth * 0.8,
+                      child: Column(
+                        children: [
+                          Text(
+                            "Tasks you want to be notified about: ",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          SizedBox(height: 15),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              height: 35,
+                              width: 100,
+                              child: DropdownButton<String>(
+                                value: time,
+                                isExpanded: true,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                style: const TextStyle(color: Colors.white),
+                                selectedItemBuilder: ((context) {
+                                  return times.map((String value) {
+                                    return Text(
+                                      time,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontFamily: 'EuclidCircular',
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    );
+                                  }).toList();
+                                }),
+                                underline: Container(
+                                  height: 2,
+                                  color: themeMediumPurple,
+                                ),
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    time = value!;
+                                  });
+                                },
+                                items: times.map<DropdownMenuItem<String>>(
+                                    (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 35),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Get notified every ",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
+                              ),
+                              SizedBox(width: 10),
+                              SizedBox(
+                                width: 35,
+                                height: 30,
+                                child: TextField(
+                                  maxLength: 3,
+                                  decoration: InputDecoration(
+                                    counterText: "",
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.deepPurple),
+                                    ),
+                                  ),
+                                  onChanged: (String val) {
+                                    debugPrint(val);
+                                  },
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  controller: duration,
+                                  maxLines: 1,
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              SizedBox(width: 15),
+                              Text(
+                                "minutes",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 30),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                presentTodos = !presentTodos;
+                              });
+                            },
+                            child: Text(
+                              "Get notified only about present tasks",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Switch(
+                              activeTrackColor: themePurple,
+                              activeColor: themeMediumPurple,
+                              value: presentTodos,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  presentTodos = value;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                        ],
                       ),
                     ),
                   ],

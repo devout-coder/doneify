@@ -80,6 +80,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           child: Scaffold(
+            resizeToAvoidBottomInset: false,
             body: IndexedStack(
               index: currentPage,
               children: [

@@ -169,6 +169,7 @@ class _MainContainerState extends State<MainContainer>
         ),
       ),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Center(
             child: FutureBuilder(
                 future: registerDB(),

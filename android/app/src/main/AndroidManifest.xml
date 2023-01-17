@@ -51,14 +51,23 @@
             android:theme="@style/Dialog"
             android:turnScreenOn="true" />
         <activity
-            android:name=".CustomFlutterActivity"
+            android:name=".WidgetFlutterActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
-            android:taskAffinity=".CustomFlutterActivity"
+            android:taskAffinity=".WidgetFlutterActivity"
             android:theme="@style/Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".NudgerFlutterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize" />
 
         <receiver

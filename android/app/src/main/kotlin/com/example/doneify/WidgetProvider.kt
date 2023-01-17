@@ -27,17 +27,17 @@ import kotlinx.coroutines.launch
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
 //import es.antonborri.home_widget.HomeWidgetProvider
 
-class CustomFlutterActivity : FlutterActivity() {
+class WidgetFlutterActivity : FlutterActivity() {
 
     companion object {
         var methodChannelInvoker: (MethodCall, MethodChannel.Result) -> Unit = { _, _ -> }
 
 //        fun withCachedEngine(cachedEngineId: String): CachedEngineIntentBuilder {
-//            return CachedEngineIntentBuilder(CustomFlutterActivity::class.java, cachedEngineId)
+//            return CachedEngineIntentBuilder(WidgetFlutterActivity::class.java, cachedEngineId)
 //        }
 
         fun withNewEngine(): NewEngineIntentBuilder {
-            return NewEngineIntentBuilder(CustomFlutterActivity::class.java)
+            return NewEngineIntentBuilder(WidgetFlutterActivity::class.java)
         }
     }
 
@@ -199,13 +199,13 @@ class WidgetProvider : HomeWidgetProvider() {
         if (intent!!.action == "editTodo") {
             val todoId: String? = intent.getStringExtra("todoId")
             Log.d("debugging", "an item is clicked $todoId")
-            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+            WidgetFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
             }
             PendingIntent.getActivity(
                 context,
                 0,
-                CustomFlutterActivity
+                WidgetFlutterActivity
                     .withNewEngine()
                     .initialRoute("/editInputModal?$todoId")
                     .build(context!!),
@@ -214,13 +214,13 @@ class WidgetProvider : HomeWidgetProvider() {
         } else if (intent.action == "createTodo") {
             val timeType: String? = intent.getStringExtra("timeType")
             Log.d("debugging", "tryna create todo with timetype: $timeType")
-            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+            WidgetFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
             }
             PendingIntent.getActivity(
                 context,
                 0,
-                CustomFlutterActivity
+                WidgetFlutterActivity
                     .withNewEngine()
                     .initialRoute("/createInputModal?$timeType")
                     .build(context!!),

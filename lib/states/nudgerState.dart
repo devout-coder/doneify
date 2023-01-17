@@ -44,6 +44,8 @@ class NudgerStates {
       List<Object?> blacklistedAppsObj =
           await platform.invokeMethod("getBlacklistedApps");
       blacklistedApps = blacklistedAppsObj.map((e) => e.toString()).toList();
+      debugPrint(
+          "fetched installed apps while loading the app ${installedApps.length}");
     }
   }
 }

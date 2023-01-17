@@ -92,6 +92,51 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.putStringSet("blacklistedApps", blacklistedApps.toSet())
         editor.apply()
+    } else if (call.method == "setNudgerTimeType") {
+        val timeType: String = call.argument<String>("timeType")!!
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putString("timeType", timeType)
+        editor.apply()
+    } else if (call.method == "getNudgerTimeType") {
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val timeType =
+            sharedPref.getString("timeType", "Day")
+        result!!.success(timeType)
+    } else if (call.method == "setInterval") {
+        val interval: String = call.argument<String>("interval")!!
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putInt("interval", Integer.parseInt(interval))
+        editor.apply()
+    } else if (call.method == "getInterval") {
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val interval =
+            sharedPref.getInt("interval", 1)
+        result!!.success(interval.toString())
+    } else if (call.method == "setOnlyPresent") {
+        val onlyPresent: Boolean = call.argument<Boolean>("onlyPresent")!!
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putBoolean("onlyPresent", onlyPresent)
+        editor.apply()
+    } else if (call.method == "getOnlyPresent") {
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val onlyPresent =
+            sharedPref.getBoolean("onlyPresent", false)
+        result!!.success(onlyPresent)
     } else if (call.method == "setAlarm") {
         val alarmId: String = call.argument<String>("alarmId")!!
         val time: String = call.argument<String>("time")!!

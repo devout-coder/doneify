@@ -42,10 +42,11 @@ class NudgerAccessibilityService : AccessibilityService() {
                 windowFocussed = windowInfo.isFocused
                 windowInPIP = windowInfo.isInPictureInPictureMode
                 windowFullScreen = accessibilityEvent.isFullScreen
-                if (windowActive && windowFocussed && windowFullScreen) {
+                if (windowActive && windowFocussed) {
                     val storedBlacklisted = sharedPref.getString("blacklisted", "")
                     val blacklistedApps =
                         sharedPref.getStringSet("blacklistedApps", mutableSetOf<String>())
+
                     if (storedBlacklisted != packageName && storedBlacklisted != "") {
                         //if some app other than the one which is stored is opened, delete alarm
                         Log.d("debugging", "gotta cancel alarm")
@@ -65,7 +66,7 @@ class NudgerAccessibilityService : AccessibilityService() {
                             this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
                         alarmManager!!.cancel(pendingAlarmIntent)
                     }
-                if (storedBlacklisted != packageName && blacklistedApps!!.contains(packageName)) {
+                    if (storedBlacklisted != packageName && blacklistedApps!!.contains(packageName)) {
 //                    if (storedBlacklisted != packageName && mutableSetOf<String>(
 //                            "com.instagram.android",
 //                            "com.yodo1.crossyroad"
@@ -76,6 +77,9 @@ class NudgerAccessibilityService : AccessibilityService() {
                         editor.putString("blacklisted", packageName)
                         editor.apply()
                         //set alarm
+
+                        val interval =
+                            sharedPref.getInt("interval", 1)
 
                         val alarmIntent = Intent(this, NudgerAlarmReceiver::class.java)
                         val pendingAlarmIntent =
@@ -89,7 +93,8 @@ class NudgerAccessibilityService : AccessibilityService() {
                             this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
                         alarmManager!!.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis() + 10000,
+//                            System.currentTimeMillis() + interval * 60 * 1000,
+                            System.currentTimeMillis() + interval * 10000,
                             pendingAlarmIntent
                         )
                     }

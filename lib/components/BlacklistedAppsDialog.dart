@@ -88,7 +88,7 @@ class _BlacklistedAppsDialogState extends State<BlacklistedAppsDialog> {
   Future loadStuff() async {
     installedApps = nudgerStates.installedApps;
     blacklistedApps = nudgerStates.blacklistedApps;
-    debugPrint("installed apps: $installedApps");
+    // debugPrint("installed apps: $installedApps");
     if (installedApps.isEmpty) {
       installedApps = await InstalledApps.getInstalledApps(true, true);
       nudgerStates.installedApps = installedApps;

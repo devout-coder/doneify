@@ -46,6 +46,7 @@ class NudgerAccessibilityService : AccessibilityService() {
                     val storedBlacklisted = sharedPref.getString("blacklisted", "")
                     val blacklistedApps =
                         sharedPref.getStringSet("blacklistedApps", mutableSetOf<String>())
+                    //timeType
 
                     if (storedBlacklisted != packageName && storedBlacklisted != "") {
                         //if some app other than the one which is stored is opened, delete alarm
@@ -93,8 +94,7 @@ class NudgerAccessibilityService : AccessibilityService() {
                             this.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
                         alarmManager!!.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
-//                            System.currentTimeMillis() + interval * 60 * 1000,
-                            System.currentTimeMillis() + interval * 10000,
+                            System.currentTimeMillis() + interval * 60 * 1000,
                             pendingAlarmIntent
                         )
                     }

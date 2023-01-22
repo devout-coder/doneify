@@ -29,8 +29,9 @@ class _NudgerSettingsState extends State<NudgerSettings> {
   bool accessibilityTurnedOn = false;
   bool nudgerTurnedOn = false;
   String time = "Day";
-  bool presentTodos = true;
-  final duration = TextEditingController();
+  bool presentTodos = false;
+  TextEditingController duration = TextEditingController();
+
   // bool loading = false;
 
   void handleSwitch() {
@@ -78,14 +79,18 @@ class _NudgerSettingsState extends State<NudgerSettings> {
     if (accessibilityTurnedOn && nudgerTurnedOn) {
       setState(() {
         nudgerSwitch = true;
+        duration.text = nudgerStates.interval;
+        time = nudgerStates.timeType;
+        presentTodos = nudgerStates.onlyPresent;
       });
     }
   }
 
   @override
   void initState() {
+    duration.text = "1";
+    //this works when i turn on accessibility settings and go back to doneify
     checkSwitch();
-    duration.text = "5";
     super.initState();
   }
 
@@ -189,8 +194,9 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                                   color: themeMediumPurple,
                                 ),
                                 onChanged: (String? value) {
+                                  nudgerStates.setTimeType(value!);
                                   setState(() {
-                                    time = value!;
+                                    time = value;
                                   });
                                 },
                                 items: times.map<DropdownMenuItem<String>>(
@@ -233,6 +239,7 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                                   ),
                                   onChanged: (String val) {
                                     debugPrint(val);
+                                    nudgerStates.setInterval(val);
                                   },
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -274,6 +281,7 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                               activeColor: themeMediumPurple,
                               value: presentTodos,
                               onChanged: (bool value) {
+                                nudgerStates.setOnlyPresent(value);
                                 setState(() {
                                   presentTodos = value;
                                 });

@@ -264,6 +264,7 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                           SizedBox(height: 30),
                           GestureDetector(
                             onTap: () {
+                              nudgerStates.setOnlyPresent(!presentTodos);
                               setState(() {
                                 presentTodos = !presentTodos;
                               });
@@ -281,9 +282,9 @@ class _NudgerSettingsState extends State<NudgerSettings> {
                               activeColor: themeMediumPurple,
                               value: presentTodos,
                               onChanged: (bool value) {
-                                nudgerStates.setOnlyPresent(value);
+                                nudgerStates.setOnlyPresent(!presentTodos);
                                 setState(() {
-                                  presentTodos = value;
+                                  presentTodos = !presentTodos;
                                 });
                               },
                             ),

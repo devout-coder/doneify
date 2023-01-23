@@ -15,6 +15,49 @@ import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+
+//fun isPresent(time: String) : Boolean{
+// 4/1/2023
+// 2/1/2023-8/1/2023
+// Aug 2023
+//2024
+//longTerm
+// }
+
+fun formattedTime(timeType: String, time: LocalDateTime): String {
+
+    var formatter: DateTimeFormatter =
+        if (timeType == "day") DateTimeFormatter.ofPattern("d/MM/yyyy") else if (timeType === "month") DateTimeFormatter.ofPattern(
+            "MMM yyy"
+        ) else DateTimeFormatter.ofPattern(
+            "yyyy"
+        )
+
+    val formatted: String
+    if (timeType == "week") {
+        val firstDay = time.minusDays((time.dayOfWeek.value - 1).toLong())
+        val lastDay = firstDay.plusDays(6)
+        formatted =
+            "${formattedTime("day", firstDay)}-${formattedTime("day", lastDay)}";
+    } else if (timeType == "longTerm") {
+        formatted = "longTerm";
+    } else {
+        formatted = formatter.format(time);
+    }
+
+    return if (timeType == "day") padDate(formatted) else formatted
+}
+
+fun isPresent(time: String, timeType: String): Boolean {
+    val current = LocalDateTime.now()
+//    val formatter: DateTimeFormatter
+    Log.d("debugging", "$timeType: ${formattedTime(timeType, current)}")
+
+    return false
+}
 
 class NudgerFlutterActivity : FlutterActivity() {
 

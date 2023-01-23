@@ -54,6 +54,12 @@ class MainActivity : FlutterActivity() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(mChannel)
 
+        isPresent("4/1/2023", "day")
+        isPresent("4/1/2023", "week")
+        isPresent("4/1/2023", "month")
+        isPresent("4/1/2023", "year")
+        isPresent("4/1/2023", "longTerm")
+
         methodChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             CHANNEL

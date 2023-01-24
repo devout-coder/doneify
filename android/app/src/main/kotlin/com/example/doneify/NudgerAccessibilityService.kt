@@ -81,7 +81,7 @@ class NudgerAccessibilityService : AccessibilityService() {
 
                         val interval =
                             sharedPref.getInt("interval", 1)
-
+                        Log.d("debugging", "fetched interval is $interval")
                         val alarmIntent = Intent(this, NudgerAlarmReceiver::class.java)
                         val pendingAlarmIntent =
                             PendingIntent.getBroadcast(

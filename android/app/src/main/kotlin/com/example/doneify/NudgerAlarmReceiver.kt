@@ -30,8 +30,8 @@ import java.time.format.DateTimeFormatter
 fun formattedTime(timeType: String, time: LocalDateTime): String {
 
     var formatter: DateTimeFormatter =
-        if (timeType == "day") DateTimeFormatter.ofPattern("d/MM/yyyy") else if (timeType === "month") DateTimeFormatter.ofPattern(
-            "MMM yyy"
+        if (timeType == "day") DateTimeFormatter.ofPattern("d/M/yyyy") else if (timeType == "month") DateTimeFormatter.ofPattern(
+            "MMM yyyy"
         ) else DateTimeFormatter.ofPattern(
             "yyyy"
         )
@@ -48,15 +48,16 @@ fun formattedTime(timeType: String, time: LocalDateTime): String {
         formatted = formatter.format(time);
     }
 
-    return if (timeType == "day") padDate(formatted) else formatted
+    return formatted
 }
 
 fun isPresent(time: String, timeType: String): Boolean {
     val current = LocalDateTime.now()
 //    val formatter: DateTimeFormatter
     Log.d("debugging", "$timeType: ${formattedTime(timeType, current)}")
+    Log.d("debugging", "$timeType: ${time == formattedTime(timeType, current)}")
 
-    return false
+    return time == formattedTime(timeType, current)
 }
 
 class NudgerFlutterActivity : FlutterActivity() {
@@ -145,7 +146,12 @@ class NudgerAlarmReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.Main.immediate).launch {
             val db: AppDB = AppDB.getDatabase(context)
             val todoDAO = db.todoDAO()
-            val todos: List<Todo> = todoDAO!!.getByTimeType(timeType!!)
+            var todos: List<Todo> = todoDAO!!.getByTimeType(timeType!!)
+            if (sharedPref.getBoolean("onlyPresent", false)) {
+                Log.d("debugging", "this is run")
+                todos = todos.filter { todo -> isPresent(todo.time!!, todo.timeType!!) }
+            }
+            Log.d("debugging", "todos actually shown by nudger: $todos")
             val todoNames: List<String> = todos.map { todo -> todo.taskName!! }
             var notifString: String = ""
             for (todo in todoNames) {

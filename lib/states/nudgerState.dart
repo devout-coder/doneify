@@ -35,7 +35,7 @@ class NudgerStates {
     return didEnable;
   }
 
-  void setNudgerSwitch(bool newState) async {
+  Future setNudgerSwitch(bool newState) async {
     nudgerTurnedOn = newState;
     platform.invokeMethod("setNudgerSwitch", {"nudgerSwitch": newState});
     if (newState) {

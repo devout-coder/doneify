@@ -32,9 +32,8 @@ class _NudgerSettingsState extends State<NudgerSettings> {
   bool presentTodos = false;
   TextEditingController duration = TextEditingController();
 
-  // bool loading = false;
 
-  void handleSwitch() {
+  void handleSwitch() async {
     bool newState = !nudgerSwitch;
     if (newState == true) {
       if (!accessibilityTurnedOn) {
@@ -51,19 +50,25 @@ class _NudgerSettingsState extends State<NudgerSettings> {
             return NudgerConfirmationModal(
                 curve: curve,
                 turnOn: () async {
+                  await nudgerStates.setNudgerSwitch(true);
+                  duration.text = nudgerStates.interval;
+                  time = nudgerStates.timeType;
+                  presentTodos = nudgerStates.onlyPresent;
                   setState(() {
                     nudgerSwitch = true;
                   });
-                  nudgerStates.setNudgerSwitch(true);
                 });
           },
           transitionDuration: const Duration(milliseconds: 300),
         );
       } else {
+        await nudgerStates.setNudgerSwitch(true);
+        duration.text = nudgerStates.interval;
+        time = nudgerStates.timeType;
+        presentTodos = nudgerStates.onlyPresent;
         setState(() {
           nudgerSwitch = true;
         });
-        nudgerStates.setNudgerSwitch(true);
       }
     } else {
       setState(() {

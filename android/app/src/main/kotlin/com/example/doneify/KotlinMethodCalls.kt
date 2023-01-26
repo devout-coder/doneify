@@ -137,6 +137,24 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         val onlyPresent =
             sharedPref.getBoolean("onlyPresent", false)
         result!!.success(onlyPresent)
+    } else if (call.method == "setWidgetChanged") {
+        val widgetChanged: Boolean = call.argument<Boolean>("widgetChanged")!!
+        Log.d("debugging", "setting the value kotlin $widgetChanged")
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putBoolean("widgetChanged", widgetChanged)
+        editor.commit()
+        result!!.success(widgetChanged)
+    } else if (call.method == "getWidgetChanged") {
+        val sharedPref: SharedPreferences = context.getSharedPreferences(
+            "nudger", Context.MODE_PRIVATE
+        )
+        val widgetChanged =
+            sharedPref.getBoolean("widgetChanged", false)
+        Log.d("debugging", "getting the value kotlin $widgetChanged")
+        result!!.success(widgetChanged)
     } else if (call.method == "setAlarm") {
         val alarmId: String = call.argument<String>("alarmId")!!
         val time: String = call.argument<String>("time")!!

@@ -61,8 +61,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      // debugPrint(
-      //     "call received method ${call.method} argument ${call.arguments}");
+      // debugPrint( //     "call received method ${call.method} argument ${call.arguments}");
       kotlinMethodCallHandler(call);
       return Future<dynamic>.value();
     });
@@ -138,11 +137,37 @@ class _MainContainerState extends State<MainContainer>
         // print('appLifeCycleState inactive');
         break;
       case AppLifecycleState.resumed:
+        // String dbPath = 'conquer.db';
+        // final appDocDir = await getApplicationDocumentsDirectory();
+        // Database db = await databaseFactoryIo
+        //     .openDatabase(join(appDocDir.path, dbPath), version: 1);
+        // final StoreRef _store = intMapStoreFactory.store("todos");
+
+        // var finder = Finder(
+        //     filter: Filter.equals(
+        //   'timeType',
+        //   "day",
+        // ));
+        // final snapshots = await _store.find(db, finder: finder);
+        // List<Todo> todos = snapshots
+        //     .map((snapshot) => Todo.fromMap(snapshot.value))
+        //     .toList(growable: true);
+        // todos.forEach((element) {
+        //   debugPrint("todo: ${element.taskName}");
+        // });
+
+        bool widgetChanged = await platform.invokeMethod("getWidgetChanged");
+        debugPrint("in dart, $widgetChanged");
+        if (widgetChanged) {
+          bool receivedVal = await platform
+              .invokeMethod("setWidgetChanged", {"widgetChanged": false});
+          debugPrint("in dart set val, $receivedVal");
+          Restart.restartApp();
+        }
         // String received = await platform.invokeMethod('get_edited_from_widget');
         // debugPrint("received in main $received");
         // if (received == "true") {
         // platform.invokeMethod("edited_from_widget", {"val": false});
-        // Restart.restartApp();
         // }
 
         break;
@@ -195,6 +220,9 @@ class _MainContainerState extends State<MainContainer>
                             time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
                               await todosdb.createTodo(todo);
+                              bool receivedVal = await platform.invokeMethod(
+                                  "setWidgetChanged", {"widgetChanged": true});
+                              debugPrint("in dart set val, $receivedVal");
                             },
                           ),
                         );
@@ -217,6 +245,9 @@ class _MainContainerState extends State<MainContainer>
                             loadedFromWidget: true,
                             onEdit: (Todo todo) async {
                               await todosdb.updateTodo(todo);
+                              bool receivedVal = await platform.invokeMethod(
+                                  "setWidgetChanged", {"widgetChanged": true});
+                              debugPrint("in dart set val, $receivedVal");
                             },
                             onDelete: () async {
                               // debugPrint(
@@ -224,6 +255,9 @@ class _MainContainerState extends State<MainContainer>
                               // platform.invokeMethod(
                               //     "edited_from_widget", {"val": true});
                               await todosdb.deleteTodo(todoId!);
+                              bool receivedVal = await platform.invokeMethod(
+                                  "setWidgetChanged", {"widgetChanged": true});
+                              debugPrint("in dart set val, $receivedVal");
                               SystemChannels.platform
                                   .invokeMethod<void>('SystemNavigator.pop');
                             },

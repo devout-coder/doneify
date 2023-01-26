@@ -119,7 +119,7 @@ class _EachTodoState extends State<EachTodo> {
   @override
   Widget build(BuildContext context) {
     return widget.finished == widget.todo.finished
-        ? OpenContainer(
+        ? OpenContainer<void>(
             useRootNavigator: true,
             transitionDuration: const Duration(milliseconds: 500),
             closedColor: Color.fromARGB(33, 255, 255, 255),

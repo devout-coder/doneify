@@ -6,7 +6,9 @@ import 'package:conquer_flutter_app/pages/Auth.dart';
 import 'package:conquer_flutter_app/pages/FriendsSettings.dart';
 import 'package:conquer_flutter_app/pages/LabelsSettings.dart';
 import 'package:conquer_flutter_app/pages/NudgerSettings.dart';
+import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 class SettingsNavigator extends StatefulWidget {
   SettingsNavigator({Key? key}) : super(key: key);
@@ -45,18 +47,6 @@ class _SettingsNavigatorState extends State<SettingsNavigator> {
               return AccountSettingsPage();
             },
           );
-        } else if (settings.name == "/login") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return Auth(type: "login");
-            },
-          );
-        } else if (settings.name == "/signup") {
-          return MaterialPageRoute(
-            builder: (context) {
-              return Auth(type: "signup");
-            },
-          );
         } else {
           return MaterialPageRoute(
             builder: (context) {
@@ -78,6 +68,11 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool signedUp = false;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -144,7 +139,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.pushNamed(context, "/login");
+                          Navigator.of(context, rootNavigator: true).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Auth(
+                                    type: "login"); //this is giving an error
+                              },
+                            ),
+                          );
                         },
                         child: GradientText(
                           'Log In',
@@ -169,7 +171,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.pushNamed(context, "/signup");
+                          Navigator.of(context, rootNavigator: true).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Auth(
+                                    type: "signup"); //this is giving an error
+                              },
+                            ),
+                          );
                         },
                         child: GradientText(
                           'Sign Up',
@@ -195,14 +204,32 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(height: 80),
         SettingsButton(
           buttonWidth: 205,
-          page: "nudgerSettings",
-          pageName: "Nudger",
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              "/nudgerSettings",
+            );
+          },
+          title: "Nudger",
+          icon: Icon(
+            Icons.keyboard_arrow_right,
+            size: 24.0,
+          ),
         ),
         SizedBox(height: 20),
         SettingsButton(
           buttonWidth: 210,
-          page: "labelsSettings",
-          pageName: "Labels",
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              "/labelsSettings",
+            );
+          },
+          title: "Labels",
+          icon: Icon(
+            Icons.keyboard_arrow_right,
+            size: 24.0,
+          ),
         ),
         SizedBox(height: 20),
         signedUp
@@ -210,14 +237,32 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   SettingsButton(
                     buttonWidth: 205,
-                    page: "friendsSettings",
-                    pageName: "Friends",
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        "/friendsSettings",
+                      );
+                    },
+                    title: "Friends",
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 24.0,
+                    ),
                   ),
                   SizedBox(height: 20),
                   SettingsButton(
                     buttonWidth: 185,
-                    page: "accountSettings",
-                    pageName: "Account",
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        "/accountSettings",
+                      );
+                    },
+                    title: "Account",
+                    icon: Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 24.0,
+                    ),
                   ),
                 ],
               )

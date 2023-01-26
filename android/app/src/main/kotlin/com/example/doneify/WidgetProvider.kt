@@ -27,19 +27,17 @@ import kotlinx.coroutines.launch
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
 //import es.antonborri.home_widget.HomeWidgetProvider
 
-const val EXTRA_ITEM = "com.example.android.listview.EXTRA_ITEM"
-
-class CustomFlutterActivity : FlutterActivity() {
+class WidgetFlutterActivity : FlutterActivity() {
 
     companion object {
         var methodChannelInvoker: (MethodCall, MethodChannel.Result) -> Unit = { _, _ -> }
 
-        fun withCachedEngine(cachedEngineId: String): CachedEngineIntentBuilder {
-            return CachedEngineIntentBuilder(CustomFlutterActivity::class.java, cachedEngineId)
-        }
+//        fun withCachedEngine(cachedEngineId: String): CachedEngineIntentBuilder {
+//            return CachedEngineIntentBuilder(WidgetFlutterActivity::class.java, cachedEngineId)
+//        }
 
         fun withNewEngine(): NewEngineIntentBuilder {
-            return NewEngineIntentBuilder(CustomFlutterActivity::class.java)
+            return NewEngineIntentBuilder(WidgetFlutterActivity::class.java)
         }
     }
 
@@ -119,16 +117,16 @@ class WidgetProvider : HomeWidgetProvider() {
                     setOnClickPendingIntent(R.id.add_button, addPendingIntent)
 
                     val todosRemoteView = RemoteViews.RemoteCollectionItems.Builder()
-//                    val db: TodosRoomDB = TodosRoomDB.getDatabase(context)
-                    val db = Room.databaseBuilder(
-                        context,
-                        AppDatabase::class.java, "db"
-                    ).build()
-                    val todosDAO = db.TodoDAO()
-                    val todos = todosDAO.getByTimeType(timeTypeHash[timeType]!!)
+                    val db: AppDB = AppDB.getDatabase(context)
+//                    val db = Room.databaseBuilder(
+//                        context,
+//                        AppDatabase::class.java, "db"
+//                    ).build()
+                    val todosDAO = db.todoDAO()
+                    val todos = todosDAO?.getByTimeType(timeTypeHash[timeType]!!)
 
 //                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
-                    for (todo in todos) {
+                    for (todo in todos!!) {
                         if (!todo.finished!!) {
                             val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
                                 setTextViewText(R.id.each_todo_container_text, todo.taskName)
@@ -201,13 +199,13 @@ class WidgetProvider : HomeWidgetProvider() {
         if (intent!!.action == "editTodo") {
             val todoId: String? = intent.getStringExtra("todoId")
             Log.d("debugging", "an item is clicked $todoId")
-            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+            WidgetFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
             }
             PendingIntent.getActivity(
                 context,
                 0,
-                CustomFlutterActivity
+                WidgetFlutterActivity
                     .withNewEngine()
                     .initialRoute("/editInputModal?$todoId")
                     .build(context!!),
@@ -216,13 +214,13 @@ class WidgetProvider : HomeWidgetProvider() {
         } else if (intent.action == "createTodo") {
             val timeType: String? = intent.getStringExtra("timeType")
             Log.d("debugging", "tryna create todo with timetype: $timeType")
-            CustomFlutterActivity.methodChannelInvoker = { call, result ->
+            WidgetFlutterActivity.methodChannelInvoker = { call, result ->
                 handleMethodCalls(context!!, call, result)
             }
             PendingIntent.getActivity(
                 context,
                 0,
-                CustomFlutterActivity
+                WidgetFlutterActivity
                     .withNewEngine()
                     .initialRoute("/createInputModal?$timeType")
                     .build(context!!),

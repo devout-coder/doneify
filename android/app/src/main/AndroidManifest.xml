@@ -51,18 +51,30 @@
             android:theme="@style/Dialog"
             android:turnScreenOn="true" />
         <activity
-            android:name=".CustomFlutterActivity"
+            android:name=".WidgetFlutterActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
-            android:taskAffinity=".CustomFlutterActivity"
+            android:taskAffinity=".WidgetFlutterActivity"
             android:theme="@style/Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".NudgerFlutterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize" />
 
         <receiver
             android:name=".AlarmReceiver"
+            android:exported="true"></receiver>
+        <receiver
+            android:name=".NudgerAlarmReceiver"
             android:exported="true"></receiver>
         <receiver
             android:name=".BootReceiver"
@@ -90,10 +102,28 @@
                 <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".NudgerAccessibilityService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibilityservice" />
+        </service>
+
         <service
             android:name="es.antonborri.home_widget.HomeWidgetBackgroundService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

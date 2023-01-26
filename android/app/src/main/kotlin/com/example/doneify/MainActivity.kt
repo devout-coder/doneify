@@ -1,188 +1,29 @@
 package com.example.doneify
 
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.net.Uri
+import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.NonNull
-import androidx.room.Room
+import androidx.annotation.Nullable
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import io.flutter.plugins.GeneratedPluginRegistrant
 import java.util.*
 
 
 val CHANNEL = "alarm_method_channel"
 
-fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel.Result?) {
+const val REQUEST_CODE_FOR_ACCESSIBILITY = 167
 
-    if (call!!.method == "setAlarm") {
-        val alarmId: String = call.argument<String>("alarmId")!!
-        val time: String = call.argument<String>("time")!!
-        val repeatStatus: String = call.argument<String>("repeatStatus")!!
-        val repeatEnd: String = padDate(call.argument<String>("repeatEnd")!!)
-        val taskId: String = call.argument<String>("taskId")!!
-        val taskName: String = call.argument<String>("taskName")!!
-        val taskDesc: String = call.argument<String>("taskDesc")!!
-        val label: String = call.argument<String>("label")!!
-        val finished: Boolean = call.argument<Boolean>("finished")!!
-        Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            activeAlarmDao.insert(
-                ActiveAlarm(
-                    alarmId = alarmId,
-                    time = time,
-                    repeatStatus = repeatStatus,
-                    repeatEnd = repeatEnd,
-                    taskId = taskId,
-                    taskName = taskName,
-                    taskDesc = taskDesc,
-                    label = label,
-                    finished = finished
-                )
-            )
-
-            val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
-        }.start()
-
-        setAlarm(
-            context,
-            alarmId,
-            time,
-            repeatStatus,
-            repeatEnd,
-            taskId,
-            taskName,
-            taskDesc,
-            label,
-            finished
-        )
-    } else if (call.method == "deleteAlarm") {
-        val alarmId: String = call.argument<String>("alarmId")!!
-        deleteAlarm(context, alarmId)
-    } else if (call.method == "getActiveIds") {
-        Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-            val activeAlarmsIds: List<String> =
-                activeAlarms.map { activeAlarm -> activeAlarm.alarmId }
-            result!!.success(activeAlarmsIds)
-            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
-        }.start()
-    } else if (call.method == "getAllAlarms") {
-        Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val activeAlarmDao = db.ActiveAlarmDao()
-            val activeAlarms: List<ActiveAlarm> = activeAlarmDao.getAll()
-//                    val activeAlarmsMap: List<String> = activeAlarms.map { activeAlarm -> Gson().toJson(activeAlarm) }
-            result!!.success(Gson().toJson(activeAlarms))
-            // Log.d("debugging", "in set alarm kotlin func, all active alarms: $activeAlarms")
-        }.start()
-    }
-//    else if (call.method == "edited_from_widget") {
-//        val value: Boolean = call.argument<Boolean>("val")!!
-//        Log.d("debugging", "kotlin side: value received in edited widget: $value")
-//        val savedVal: String?
-//        if (value == true) {
-//            savedVal = "true"
-//        } else {
-//            savedVal = "false"
-//        }
-//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        with(sharedPref.edit()) {
-//            putString("widget", savedVal)
-//            apply()
-//        }
-//
-//        val sharedPrf = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        val fetched = sharedPrf.getString("widget", "null")
-//        Log.d("debugging", "kotlin side: verifying value saved: $fetched")
-////        }
-//    }
-//    else if (call.method == "get_edited_from_widget") {
-//        val sharedPref = context.getSharedPreferences("shared", Context.MODE_PRIVATE) ?: return
-//        val fetched = sharedPref.getString("widget", "null")
-//        Log.d("debugging", "kotlin side: value fetched from edited widget: $fetched")
-//        result!!.success(fetched)
-//    }
-    else if (call.method == "createTodo" || call.method == "updateTodo") {
-//        methodChannel!!.invokeMethod("callBack", "data1")
-        val id: String = call.argument<String>("id")!!
-        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
-        // Log.d("debugging", "in method call receiver: id = $id")
-        val taskName: String = call.argument<String>("taskName")!!
-        val taskDesc: String = call.argument<String>("taskDesc")!!
-        val finished: Boolean = call.argument<Boolean>("finished")!!
-        val labelName: String = call.argument<String>("labelName")!!
-        val timeStamp: Int = call.argument<Int>("timeStamp")!!
-        val time: String = call.argument<String>("time")!!
-        val timeType: String = call.argument<String>("timeType")!!
-        val index: Int = call.argument<Int>("index")!!
-        val todo: Todo = Todo(
-            id = id,
-            taskName = taskName,
-            taskDesc = taskDesc,
-            finished = finished,
-            labelName = labelName,
-            timeStamp = timeStamp,
-            time = time,
-            timeType = timeType,
-            index = index
-        )
-        Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val todoDAO = db.TodoDAO()
-            if (call.method == "createTodo") {
-                Log.d("debugging", "the id used is $id")
-                todoDAO.insert(todo)
-            } else {
-                todoDAO.update(todo)
-            }
-        }.start()
-    } else if (call.method == "deleteTodo") {
-        val id: String = call.argument<String>("id")!!
-        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
-        var reqTodo: Todo?
-        Thread {
-            val db = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java, "db"
-            ).build()
-            val todoDAO = db.TodoDAO()
-            val fetchedTodos: List<Todo> = todoDAO.getById(id)
-            if (fetchedTodos.isNotEmpty()) {
-                reqTodo = fetchedTodos[0]
-                todoDAO.delete(reqTodo!!)
-            }
-        }.start()
-    }
-}
+var pendingResult: MethodChannel.Result? = null
 
 var methodChannel: MethodChannel? = null
 
@@ -192,6 +33,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
 
         val receiver = ComponentName(context, BootReceiver::class.java)
         context.packageManager.setComponentEnabledSetting(
@@ -212,18 +54,11 @@ class MainActivity : FlutterActivity() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(mChannel)
 
-
-//        newFlutterEngine = FlutterEngine(this);
-////        newFlutterEngine.navigationChannel.setInitialRoute("inputModal");
-//        // Start executing Dart code to pre-warm the FlutterEngine.
-//        newFlutterEngine.getDartExecutor().executeDartEntrypoint(
-//            DartExecutor.DartEntrypoint.createDefault()
-//        );
-//        // Cache the FlutterEngine to be used by FlutterActivity.
-//        FlutterEngineCache
-//            .getInstance()
-//            .put("doneify", newFlutterEngine);
-//        Log.d("debugging", "inside default flutter engine")
+//        isPresent("24/1/2023", "day")
+//        isPresent("23/1/2023-29/1/2023", "week")
+//        isPresent("Jan 2023", "month")
+//        isPresent("2023", "year")
+//        isPresent("longTerm", "longTerm")
 
         methodChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -231,6 +66,20 @@ class MainActivity : FlutterActivity() {
         )
         methodChannel!!.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
             handleMethodCalls(context, call, result)
+            handleNudgerCall(this, context, call, result)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
+        //this func checks whether accessibility has been enabled after returning from settings
+        if (requestCode == REQUEST_CODE_FOR_ACCESSIBILITY) {
+            if (resultCode == RESULT_OK) {
+                pendingResult?.success(true)
+            } else if (resultCode == RESULT_CANCELED) {
+                pendingResult?.success(isAccessibilitySettingsOn(context))
+            } else {
+                pendingResult?.success(false)
+            }
         }
     }
 }
@@ -262,14 +111,6 @@ fun setAlarm(
 
     val alarmIntent = Intent(context, AlarmReceiver::class.java).apply {
         putExtra("alarmId", alarmId)
-//        putExtra("time", time)
-//        putExtra("repeatStatus", repeatStatus)
-//        putExtra("repeatEnd", padDate(repeatEnd))
-//        putExtra("taskId", taskId)
-//        putExtra("taskName", taskName);
-//        putExtra("taskDesc", taskDesc);
-//        putExtra("label", label)
-//        putExtra("finished", finished)
     }
     val pendingAlarmIntent =
         PendingIntent.getBroadcast(
@@ -332,12 +173,9 @@ fun setAlarm(
 fun deleteAlarm(context: Context, alarmId: String) {
     Thread {
         var reqAlarm: ActiveAlarm?
-        val db = Room.databaseBuilder(
-            context,
-            AppDatabase::class.java, "db"
-        ).build()
-        val activeAlarmDao = db.ActiveAlarmDao()
-        val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao.getById(alarmId)
+        val db: AppDB = AppDB.getDatabase(context)
+        val activeAlarmDao = db.activeAlarmDAO()
+        val fetchedAlarms: List<ActiveAlarm> = activeAlarmDao!!.getById(alarmId)
         if (fetchedAlarms.isNotEmpty()) {
             reqAlarm = fetchedAlarms[0]
             activeAlarmDao.delete(reqAlarm)

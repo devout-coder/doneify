@@ -49,6 +49,7 @@ dependencies:
   home_widget: ^0.1.6
   restart_app: ^1.1.1
   installed_apps: ^1.3.1
+  google_sign_in: ^5.4.4
   # flutter_accessibility_service: ^0.2.2
   # flutter_accessibility_service:
   #   git: https://github.com/devout-coder/flutter_accessibility_service.git

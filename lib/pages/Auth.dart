@@ -1,5 +1,7 @@
+import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth extends StatefulWidget {
   String type;
@@ -18,6 +20,25 @@ class _AuthState extends State<Auth> {
   String username = '';
   String email = "";
   String password = "";
+
+  GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<void> handleSignIn() async {
+    try {
+      debugPrint("shits gotta happen");
+      GoogleSignInAccount? signIn = await _googleSignIn.signIn();
+      debugPrint("google sign in $signIn");
+      Navigator.pop(context);
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  @override
+  void initState() {
+    _googleSignIn.signOut();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +60,9 @@ class _AuthState extends State<Auth> {
             SizedBox(
               width: 300,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  handleSignIn();
+                },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.all(0)),
                   foregroundColor: MaterialStateProperty.all(Colors.white),

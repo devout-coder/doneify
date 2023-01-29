@@ -70,12 +70,14 @@ class _SettingsPageState extends State<SettingsPage> {
   bool signedUp = false;
   @override
   void initState() {
+    debugPrint("settings page loaded");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: UniqueKey(),
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: 40),
@@ -139,14 +141,18 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.of(context, rootNavigator: true).push(
+                          Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) {
                                 return Auth(
                                     type: "login"); //this is giving an error
                               },
                             ),
-                          );
+                          ).whenComplete(() {
+                            debugPrint("gone back");
+                            //make sure that latest signup state is fetched here
+                            setState(() {});
+                          });
                         },
                         child: GradientText(
                           'Log In',
@@ -178,7 +184,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                     type: "signup"); //this is giving an error
                               },
                             ),
-                          );
+                          ).whenComplete(() {
+                            debugPrint("gone back");
+                            //make sure that latest signup state is fetched here
+                            setState(() {});
+                          });
                         },
                         child: GradientText(
                           'Sign Up',

@@ -141,7 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         focusColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          Navigator.of(context).push(
+                          Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
                               builder: (context) {
                                 return Auth(

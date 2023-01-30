@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,6 +21,8 @@ class _AuthState extends State<Auth> {
   bool _passwordVisible = true;
   Color textFieldActiveColor = Color.fromARGB(255, 230, 230, 230);
   Color textFieldInactiveColor = Colors.grey;
+
+  AuthState authState = GetIt.I.get();
 
   bool loading = false;
 
@@ -49,6 +54,28 @@ class _AuthState extends State<Auth> {
     return ret;
   }
 
+  void dealWithResponse(int statusCode, String body) {
+    if (statusCode == 200) {
+      Map res = json.decode(body);
+      User newUser = User(
+        res["data"]["username"],
+        res["data"]["email"],
+        res["token"],
+      );
+      authState.saveUserToStorage(newUser);
+      setState(() {
+        loading = false;
+      });
+      Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(
+        msg: json.decode(body)["message"],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
+  }
+
   void signup() async {
     if (fieldsValid()) {
       setState(() {
@@ -65,11 +92,7 @@ class _AuthState extends State<Auth> {
         headers: {"Content-Type": "application/json"},
         body: body,
       );
-      debugPrint(response.body);
-      setState(() {
-        loading = false;
-      });
-      Navigator.pop(context);
+      dealWithResponse(response.statusCode, response.body);
     }
   }
 
@@ -89,18 +112,7 @@ class _AuthState extends State<Auth> {
         body: body,
       );
 
-      setState(() {
-        loading = false;
-      });
-      if (response.statusCode == 200) {
-        Navigator.pop(context);
-      } else {
-        Fluttertoast.showToast(
-          msg: json.decode(response.body)["message"],
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-        );
-      }
+      dealWithResponse(response.statusCode, response.body);
     }
   }
 
@@ -110,21 +122,19 @@ class _AuthState extends State<Auth> {
         loading = true;
       });
       GoogleSignInAccount? signIn = await _googleSignIn.signIn();
-      Map data = {
-        "username": signIn?.displayName,
-        'email': signIn?.email,
-      };
-      var body = json.encode(data);
-      var response = await http.post(
-        Uri.parse("http://192.168.71.108:8000/signupGoogle"),
-        headers: {"Content-Type": "application/json"},
-        body: body,
-      );
-      debugPrint(response.body);
-      setState(() {
-        loading = false;
-      });
-      Navigator.pop(context);
+      if (signIn != null) {
+        Map data = {
+          "username": signIn.displayName,
+          'email': signIn.email,
+        };
+        var body = json.encode(data);
+        var response = await http.post(
+          Uri.parse("http://192.168.71.108:8000/signupGoogle"),
+          headers: {"Content-Type": "application/json"},
+          body: body,
+        );
+        dealWithResponse(response.statusCode, response.body);
+      }
     } catch (error) {
       debugPrint(error.toString());
     }

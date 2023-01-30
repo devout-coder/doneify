@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
@@ -26,6 +27,7 @@ class GetItRegister {
     GetIt.I.registerLazySingleton<SelectedFilters>(() => SelectedFilters());
     GetIt.I.registerLazySingleton<StartTodos>(() => StartTodos());
     GetIt.I.registerLazySingleton<NudgerStates>(() => NudgerStates());
+    GetIt.I.registerLazySingleton<AuthState>(() => AuthState());
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }

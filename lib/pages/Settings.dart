@@ -6,6 +6,7 @@ import 'package:conquer_flutter_app/pages/Auth.dart';
 import 'package:conquer_flutter_app/pages/FriendsSettings.dart';
 import 'package:conquer_flutter_app/pages/LabelsSettings.dart';
 import 'package:conquer_flutter_app/pages/NudgerSettings.dart';
+import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -68,9 +69,21 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool signedUp = false;
+
+  String name = "";
+  String email = "";
+
+  AuthState authState = GetIt.I.get();
+
   @override
   void initState() {
-    debugPrint("settings page loaded");
+    if (authState.user != null) {
+      setState(() {
+        signedUp = true;
+        name = authState.user!.name;
+        email = authState.user!.email;
+      });
+    }
     super.initState();
   }
 
@@ -95,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GradientText(
-                          'Bruce Wayne',
+                          name,
                           style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w600,
@@ -111,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                         Text(
-                          "ts@gmial.com",
+                          email,
                           style:
                               TextStyle(fontSize: 18, color: Color(0xff9A9A9A)),
                         )
@@ -261,14 +274,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: 20),
                   SettingsButton(
-                    buttonWidth: 185,
+                    buttonWidth: 195,
                     onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        "/accountSettings",
-                      );
+                      // Navigator.pushNamed(
+                      //   context,
+                      //   "/accountSettings",
+                      // );
+                      authState.logOut();
                     },
-                    title: "Account",
+                    title: "Log out",
                     icon: Icon(
                       Icons.keyboard_arrow_right,
                       size: 24.0,

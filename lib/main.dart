@@ -8,6 +8,7 @@ import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
 import 'package:conquer_flutter_app/pages/Todos.dart';
+import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/nudgerState.dart';
@@ -41,13 +42,15 @@ Future registerDB() async {
   LabelDAO labelsDB = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
   StartTodos startTodos = GetIt.I.get();
+  NudgerStates nudgerStates = GetIt.I.get();
+  AuthState authState = GetIt.I.get();
 
   //don't fuck up this order
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
   await startTodos.loadTodos();
+  await authState.fetchUserFromStorage();
 
-  NudgerStates nudgerStates = GetIt.I.get();
   nudgerStates.fetchNudgerStates();
 }
 

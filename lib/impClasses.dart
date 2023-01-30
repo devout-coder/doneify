@@ -8,6 +8,14 @@ class Label {
   Label(this.name, this.color);
 }
 
+class User {
+  String name;
+  String email;
+  String token;
+
+  User(this.name, this.email, this.token);
+}
+
 class Alarm {
   int alarmId;
   int taskId;

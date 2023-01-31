@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get_it/get_it.dart';
 
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
 import 'package:conquer_flutter_app/states/authState.dart';
@@ -31,3 +32,6 @@ class GetItRegister {
     //lazy singleton won't be initialized until its resource is used for the first time
   }
 }
+
+final _get = GetIt.I.get;
+AuthState get auth => _get<AuthState>();

@@ -48,9 +48,10 @@ class AlarmDAO {
       ),
     );
     final snapshots = await _store.find(_db, finder: finder);
-    return snapshots
-        .map((snapshot) => Alarm.fromMap(snapshot.value))
-        .toList(growable: true);
+    List<Map<String, dynamic>> maps = snapshots
+        .map((snapshot) => snapshot.value as Map<String, dynamic>)
+        .toList();
+    return maps.map((map) => Alarm.fromMap(map)).toList(growable: true);
   }
 
   Future deleteAlarm(int alarmId) async {

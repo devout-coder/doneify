@@ -52,15 +52,17 @@ class TodoDAO {
   Future<Todo?> getTodo(int key) async {
     debugPrint("tryna fetch a todo id: $key");
     final snapshot = await _store.record(key).getSnapshot(_db);
-    return Future<Todo?>.value(
-        snapshot != null ? Todo.fromMap(snapshot.value) : null);
+    Map<String, dynamic> map = snapshot?.value as Map<String, dynamic>;
+    return Future<Todo?>.value(snapshot != null ? Todo.fromMap(map) : null);
   }
 
   Future<List<Todo>> getAllTodos(Finder finder) async {
     final snapshots = await _store.find(_db, finder: finder);
-    return snapshots
-        .map((snapshot) => Todo.fromMap(snapshot.value))
-        .toList(growable: true);
+
+    List<Map<String, dynamic>> maps = snapshots
+        .map((snapshot) => snapshot.value as Map<String, dynamic>)
+        .toList();
+    return maps.map((map) => Todo.fromMap(map)).toList(growable: true);
   }
 
   Future updateTodo(Todo todo) async {

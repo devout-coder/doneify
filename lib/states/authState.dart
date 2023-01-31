@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthState {
-  User? user;
+class AuthState extends ChangeNotifier {
+  final user = ValueNotifier<User?>(null);
 
   Future fetchUserFromStorage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -13,15 +13,14 @@ class AuthState {
     String email = prefs.getString('userEmail') ?? "";
     String token = prefs.getString('userToken') ?? "";
     if (name.isNotEmpty) {
-      user = User(name, email, token);
-
+      user.value = User(name, email, token);
       debugPrint("fetched user from storage: $user");
     }
   }
 
   void saveUserToStorage(User newUser) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    user = newUser;
+    user.value = newUser;
 
     debugPrint("new user: $user");
 
@@ -38,6 +37,6 @@ class AuthState {
     prefs.setString('userName', "");
     prefs.setString('userEmail', "");
     prefs.setString('userToken', "");
-    user = null;
+    user.value = null;
   }
 }

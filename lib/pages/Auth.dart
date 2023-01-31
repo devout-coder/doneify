@@ -88,7 +88,7 @@ class _AuthState extends State<Auth> {
       };
       var body = json.encode(data);
       var response = await http.post(
-        Uri.parse("http://192.168.71.108:8000/signup"),
+        Uri.parse("$serverUrl/signup"),
         headers: {"Content-Type": "application/json"},
         body: body,
       );
@@ -107,7 +107,7 @@ class _AuthState extends State<Auth> {
       };
       var body = json.encode(data);
       var response = await http.post(
-        Uri.parse("http://192.168.71.108:8000/login"),
+        Uri.parse("$serverUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: body,
       );
@@ -129,7 +129,7 @@ class _AuthState extends State<Auth> {
         };
         var body = json.encode(data);
         var response = await http.post(
-          Uri.parse("http://192.168.71.108:8000/signupGoogle"),
+          Uri.parse("$serverUrl/signupGoogle"),
           headers: {"Content-Type": "application/json"},
           body: body,
         );

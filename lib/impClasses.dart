@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
+String serverUrl = "http://192.168.26.108:8000";
+
 class Label {
   String name;
   String color;
@@ -76,7 +78,7 @@ class Todo {
     };
   }
 
-  factory Todo.fromMap(Map<String, dynamic> map) {
+  static Todo fromMap(Map<String, dynamic> map) {
     return Todo(
       map["taskName"],
       map["taskDesc"],

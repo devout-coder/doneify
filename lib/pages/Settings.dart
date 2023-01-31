@@ -1,5 +1,6 @@
 import 'package:conquer_flutter_app/components/GradientText.dart';
 import 'package:conquer_flutter_app/components/SettingsButton.dart';
+import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/navigatorKeys.dart';
 import 'package:conquer_flutter_app/pages/AccountSettings.dart';
 import 'package:conquer_flutter_app/pages/Auth.dart';
@@ -10,6 +11,7 @@ import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:conquer_flutter_app/states/nudgerState.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 
 class SettingsNavigator extends StatefulWidget {
   SettingsNavigator({Key? key}) : super(key: key);
@@ -60,35 +62,39 @@ class _SettingsNavigatorState extends State<SettingsNavigator> {
   }
 }
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+class SettingsPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  SettingsPage({Key? key}) : super(key: key);
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with GetItStateMixin {
   bool signedUp = false;
-
-  String name = "";
-  String email = "";
+  // String name = "";
+  // String email = "";
 
   AuthState authState = GetIt.I.get();
 
   @override
   void initState() {
-    if (authState.user != null) {
-      setState(() {
-        signedUp = true;
-        name = authState.user!.name;
-        email = authState.user!.email;
-      });
-    }
+    // if (authState.user != null) {
+    //   setState(() {
+    //     signedUp = true;
+    //     name = authState.user!.name;
+    //     email = authState.user!.email;
+    //   });
+    // }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    User? user = watchX((AuthState auth) => auth.user);
+    signedUp = user != null;
+    String? name = user?.name;
+    String? email = user?.email;
+
     return Column(
       key: UniqueKey(),
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -108,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GradientText(
-                          name,
+                          name!,
                           style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w600,
@@ -124,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                         Text(
-                          email,
+                          email!,
                           style:
                               TextStyle(fontSize: 18, color: Color(0xff9A9A9A)),
                         )
@@ -161,11 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     type: "login"); //this is giving an error
                               },
                             ),
-                          ).whenComplete(() {
-                            debugPrint("gone back");
-                            //make sure that latest signup state is fetched here
-                            setState(() {});
-                          });
+                          );
                         },
                         child: GradientText(
                           'Log In',
@@ -197,11 +199,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     type: "signup"); //this is giving an error
                               },
                             ),
-                          ).whenComplete(() {
-                            debugPrint("gone back");
-                            //make sure that latest signup state is fetched here
-                            setState(() {});
-                          });
+                          );
                         },
                         child: GradientText(
                           'Sign Up',

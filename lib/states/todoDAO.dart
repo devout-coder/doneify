@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
+import 'package:http/http.dart' as http;
 
 class TodoDAO {
   final Database _db = GetIt.I.get();
@@ -27,22 +28,36 @@ class TodoDAO {
     final allTodos = await getAllTodos(finder);
     todo.index = allTodos.length;
     await _store.record(todo.id).put(_db, todo.toMap());
+
+    Map newTodo = {
+      "id": todo.id.toString(),
+      "taskName": todo.taskName,
+      "taskDesc": todo.taskDesc,
+      "finished": todo.finished,
+      "labelName": todo.labelName,
+      "timeStamp": todo.timeStamp,
+      "time": todo.time,
+      "timeType": todo.timeType,
+      "index": todo.index,
+    };
     try {
       debugPrint("creating todo for system ${todo.id}");
-      platform.invokeMethod("createTodo", {
-        "id": todo.id.toString(),
-        "taskName": todo.taskName,
-        "taskDesc": todo.taskDesc,
-        "finished": todo.finished,
-        "labelName": todo.labelName,
-        "timeStamp": todo.timeStamp,
-        "time": todo.time,
-        "timeType": todo.timeType,
-        "index": todo.index,
-      });
+      platform.invokeMethod("createTodo", newTodo);
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while creating todo: $e");
     }
+
+    http
+        .post(
+      Uri.parse("$serverUrl/todos"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(newTodo),
+    )
+        .then((response) {
+      Map res = json.decode(response.body);
+      debugPrint(res.toString());
+    });
+
     HomeWidget.updateWidget(
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',
@@ -92,22 +107,36 @@ class TodoDAO {
       todo.index = presentTodos.length;
     }
     await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
+
+    Map updatedTodo = {
+      "id": todo.id.toString(),
+      "taskName": todo.taskName,
+      "taskDesc": todo.taskDesc,
+      "finished": todo.finished,
+      "labelName": todo.labelName,
+      "timeStamp": todo.timeStamp,
+      "time": todo.time,
+      "timeType": todo.timeType,
+      "index": todo.index,
+    };
     try {
       debugPrint("updating todo for system ${todo.id}");
-      platform.invokeMethod("updateTodo", {
-        "id": todo.id.toString(),
-        "taskName": todo.taskName,
-        "taskDesc": todo.taskDesc,
-        "finished": todo.finished,
-        "labelName": todo.labelName,
-        "timeStamp": todo.timeStamp,
-        "time": todo.time,
-        "timeType": todo.timeType,
-        "index": todo.index,
-      });
+      platform.invokeMethod("updateTodo", updatedTodo);
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while updating todo: $e");
     }
+
+    http
+        .put(
+      Uri.parse("$serverUrl/todos"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(updatedTodo),
+    )
+        .then((response) {
+      Map res = json.decode(response.body);
+      debugPrint(res.toString());
+    });
+
     HomeWidget.updateWidget(
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',
@@ -127,21 +156,17 @@ class TodoDAO {
     presentTodos.forEach((element) async {
       if (element.index > todo.index) {
         element.index--;
-        debugPrint("wrking flawlessly till before update");
         await updateTodo(element);
-        debugPrint("wrking flawlessly till here update");
       }
     });
-    debugPrint("working flawlessly till here now");
     await _store.record(todoId).delete(_db);
-    debugPrint("working flawlessly till here");
 
     AlarmDAO alarmsdb = GetIt.I.get();
     List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
     toDeleteAlarms.forEach((alarm) {
       alarmsdb.deleteAlarm(alarm.alarmId);
     });
-    debugPrint("working flawllessly till after alarms");
+    debugPrint("working flawlessly till after alarms");
 
     try {
       debugPrint("deleting todo for system ${todo.id}");
@@ -151,6 +176,18 @@ class TodoDAO {
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while deleting todo: $e");
     }
+
+    http
+        .delete(
+      Uri.parse("$serverUrl/todos"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"id": todo.id.toString()}),
+    )
+        .then((response) {
+      Map res = json.decode(response.body);
+      debugPrint(res.toString());
+    });
+
     HomeWidget.updateWidget(
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',

@@ -30,7 +30,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int currentPage = 5;
+  int currentPage = 0;
   var timeTypeMap = {
     'Day': 0,
     'Week': 1,

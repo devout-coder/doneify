@@ -531,7 +531,7 @@ class _InputModalState extends State<InputModal> {
       todo = await todosdb.getTodo(widget.todoId!);
       // debugPrint("fetched todo: $todo");
     }
-    taskId = todo != null ? todo!.id : getRandInt(18);
+    taskId = todo != null ? todo!.id : getRandInt(15);
     taskName.text = todo != null ? todo!.taskName : '';
     taskDesc.text = todo != null ? todo!.taskDesc : '';
     selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;

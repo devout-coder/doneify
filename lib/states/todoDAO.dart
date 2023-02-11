@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
+import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
@@ -46,17 +47,23 @@ class TodoDAO {
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while creating todo: $e");
     }
+    AuthState auth = GetIt.I.get();
 
-    http
-        .post(
-      Uri.parse("$serverUrl/todos"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(newTodo),
-    )
-        .then((response) {
-      Map res = json.decode(response.body);
-      debugPrint(res.toString());
-    });
+    if (auth.user.value != null) {
+      http
+          .post(
+        Uri.parse("$serverUrl/todos"),
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": auth.user.value!.token
+        },
+        body: json.encode(newTodo),
+      )
+          .then((response) {
+        Map res = json.decode(response.body);
+        debugPrint(res.toString());
+      });
+    }
 
     HomeWidget.updateWidget(
       name: 'WidgetProvider',
@@ -126,16 +133,22 @@ class TodoDAO {
       debugPrint("some fuckup happended while updating todo: $e");
     }
 
-    http
-        .put(
-      Uri.parse("$serverUrl/todos"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(updatedTodo),
-    )
-        .then((response) {
-      Map res = json.decode(response.body);
-      debugPrint(res.toString());
-    });
+    AuthState auth = GetIt.I.get();
+    if (auth.user.value != null) {
+      http
+          .put(
+        Uri.parse("$serverUrl/todos"),
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": auth.user.value!.token
+        },
+        body: json.encode(updatedTodo),
+      )
+          .then((response) {
+        Map res = json.decode(response.body);
+        debugPrint(res.toString());
+      });
+    }
 
     HomeWidget.updateWidget(
       name: 'WidgetProvider',
@@ -177,16 +190,22 @@ class TodoDAO {
       debugPrint("some fuckup happended while deleting todo: $e");
     }
 
-    http
-        .delete(
-      Uri.parse("$serverUrl/todos"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({"id": todo.id.toString()}),
-    )
-        .then((response) {
-      Map res = json.decode(response.body);
-      debugPrint(res.toString());
-    });
+    AuthState auth = GetIt.I.get();
+    if (auth.user.value != null) {
+      http
+          .delete(
+        Uri.parse("$serverUrl/todos"),
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": auth.user.value!.token
+        },
+        body: json.encode({"id": todo.id.toString()}),
+      )
+          .then((response) {
+        Map res = json.decode(response.body);
+        debugPrint(res.toString());
+      });
+    }
 
     HomeWidget.updateWidget(
       name: 'WidgetProvider',

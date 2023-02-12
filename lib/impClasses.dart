@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
-String serverUrl = "http://192.168.17.108:8000";
+String serverUrl = "http://192.168.32.108:8000";
 
 class Label {
   String name;

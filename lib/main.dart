@@ -27,6 +27,7 @@ import 'package:sembast/sembast.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 final channel = MethodChannel('alarm_method_channel');
 
@@ -109,6 +110,24 @@ class _MainContainerState extends State<MainContainer>
   String? path;
   String? timeType;
   int? todoId;
+  IO.Socket? socket;
+
+  void initSocket() {
+    socket = IO.io(serverUrl, <String, dynamic>{
+      'autoConnect': false,
+      'transports': ['websocket'],
+    });
+    socket?.connect();
+    socket?.onConnect((_) {
+      print('Connection established');
+    });
+    socket?.on('receive_message', (newMessage) {
+      debugPrint("new message $newMessage");
+    });
+    socket?.onDisconnect((_) => print('Connection Disconnection'));
+    socket?.onConnectError((err) => print(err));
+    socket?.onError((err) => print(err));
+  }
 
   @override
   void initState() {
@@ -120,6 +139,8 @@ class _MainContainerState extends State<MainContainer>
     } else if (path == "/editInputModal") {
       todoId = int.parse(widget.entirePath.split("?")[1]);
     }
+
+    initSocket();
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);

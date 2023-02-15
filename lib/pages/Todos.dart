@@ -12,7 +12,6 @@ import 'package:intl/intl.dart';
 // import 'package:animations/animations.dart';
 
 import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:provider/provider.dart';
 import 'package:sembast/sembast.dart';
 
 class Todos extends StatefulWidget {

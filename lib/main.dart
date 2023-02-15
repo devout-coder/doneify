@@ -1,13 +1,8 @@
-import 'dart:developer';
-import 'dart:ffi';
-import 'dart:io';
-import 'package:conquer_flutter_app/components/EachTodo.dart';
+import 'dart:convert';
+
 import 'package:conquer_flutter_app/dartMethodCalls.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
 import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
 import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/pages/Todos.dart';
 import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:conquer_flutter_app/states/initStates.dart';
 import 'package:conquer_flutter_app/states/labelDAO.dart';
@@ -121,8 +116,12 @@ class _MainContainerState extends State<MainContainer>
     socket?.onConnect((_) {
       print('Connection established');
     });
-    socket?.on('receive_message', (newMessage) {
-      debugPrint("new message $newMessage");
+
+    socket?.on('todo_changed_server', (todo) {
+      //this works only for create, have to make changes to server to make it work for update and delete
+      debugPrint("new todo ${todo}");
+      Todo todoObj = Todo.fromMap(json.decode(todo));
+      debugPrint(todoObj.taskName);
     });
     socket?.onDisconnect((_) => print('Connection Disconnection'));
     socket?.onConnectError((err) => print(err));

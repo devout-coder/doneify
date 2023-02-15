@@ -44,7 +44,6 @@ dependencies:
   path: ^1.8.1
   path_provider: ^2.0.11
   get_it: ^7.2.0
-  provider: ^6.0.3
   syncfusion_flutter_datepicker: ^20.2.44
   home_widget: ^0.1.6
   restart_app: ^1.1.1

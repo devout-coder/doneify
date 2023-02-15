@@ -20,7 +20,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -457,12 +456,6 @@ class _InputModalState extends State<InputModal> {
       //     platform.invokeMethod("edited_from_widget", {"val": true});
       //   }
       // }
-      IO.Socket socket = IO.io(serverUrl);
-      socket.connect();
-      socket.onConnect((_) {
-        print('connection again');
-      });
-      socket.emit('send_message', {"mess": taskName.text});
 
       if (todo != null) {
         newTodo = Todo(

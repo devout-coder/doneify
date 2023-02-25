@@ -22,7 +22,6 @@ import 'package:sembast/sembast.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 final channel = MethodChannel('alarm_method_channel');
 
@@ -60,7 +59,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      // debugPrint( //     "call received method ${call.method} argument ${call.arguments}");
       kotlinMethodCallHandler(call);
       return Future<dynamic>.value();
     });
@@ -105,28 +103,7 @@ class _MainContainerState extends State<MainContainer>
   String? path;
   String? timeType;
   int? todoId;
-  IO.Socket? socket;
 
-  void initSocket() {
-    socket = IO.io(serverUrl, <String, dynamic>{
-      'autoConnect': false,
-      'transports': ['websocket'],
-    });
-    socket?.connect();
-    socket?.onConnect((_) {
-      print('Connection established');
-    });
-
-    socket?.on('todo_changed_server', (todo) {
-      //this works only for create, have to make changes to server to make it work for update and delete
-      debugPrint("new todo ${todo}");
-      Todo todoObj = Todo.fromMap(json.decode(todo));
-      debugPrint(todoObj.taskName);
-    });
-    socket?.onDisconnect((_) => print('Connection Disconnection'));
-    socket?.onConnectError((err) => print(err));
-    socket?.onError((err) => print(err));
-  }
 
   @override
   void initState() {
@@ -139,7 +116,6 @@ class _MainContainerState extends State<MainContainer>
       todoId = int.parse(widget.entirePath.split("?")[1]);
     }
 
-    initSocket();
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);

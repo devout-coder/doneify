@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:conquer_flutter_app/pages/Home.dart';
 import 'package:conquer_flutter_app/states/alarmDAO.dart';
 import 'package:conquer_flutter_app/states/authState.dart';
 import 'package:flutter/services.dart';
@@ -50,18 +51,8 @@ class TodoDAO {
     AuthState auth = GetIt.I.get();
 
     if (auth.user.value != null) {
-      http
-          .post(
-        Uri.parse("$serverUrl/todos"),
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": auth.user.value!.token
-        },
-        body: json.encode(newTodo),
-      )
-          .then((response) {
-        Map res = json.decode(response.body);
-        debugPrint(res.toString());
+      socket?.emitWithAck("create_todo", json.encode(newTodo), ack: (response) {
+        debugPrint("ack from server $response");
       });
     }
 
@@ -135,19 +126,13 @@ class TodoDAO {
 
     AuthState auth = GetIt.I.get();
     if (auth.user.value != null) {
-      http
-          .put(
-        Uri.parse("$serverUrl/todos"),
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": auth.user.value!.token
+      socket?.emitWithAck(
+        "update_todo",
+        json.encode(updatedTodo),
+        ack: (response) {
+          debugPrint("ack from server $response");
         },
-        body: json.encode(updatedTodo),
-      )
-          .then((response) {
-        Map res = json.decode(response.body);
-        debugPrint(res.toString());
-      });
+      );
     }
 
     HomeWidget.updateWidget(
@@ -192,19 +177,13 @@ class TodoDAO {
 
     AuthState auth = GetIt.I.get();
     if (auth.user.value != null) {
-      http
-          .delete(
-        Uri.parse("$serverUrl/todos"),
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": auth.user.value!.token
+      socket?.emitWithAck(
+        "delete_todo",
+        json.encode({"id": todo.id.toString()}),
+        ack: (response) {
+          debugPrint("ack from server $response");
         },
-        body: json.encode({"id": todo.id.toString()}),
-      )
-          .then((response) {
-        Map res = json.decode(response.body);
-        debugPrint(res.toString());
-      });
+      );
     }
 
     HomeWidget.updateWidget(

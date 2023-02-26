@@ -20,6 +20,29 @@ import 'package:conquer_flutter_app/states/labelDAO.dart';
 import 'package:conquer_flutter_app/states/selectedFilters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+IO.Socket? socket;
+
+void initSocket(String token) {
+  debugPrint("connection token is $token");
+
+  socket?.auth = {"auth_token": token};
+  socket?.connect();
+  socket?.onConnect((_) {
+    print('Connection established');
+  });
+
+  socket?.on('todo_operation', (data) {
+    //this works only for create, have to make changes to server to make it work for update and delete
+    // debugPrint("new todo ${todo}");
+    // Todo todoObj = Todo.fromMap(json.decode(todo));
+    // debugPrint(todoObj.taskName);
+    debugPrint("real time data is $data");
+  });
+  socket?.onDisconnect((_) => print('Connection Disconnection'));
+  socket?.onConnectError((err) => print(err));
+  socket?.onError((err) => print(err));
+}
+
 class HomePage extends StatefulWidget with GetItStatefulWidgetMixin {
   // String? launchFromWidgetTimeType;
   // String? launchFromWidgetCommand;
@@ -43,39 +66,16 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     "Long Term": 4
   };
 
-  IO.Socket? socket;
-
-  void initSocket(String token) {
-    // AuthState authState = GetIt.I.get();
-    debugPrint("connection token is $token");
-    socket = IO.io(serverUrl, <String, dynamic>{
-      'autoConnect': false,
-      'transports': ['websocket'],
-      // 'auth': {"auth_token": token}
-    });
-    socket?.auth = {"auth_token": token};
-    socket?.connect();
-    socket?.onConnect((_) {
-      print('Connection established');
-    });
-
-    socket?.on('todo_changed_server', (todo) {
-      //this works only for create, have to make changes to server to make it work for update and delete
-      debugPrint("new todo ${todo}");
-      Todo todoObj = Todo.fromMap(json.decode(todo));
-      debugPrint(todoObj.taskName);
-    });
-    socket?.onDisconnect((_) => print('Connection Disconnection'));
-    socket?.onConnectError((err) => print(err));
-    socket?.onError((err) => print(err));
-  }
-
   @override
   void initState() {
     super.initState();
     debugPrint("home rendered");
 
-    // initSocket();
+    socket = IO.io(serverUrl, <String, dynamic>{
+      'autoConnect': false,
+      'transports': ['websocket'],
+    });
+
     // debugPrint("In Home ${widget.launchFromWidgetTimeType}");
     // if (widget.launchFromWidgetTimeType == null) {
     //   currentPage = 5;
@@ -90,6 +90,8 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     User? user = watchX((AuthState auth) => auth.user);
     if (user != null) {
       initSocket(user.token);
+    } else {
+      socket?.disconnect();
     }
 
     return WillPopScope(

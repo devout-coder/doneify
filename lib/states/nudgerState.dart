@@ -1,4 +1,4 @@
-import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:doneify/pages/InputModal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';

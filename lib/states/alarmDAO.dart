@@ -1,4 +1,4 @@
-import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:doneify/impClasses.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';

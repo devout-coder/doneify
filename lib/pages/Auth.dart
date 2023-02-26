@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/authState.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/authState.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';

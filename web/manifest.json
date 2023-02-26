@@ -1,6 +1,6 @@
 {
-    "name": "conquer_flutter_app",
-    "short_name": "conquer_flutter_app",
+    "name": "doneify",
+    "short_name": "doneify",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

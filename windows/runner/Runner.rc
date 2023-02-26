@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "conquer_flutter_app" "\0"
+            VALUE "FileDescription", "doneify" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "conquer_flutter_app" "\0"
+            VALUE "InternalName", "doneify" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "conquer_flutter_app.exe" "\0"
-            VALUE "ProductName", "conquer_flutter_app" "\0"
+            VALUE "OriginalFilename", "doneify.exe" "\0"
+            VALUE "ProductName", "doneify" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

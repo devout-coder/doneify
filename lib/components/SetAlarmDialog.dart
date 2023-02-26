@@ -1,8 +1,8 @@
-import 'package:conquer_flutter_app/components/EachWeekCell.dart';
-import 'package:conquer_flutter_app/components/MyExpansionPanel.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/components/MyExpansionPanel.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/InputModal.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -187,7 +187,9 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
   bool isInPast() {
     DateTime combinedDateTime = DateTime(onceDate.year, onceDate.month,
         onceDate.day, onceTime.hour, onceTime.minute);
-    return (getSwitchValue("once") && combinedDateTime.isBefore(DateTime.now())) || (widget.timeType == "week" &&
+    return (getSwitchValue("once") &&
+            combinedDateTime.isBefore(DateTime.now())) ||
+        (widget.timeType == "week" &&
             widget.selectedWeekDates[6].isBefore(justDate(DateTime.now()))) ||
         (widget.timeType == "month" &&
             DateTime(widget.selectedTime!.year, widget.selectedTime!.month + 1,

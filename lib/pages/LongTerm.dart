@@ -1,4 +1,4 @@
-import 'package:conquer_flutter_app/pages/Todos.dart';
+import 'package:doneify/pages/Todos.dart';
 import 'package:flutter/material.dart';
 
 class LongTermPage extends StatelessWidget {

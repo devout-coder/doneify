@@ -1,7 +1,7 @@
-import 'package:conquer_flutter_app/components/EachTodo.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/EachTodo.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';

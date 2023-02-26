@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Home.dart';
-import 'package:conquer_flutter_app/states/alarmDAO.dart';
-import 'package:conquer_flutter_app/states/authState.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/Home.dart';
+import 'package:doneify/states/alarmDAO.dart';
+import 'package:doneify/states/authState.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';

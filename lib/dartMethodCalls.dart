@@ -1,5 +1,5 @@
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/main.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';

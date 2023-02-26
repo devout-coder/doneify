@@ -1,7 +1,7 @@
-import 'package:conquer_flutter_app/components/EachWeekCell.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/Week.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';

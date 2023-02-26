@@ -1,5 +1,5 @@
-import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/nudgerState.dart';
+import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/states/nudgerState.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';

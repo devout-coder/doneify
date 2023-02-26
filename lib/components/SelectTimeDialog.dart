@@ -1,8 +1,8 @@
-import 'package:conquer_flutter_app/components/EachWeekCell.dart';
-import 'package:conquer_flutter_app/components/SetAlarmDialog.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
+import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/components/SetAlarmDialog.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/InputModal.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';

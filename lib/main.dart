@@ -1,18 +1,18 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/dartMethodCalls.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/authState.dart';
-import 'package:conquer_flutter_app/states/initStates.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
-import 'package:conquer_flutter_app/states/nudgerState.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/startTodos.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
-import 'package:conquer_flutter_app/timeFuncs.dart';
+import 'package:doneify/dartMethodCalls.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/initStates.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/nudgerState.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
+import 'package:doneify/timeFuncs.dart';
 import 'package:flutter/material.dart';
-import 'package:conquer_flutter_app/pages/Home.dart';
+import 'package:doneify/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
@@ -103,7 +103,6 @@ class _MainContainerState extends State<MainContainer>
   String? path;
   String? timeType;
   int? todoId;
-
 
   @override
   void initState() {

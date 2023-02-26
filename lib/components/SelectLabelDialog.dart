@@ -1,6 +1,6 @@
-import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
+import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:fluttertoast/fluttertoast.dart';

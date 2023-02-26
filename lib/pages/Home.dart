@@ -1,23 +1,23 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/authState.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/authState.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:conquer_flutter_app/pages/LongTerm.dart';
-import 'package:conquer_flutter_app/pages/Month.dart';
-import 'package:conquer_flutter_app/pages/Week.dart';
-import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Settings.dart';
-import 'package:conquer_flutter_app/icons/time_type_icons.dart';
-import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
+import 'package:doneify/pages/LongTerm.dart';
+import 'package:doneify/pages/Month.dart';
+import 'package:doneify/pages/Week.dart';
+import 'package:doneify/pages/Year.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/Settings.dart';
+import 'package:doneify/icons/time_type_icons.dart';
+import 'package:doneify/navigatorKeys.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/selectedFilters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 IO.Socket? socket;

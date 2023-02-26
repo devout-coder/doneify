@@ -1,4 +1,4 @@
-import 'package:conquer_flutter_app/impClasses.dart';
+import 'package:doneify/impClasses.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -96,22 +96,22 @@ class _TodosState extends State<Todos> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 
   editTodo(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
     loadTodos();
   }
 
   editTodoWithoutReload(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
   }
 
   deleteTodo(int todoId) async {
     try {
-      await todosdb.deleteTodo(todoId);
+      await todosdb.deleteTodo(todoId, false);
       await loadTodos();
     } catch (e, s) {
       print("exception e");

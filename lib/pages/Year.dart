@@ -150,7 +150,7 @@ class _YearPageState extends State<YearPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 

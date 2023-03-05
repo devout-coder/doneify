@@ -17,7 +17,8 @@ class TodoDAO {
   final StoreRef _store = intMapStoreFactory.store("todos");
   static const platform = MethodChannel('alarm_method_channel');
 
-  Future createTodo(Todo todo) async {
+  Future createTodo(Todo todo, bool receivedFromServer) async {
+    // if (!received) {
     var finder = Finder(
       filter: Filter.equals(
         'time',
@@ -29,6 +30,7 @@ class TodoDAO {
     );
     final allTodos = await getAllTodos(finder);
     todo.index = allTodos.length;
+    // }
     await _store.record(todo.id).put(_db, todo.toMap());
 
     Map newTodo = {
@@ -50,7 +52,7 @@ class TodoDAO {
     }
     AuthState auth = GetIt.I.get();
 
-    if (auth.user.value != null) {
+    if (auth.user.value != null && !receivedFromServer) {
       socket?.emitWithAck("create_todo", json.encode(newTodo), ack: (response) {
         debugPrint("ack from server $response");
       });
@@ -78,7 +80,7 @@ class TodoDAO {
     return maps.map((map) => Todo.fromMap(map)).toList(growable: true);
   }
 
-  Future updateTodo(Todo todo) async {
+  Future updateTodo(Todo todo, bool receivedFromServer) async {
     debugPrint("updating todo id: ${todo.id}");
     Todo? prevTodo = await getTodo(todo.id);
     if (prevTodo!.time != todo.time) {
@@ -92,7 +94,7 @@ class TodoDAO {
       prevTodos.forEach((element) {
         if (element.index > prevTodo.index) {
           element.index--;
-          updateTodo(element);
+          updateTodo(element, receivedFromServer);
         }
       });
       finder = Finder(
@@ -125,7 +127,7 @@ class TodoDAO {
     }
 
     AuthState auth = GetIt.I.get();
-    if (auth.user.value != null) {
+    if (auth.user.value != null && !receivedFromServer) {
       socket?.emitWithAck(
         "update_todo",
         json.encode(updatedTodo),
@@ -141,7 +143,7 @@ class TodoDAO {
     );
   }
 
-  Future deleteTodo(int todoId) async {
+  Future deleteTodo(int todoId, bool receivedFromServer) async {
     Todo? todo = await getTodo(todoId);
     debugPrint("deleting todo id: $todoId");
     var finder = Finder(
@@ -154,7 +156,7 @@ class TodoDAO {
     presentTodos.forEach((element) async {
       if (element.index > todo.index) {
         element.index--;
-        await updateTodo(element);
+        await updateTodo(element, receivedFromServer);
       }
     });
     await _store.record(todoId).delete(_db);
@@ -176,7 +178,7 @@ class TodoDAO {
     }
 
     AuthState auth = GetIt.I.get();
-    if (auth.user.value != null) {
+    if (auth.user.value != null && !receivedFromServer) {
       socket?.emitWithAck(
         "delete_todo",
         json.encode({"id": todo.id.toString()}),
@@ -204,20 +206,20 @@ class TodoDAO {
       todos.forEach((element) async {
         if (element.index == oldIndex) {
           element.index = newIndex;
-          await updateTodo(element);
+          await updateTodo(element, false);
         } else if (element.index > oldIndex && element.index <= newIndex) {
           element.index -= 1;
-          await updateTodo(element);
+          await updateTodo(element, false);
         }
       });
     } else if (oldIndex > newIndex) {
       todos.forEach((element) async {
         if (element.index == oldIndex) {
           element.index = newIndex;
-          await updateTodo(element);
+          await updateTodo(element, false);
         } else if (element.index < oldIndex && element.index >= newIndex) {
           element.index += 1;
-          await updateTodo(element);
+          await updateTodo(element, false);
         }
       });
     }

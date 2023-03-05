@@ -91,7 +91,7 @@ class LabelDAO {
     List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
     requiredTodos.forEach((todo) {
       todo.labelName = labelName;
-      _todosdb.updateTodo(todo);
+      _todosdb.updateTodo(todo, false);
     });
 
     Label newLabel = Label(labelName, labelColor.toString());
@@ -127,7 +127,7 @@ class LabelDAO {
     List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
     requiredTodos.forEach((todo) {
       todo.labelName = labels[0].name;
-      _todosdb.updateTodo(todo);
+      _todosdb.updateTodo(todo, false);
     });
 
     labels.removeAt(labelIndex);

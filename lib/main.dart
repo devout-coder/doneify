@@ -217,7 +217,7 @@ class _MainContainerState extends State<MainContainer>
                             timeType: timeType!,
                             time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
-                              await todosdb.createTodo(todo);
+                              await todosdb.createTodo(todo, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -242,7 +242,7 @@ class _MainContainerState extends State<MainContainer>
                             todoId: todoId!,
                             loadedFromWidget: true,
                             onEdit: (Todo todo) async {
-                              await todosdb.updateTodo(todo);
+                              await todosdb.updateTodo(todo, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -252,7 +252,7 @@ class _MainContainerState extends State<MainContainer>
                               //     "this gets run even if i don't want it to");
                               // platform.invokeMethod(
                               //     "edited_from_widget", {"val": true});
-                              await todosdb.deleteTodo(todoId!);
+                              await todosdb.deleteTodo(todoId!, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -265,9 +265,7 @@ class _MainContainerState extends State<MainContainer>
                         return HomePage(key: UniqueKey());
                       default:
                         debugPrint("default contianer");
-                        return HomePage(
-                            // key: UniqueKey()
-                            );
+                        return HomePage(key: UniqueKey());
                     }
                   } else {
                     return Container(

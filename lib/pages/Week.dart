@@ -138,7 +138,7 @@ class _WeekPageState extends State<WeekPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 

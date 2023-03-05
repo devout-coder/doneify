@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/ip.dart';
 import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -21,27 +24,6 @@ import 'package:doneify/states/selectedFilters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 IO.Socket? socket;
-
-void initSocket(String token) {
-  debugPrint("connection token is $token");
-
-  socket?.auth = {"auth_token": token};
-  socket?.connect();
-  socket?.onConnect((_) {
-    print('Connection established');
-  });
-
-  socket?.on('todo_operation', (data) {
-    //this works only for create, have to make changes to server to make it work for update and delete
-    // debugPrint("new todo ${todo}");
-    // Todo todoObj = Todo.fromMap(json.decode(todo));
-    // debugPrint(todoObj.taskName);
-    debugPrint("real time data is $data");
-  });
-  socket?.onDisconnect((_) => print('Connection Disconnection'));
-  socket?.onConnectError((err) => print(err));
-  socket?.onError((err) => print(err));
-}
 
 class HomePage extends StatefulWidget with GetItStatefulWidgetMixin {
   // String? launchFromWidgetTimeType;
@@ -65,6 +47,44 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     "Year": 3,
     "Long Term": 4
   };
+
+  void initSocket(String token) {
+    debugPrint("connection token is $token");
+
+    socket?.auth = {"auth_token": token};
+    socket?.connect();
+    socket?.onConnect((_) {
+      print('Connection established');
+    });
+
+    socket?.on('todo_operation', (data) {
+      debugPrint("real time data is $data");
+      // var dataMap = json.decode(data);
+      String operation = data['operation'];
+      TodoDAO todoDAO = GetIt.I.get();
+      StartTodos startTodos = GetIt.I.get();
+      Todo todo = Todo.fromMap(data['data']);
+
+      switch (operation) {
+        case "create":
+          todoDAO.createTodo(todo, true);
+          startTodos.reloadTodos.value = true;
+          break;
+        case "update":
+          todoDAO.updateTodo(todo, true);
+          startTodos.reloadTodos.value = true;
+          break;
+        case "delete":
+          todoDAO.deleteTodo(todo.id, true);
+          startTodos.reloadTodos.value = true;
+          break;
+      }
+      debugPrint("data is ${data['operation']}");
+    });
+    socket?.onDisconnect((_) => print('Connection Disconnection'));
+    socket?.onConnectError((err) => print(err));
+    socket?.onError((err) => print(err));
+  }
 
   @override
   void initState() {
@@ -124,12 +144,12 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
             body: IndexedStack(
               index: currentPage,
               children: [
-                DayNavigator(),
-                WeekNavigator(),
-                MonthNavigator(),
-                YearNavigator(),
-                LongTermPage(),
-                SettingsNavigator()
+                DayNavigator(key: UniqueKey()),
+                WeekNavigator(key: UniqueKey()),
+                MonthNavigator(key: UniqueKey()),
+                YearNavigator(key: UniqueKey()),
+                LongTermPage(key: UniqueKey()),
+                SettingsNavigator(key: UniqueKey())
               ],
             ),
             backgroundColor: Colors.transparent,

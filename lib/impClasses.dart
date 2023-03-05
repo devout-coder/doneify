@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
-String serverUrl = "http://192.168.99.109:8000";
-
 class Label {
   String name;
   String color;
@@ -88,7 +86,7 @@ class Todo {
       map["time"],
       map["timeType"],
       map["index"],
-      map["id"],
+      map["id"] ?? map["_id"],
       // map["indices"],
       // map["users"],
     );

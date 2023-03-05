@@ -147,7 +147,7 @@ class _DayPageState extends State<DayPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 

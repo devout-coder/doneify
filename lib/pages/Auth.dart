@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/ip.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';

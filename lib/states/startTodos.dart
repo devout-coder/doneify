@@ -13,6 +13,8 @@ class StartTodos {
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
 
+  final reloadTodos = ValueNotifier<bool>(false);
+
   SelectedFilters selectedFilters = GetIt.I.get();
 
   int comparingTodos(Todo todo1, Todo todo2) {

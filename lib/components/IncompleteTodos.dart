@@ -31,17 +31,17 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
   TodoDAO todosdb = GetIt.I.get();
 
   editTodo(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
     widget.loadTodos();
   }
 
   editTodoWithoutReload(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
   }
 
   deleteTodo(int todoId) async {
     try {
-      await todosdb.deleteTodo(todoId);
+      await todosdb.deleteTodo(todoId, false);
       await widget.loadTodos();
     } catch (e, s) {
       print("exception e");

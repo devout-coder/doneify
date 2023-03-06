@@ -19,49 +19,56 @@ class TodoDAO {
 
   Future createTodo(Todo todo, bool receivedFromServer) async {
     // if (!received) {
-    var finder = Finder(
-      filter: Filter.equals(
-        'time',
-        todo.time,
-      ),
-      sortOrders: [
-        SortOrder("index"),
-      ],
-    );
-    final allTodos = await getAllTodos(finder);
-    todo.index = allTodos.length;
-    // }
-    await _store.record(todo.id).put(_db, todo.toMap());
+    var alreadyExistingTodo = await getTodo(todo.id);
+    debugPrint("already existing $alreadyExistingTodo");
+    if (alreadyExistingTodo == null) {
+      var finder = Finder(
+        filter: Filter.equals(
+          'time',
+          todo.time,
+        ),
+        sortOrders: [
+          SortOrder("index"),
+        ],
+      );
+      final allTodos = await getAllTodos(finder);
+      todo.index = allTodos.length;
+      // }
+      await _store.record(todo.id).put(_db, todo.toMap());
 
-    Map newTodo = {
-      "id": todo.id.toString(),
-      "taskName": todo.taskName,
-      "taskDesc": todo.taskDesc,
-      "finished": todo.finished,
-      "labelName": todo.labelName,
-      "timeStamp": todo.timeStamp,
-      "time": todo.time,
-      "timeType": todo.timeType,
-      "index": todo.index,
-    };
-    try {
-      debugPrint("creating todo for system ${todo.id}");
-      platform.invokeMethod("createTodo", newTodo);
-    } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while creating todo: $e");
+      Map newTodo = {
+        "id": todo.id.toString(),
+        "taskName": todo.taskName,
+        "taskDesc": todo.taskDesc,
+        "finished": todo.finished,
+        "labelName": todo.labelName,
+        "timeStamp": todo.timeStamp,
+        "time": todo.time,
+        "timeType": todo.timeType,
+        "index": todo.index,
+      };
+      try {
+        debugPrint("creating todo for system ${todo.id}");
+        platform.invokeMethod("createTodo", newTodo);
+      } on PlatformException catch (e) {
+        debugPrint("some fuckup happended while creating todo: $e");
+      }
+      AuthState auth = GetIt.I.get();
+
+      if (auth.user.value != null && !receivedFromServer) {
+        socket?.emitWithAck("create_todo", json.encode(newTodo),
+            ack: (response) {
+          debugPrint("ack from server $response");
+        });
+      }
+
+      HomeWidget.updateWidget(
+        name: 'WidgetProvider',
+        iOSName: 'WidgetProvider',
+      );
+    } else {
+      debugPrint("todo already exists");
     }
-    AuthState auth = GetIt.I.get();
-
-    if (auth.user.value != null && !receivedFromServer) {
-      socket?.emitWithAck("create_todo", json.encode(newTodo), ack: (response) {
-        debugPrint("ack from server $response");
-      });
-    }
-
-    HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
-    );
   }
 
   Future<Todo?> getTodo(int key) async {

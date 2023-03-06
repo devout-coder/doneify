@@ -5,20 +5,22 @@ import 'package:doneify/components/FiltersDialog.dart';
 import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:intl/intl.dart';
 // import 'package:animations/animations.dart';
 
 import 'package:doneify/pages/Day.dart';
 import 'package:sembast/sembast.dart';
 
-class Todos extends StatefulWidget {
+class Todos extends StatefulWidget with GetItStatefulWidgetMixin {
   static const routeName = '/todos';
   final String time;
   final String timeType;
-  const Todos({Key? key, required this.time, required this.timeType})
+  Todos({Key? key, required this.time, required this.timeType})
       : super(key: key);
 
   @override
@@ -46,10 +48,11 @@ String formattedDateTodosPage(String time, String timeType) {
   }
 }
 
-class _TodosState extends State<Todos> {
+class _TodosState extends State<Todos> with GetItStateMixin {
   TodoDAO todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
-  // List<String> selectedLabels = [];
+  StartTodos startTodos = GetIt.I.get();
+
   List<Todo> todos = [];
   List<Todo> unfinishedTodos = [];
   List<Todo> finishedTodos = [];
@@ -143,6 +146,18 @@ class _TodosState extends State<Todos> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
+    bool reloadLongTermTodos =
+        watchX((StartTodos todos) => todos.reloadLongTermTodos);
+    String reloadTodos = watchX((StartTodos todos) => todos.reloadTodos);
+    if (reloadLongTermTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadLongTermTodos.value = false;
+    }
+    if (reloadTodos == widget.time) {
+      loadTodos();
+      startTodos.reloadTodos.value = "";
+    }
     return Column(
       children: [
         SizedBox(

@@ -13,7 +13,13 @@ class StartTodos {
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
 
-  final reloadTodos = ValueNotifier<bool>(false);
+  final reloadDayTodos = ValueNotifier<bool>(false);
+  final reloadWeekTodos = ValueNotifier<bool>(false);
+  final reloadMonthTodos = ValueNotifier<bool>(false);
+  final reloadYearTodos = ValueNotifier<bool>(false);
+  final reloadLongTermTodos = ValueNotifier<bool>(false);
+  final reloadTodos = ValueNotifier<String>("");
+  
 
   SelectedFilters selectedFilters = GetIt.I.get();
 

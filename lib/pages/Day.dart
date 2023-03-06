@@ -15,6 +15,7 @@ import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -55,7 +56,7 @@ class _DayNavigatorState extends State<DayNavigator> {
   }
 }
 
-class DayPage extends StatefulWidget {
+class DayPage extends StatefulWidget with GetItStatefulWidgetMixin {
   DayPage({Key? key}) : super(key: key);
 
   @override
@@ -68,7 +69,7 @@ String formattedDate(DateTime date) {
   return formatted;
 }
 
-class _DayPageState extends State<DayPage> {
+class _DayPageState extends State<DayPage> with GetItStateMixin {
   String timeType = "day";
   final DateRangePickerController _controller = DateRangePickerController();
 
@@ -163,6 +164,13 @@ class _DayPageState extends State<DayPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadDayTodos);
+    if (reloadTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadDayTodos.value = false;
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

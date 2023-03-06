@@ -5,9 +5,11 @@ import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
 import 'package:doneify/pages/Todos.dart';
 import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
@@ -46,8 +48,8 @@ class _MonthNavigatorState extends State<MonthNavigator> {
   }
 }
 
-class MonthPage extends StatefulWidget {
-  const MonthPage({Key? key}) : super(key: key);
+class MonthPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  MonthPage({Key? key}) : super(key: key);
 
   @override
   State<MonthPage> createState() => _MonthPageState();
@@ -59,12 +61,13 @@ String formattedMonth(DateTime date) {
   return formatted;
 }
 
-class _MonthPageState extends State<MonthPage> {
+class _MonthPageState extends State<MonthPage> with GetItStateMixin {
   String timeType = "month";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
+  StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
   List<String> unfinishedMonths = [];
@@ -87,10 +90,7 @@ class _MonthPageState extends State<MonthPage> {
   }
 
   loadTodos() async {
-    // debugPrint(selectedLabelsClass.selectedLabels.toString());
-    // debugPrint("todos loaded");
-    // debugPrint("loading...");
-    // if (this.mounted) {
+    debugPrint("inside reload");
     _controller.selectedDate = null;
     // }
     var finder = Finder(
@@ -129,12 +129,6 @@ class _MonthPageState extends State<MonthPage> {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
-    // debugPrint("unfinished");
-    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
-    // debugPrint("finished");
-    // finishedTodosTemp.forEach)((element) => debugPrint(element.taskName));
 
     setState(() {
       todos = todosTemp;
@@ -155,6 +149,13 @@ class _MonthPageState extends State<MonthPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadMonthTodos);
+    if (reloadTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadMonthTodos.value = false;
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

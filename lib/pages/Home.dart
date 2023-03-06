@@ -48,6 +48,29 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     "Long Term": 4
   };
 
+  void reloadAppropriateTodos(
+      String timeType, String time, StartTodos startTodos) {
+    startTodos.reloadTodos.value = time;
+    switch (timeType) {
+      case "day":
+        startTodos.reloadDayTodos.value = true;
+        break;
+      case "week":
+        startTodos.reloadWeekTodos.value = true;
+        break;
+      case "month":
+        startTodos.reloadMonthTodos.value = true;
+        break;
+      case "year":
+        startTodos.reloadYearTodos.value = true;
+        break;
+      case "longTerm":
+        startTodos.reloadLongTermTodos.value = true;
+        break;
+      default:
+    }
+  }
+
   void initSocket(String token) {
     debugPrint("connection token is $token");
 
@@ -57,7 +80,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
       print('Connection established');
     });
 
-    socket?.on('todo_operation', (data) {
+    socket?.on('todo_operation', (data) async {
       debugPrint("real time data is $data");
       // var dataMap = json.decode(data);
       String operation = data['operation'];
@@ -67,16 +90,16 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
 
       switch (operation) {
         case "create":
-          todoDAO.createTodo(todo, true);
-          startTodos.reloadTodos.value = true;
+          await todoDAO.createTodo(todo, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
           break;
         case "update":
-          todoDAO.updateTodo(todo, true);
-          startTodos.reloadTodos.value = true;
+          await todoDAO.updateTodo(todo, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
           break;
         case "delete":
-          todoDAO.deleteTodo(todo.id, true);
-          startTodos.reloadTodos.value = true;
+          await todoDAO.deleteTodo(todo.id, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
           break;
       }
       debugPrint("data is ${data['operation']}");

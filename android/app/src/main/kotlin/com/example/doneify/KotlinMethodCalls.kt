@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import androidx.room.OnConflictStrategy
 import com.google.gson.Gson
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -241,7 +242,11 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         Thread {
             if (call.method == "createTodo") {
                 Log.d("debugging", "the id used is $id")
-                todoDAO!!.insert(todo)
+                try {
+                    todoDAO!!.insert(todo)
+                } catch (e: Exception) {
+                    Log.d("debugging", "the caught exception is ${e.toString()}")
+                }
             } else {
                 todoDAO!!.update(todo)
             }

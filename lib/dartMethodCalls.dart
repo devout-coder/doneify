@@ -1,5 +1,5 @@
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/main.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
@@ -23,7 +23,9 @@ void kotlinMethodCallHandler(MethodCall call) async {
     // debugPrint("fetched store");
     final snapshot = await store.record(todoId).getSnapshot(db);
     // debugPrint("got a todo");
-    Todo todo = Todo.fromMap(snapshot!.value);
+
+    Map<String, dynamic> map = snapshot?.value as Map<String, dynamic>;
+    Todo todo = Todo.fromMap(map);
     todo.finished = true;
     await store.record(todoId).put(db, todo.toMap(), merge: true);
     // debugPrint("updated todo record in storage");

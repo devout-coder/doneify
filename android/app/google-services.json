@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "52294703459",
+    "project_id": "doneify",
+    "storage_bucket": "doneify.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52294703459:android:b1d8369cbcbe072a38db56",
+        "android_client_info": {
+          "package_name": "com.example.doneify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52294703459-388f732f6cvv4c1aqtpdr3tl7b7ejb9p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.doneify",
+            "certificate_hash": "908d2f1e2baae43b4c9add557aefefd8ca542186"
+          }
+        },
+        {
+          "client_id": "52294703459-ev3mkullv0fchdrsso7pgjtliimheav8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtbZ9kd54IGKiJbB-0AmhXRtggo7SQ9ZI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52294703459-0ir40ukcrn990dsj4fucr6qhho9uk9fq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,22 +1,18 @@
-import 'dart:developer';
-import 'dart:ffi';
-import 'dart:io';
-import 'package:conquer_flutter_app/components/EachTodo.dart';
-import 'package:conquer_flutter_app/dartMethodCalls.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/pages/Todos.dart';
-import 'package:conquer_flutter_app/states/initStates.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
-import 'package:conquer_flutter_app/states/nudgerState.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/startTodos.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
-import 'package:conquer_flutter_app/timeFuncs.dart';
+import 'dart:convert';
+
+import 'package:doneify/dartMethodCalls.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/initStates.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/nudgerState.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
+import 'package:doneify/timeFuncs.dart';
 import 'package:flutter/material.dart';
-import 'package:conquer_flutter_app/pages/Home.dart';
+import 'package:doneify/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
@@ -41,13 +37,15 @@ Future registerDB() async {
   LabelDAO labelsDB = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
   StartTodos startTodos = GetIt.I.get();
+  NudgerStates nudgerStates = GetIt.I.get();
+  AuthState authState = GetIt.I.get();
 
   //don't fuck up this order
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
   await startTodos.loadTodos();
+  await authState.fetchUserFromStorage();
 
-  NudgerStates nudgerStates = GetIt.I.get();
   nudgerStates.fetchNudgerStates();
 }
 
@@ -61,7 +59,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   void handleKotlinEvents() async {
     channel.setMethodCallHandler((call) async {
-      // debugPrint( //     "call received method ${call.method} argument ${call.arguments}");
       kotlinMethodCallHandler(call);
       return Future<dynamic>.value();
     });
@@ -117,6 +114,7 @@ class _MainContainerState extends State<MainContainer>
     } else if (path == "/editInputModal") {
       todoId = int.parse(widget.entirePath.split("?")[1]);
     }
+
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
@@ -219,7 +217,7 @@ class _MainContainerState extends State<MainContainer>
                             timeType: timeType!,
                             time: formattedTime(timeType!, DateTime.now()),
                             onCreate: (Todo todo) async {
-                              await todosdb.createTodo(todo);
+                              await todosdb.createTodo(todo, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -244,7 +242,7 @@ class _MainContainerState extends State<MainContainer>
                             todoId: todoId!,
                             loadedFromWidget: true,
                             onEdit: (Todo todo) async {
-                              await todosdb.updateTodo(todo);
+                              await todosdb.updateTodo(todo, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -254,7 +252,7 @@ class _MainContainerState extends State<MainContainer>
                               //     "this gets run even if i don't want it to");
                               // platform.invokeMethod(
                               //     "edited_from_widget", {"val": true});
-                              await todosdb.deleteTodo(todoId!);
+                              await todosdb.deleteTodo(todoId!, false);
                               bool receivedVal = await platform.invokeMethod(
                                   "setWidgetChanged", {"widgetChanged": true});
                               debugPrint("in dart set val, $receivedVal");
@@ -267,9 +265,7 @@ class _MainContainerState extends State<MainContainer>
                         return HomePage(key: UniqueKey());
                       default:
                         debugPrint("default contianer");
-                        return HomePage(
-                            // key: UniqueKey()
-                            );
+                        return HomePage(key: UniqueKey());
                     }
                   } else {
                     return Container(

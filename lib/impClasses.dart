@@ -8,6 +8,14 @@ class Label {
   Label(this.name, this.color);
 }
 
+class User {
+  String name;
+  String email;
+  String token;
+
+  User(this.name, this.email, this.token);
+}
+
 class Alarm {
   int alarmId;
   int taskId;
@@ -68,7 +76,7 @@ class Todo {
     };
   }
 
-  factory Todo.fromMap(Map<String, dynamic> map) {
+  static Todo fromMap(Map<String, dynamic> map) {
     return Todo(
       map["taskName"],
       map["taskDesc"],
@@ -78,7 +86,7 @@ class Todo {
       map["time"],
       map["timeType"],
       map["index"],
-      map["id"],
+      map["id"] ?? map["_id"],
       // map["indices"],
       // map["users"],
     );

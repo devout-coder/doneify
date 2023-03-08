@@ -1,17 +1,17 @@
-import 'package:conquer_flutter_app/components/AddOrEditLabelDialog.dart';
-import 'package:conquer_flutter_app/components/EachWeekCell.dart';
-import 'package:conquer_flutter_app/components/SelectLabelDialog.dart';
-import 'package:conquer_flutter_app/components/SelectTimeDialog.dart';
-import 'package:conquer_flutter_app/components/SetAlarmDialog.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Month.dart';
-import 'package:conquer_flutter_app/pages/Week.dart';
-import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/states/alarmDAO.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/components/SelectLabelDialog.dart';
+import 'package:doneify/components/SelectTimeDialog.dart';
+import 'package:doneify/components/SetAlarmDialog.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/Month.dart';
+import 'package:doneify/pages/Week.dart';
+import 'package:doneify/pages/Year.dart';
+import 'package:doneify/states/alarmDAO.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -20,9 +20,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class InputModal extends StatefulWidget {
   final goBack;
@@ -456,6 +456,7 @@ class _InputModalState extends State<InputModal> {
       //     platform.invokeMethod("edited_from_widget", {"val": true});
       //   }
       // }
+
       if (todo != null) {
         newTodo = Todo(
           taskName.text,
@@ -531,7 +532,7 @@ class _InputModalState extends State<InputModal> {
       todo = await todosdb.getTodo(widget.todoId!);
       // debugPrint("fetched todo: $todo");
     }
-    taskId = todo != null ? todo!.id : getRandInt(18);
+    taskId = todo != null ? todo!.id : getRandInt(15);
     taskName.text = todo != null ? todo!.taskName : '';
     taskDesc.text = todo != null ? todo!.taskDesc : '';
     selectedLabel = todo != null ? findLabelIndex(todo!.labelName) : 0;

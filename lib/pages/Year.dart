@@ -1,13 +1,15 @@
-import 'package:conquer_flutter_app/components/BottomButtons.dart';
-import 'package:conquer_flutter_app/components/EachYearCell.dart';
-import 'package:conquer_flutter_app/components/IncompleteTodos.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/pages/Todos.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/BottomButtons.dart';
+import 'package:doneify/components/EachYearCell.dart';
+import 'package:doneify/components/IncompleteTodos.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/navigatorKeys.dart';
+import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:intl/intl.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
@@ -55,8 +57,8 @@ class _YearNavigatorState extends State<YearNavigator> {
   }
 }
 
-class YearPage extends StatefulWidget {
-  const YearPage({Key? key}) : super(key: key);
+class YearPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  YearPage({Key? key}) : super(key: key);
 
   @override
   State<YearPage> createState() => _YearPageState();
@@ -68,12 +70,13 @@ String formattedYear(DateTime date) {
   return formatted;
 }
 
-class _YearPageState extends State<YearPage> {
+class _YearPageState extends State<YearPage> with GetItStateMixin {
   String timeType = "year";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
+  StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
   List<String> unfinishedYears = [];
@@ -136,12 +139,6 @@ class _YearPageState extends State<YearPage> {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
-    // debugPrint("unfinished");
-    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
-    // debugPrint("finished");
-    // finishedTodosTemp.forEach)((element) => debugPrint(element.taskName));
 
     setState(() {
       todos = todosTemp;
@@ -150,7 +147,7 @@ class _YearPageState extends State<YearPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 
@@ -162,6 +159,12 @@ class _YearPageState extends State<YearPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadYearTodos);
+    if (reloadTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadYearTodos.value = false;
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

@@ -1,7 +1,7 @@
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
@@ -12,6 +12,14 @@ class StartTodos {
   List<Todo> todos = [];
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
+
+  final reloadDayTodos = ValueNotifier<bool>(false);
+  final reloadWeekTodos = ValueNotifier<bool>(false);
+  final reloadMonthTodos = ValueNotifier<bool>(false);
+  final reloadYearTodos = ValueNotifier<bool>(false);
+  final reloadLongTermTodos = ValueNotifier<bool>(false);
+  final reloadTodos = ValueNotifier<String>("");
+  
 
   SelectedFilters selectedFilters = GetIt.I.get();
 

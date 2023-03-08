@@ -1,20 +1,21 @@
 import 'dart:ui';
 
 import 'package:animations/animations.dart';
-import 'package:conquer_flutter_app/components/BottomButtons.dart';
-import 'package:conquer_flutter_app/components/EachDayCell.dart';
-import 'package:conquer_flutter_app/components/FiltersDialog.dart';
-import 'package:conquer_flutter_app/components/IncompleteTodos.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/pages/Todos.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/components/FiltersDialog.dart';
-import 'package:conquer_flutter_app/states/startTodos.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/BottomButtons.dart';
+import 'package:doneify/components/EachDayCell.dart';
+import 'package:doneify/components/FiltersDialog.dart';
+import 'package:doneify/components/IncompleteTodos.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/navigatorKeys.dart';
+import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/components/FiltersDialog.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -55,7 +56,7 @@ class _DayNavigatorState extends State<DayNavigator> {
   }
 }
 
-class DayPage extends StatefulWidget {
+class DayPage extends StatefulWidget with GetItStatefulWidgetMixin {
   DayPage({Key? key}) : super(key: key);
 
   @override
@@ -68,7 +69,7 @@ String formattedDate(DateTime date) {
   return formatted;
 }
 
-class _DayPageState extends State<DayPage> {
+class _DayPageState extends State<DayPage> with GetItStateMixin {
   String timeType = "day";
   final DateRangePickerController _controller = DateRangePickerController();
 
@@ -147,7 +148,7 @@ class _DayPageState extends State<DayPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 
@@ -163,6 +164,13 @@ class _DayPageState extends State<DayPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadDayTodos);
+    if (reloadTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadDayTodos.value = false;
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

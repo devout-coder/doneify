@@ -1,7 +1,7 @@
-import 'package:conquer_flutter_app/components/EachTodo.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/EachTodo.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
@@ -31,17 +31,17 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
   TodoDAO todosdb = GetIt.I.get();
 
   editTodo(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
     widget.loadTodos();
   }
 
   editTodoWithoutReload(Todo todo) async {
-    await todosdb.updateTodo(todo);
+    await todosdb.updateTodo(todo, false);
   }
 
   deleteTodo(int todoId) async {
     try {
-      await todosdb.deleteTodo(todoId);
+      await todosdb.deleteTodo(todoId, false);
       await widget.loadTodos();
     } catch (e, s) {
       print("exception e");

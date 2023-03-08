@@ -1,14 +1,16 @@
-import 'package:conquer_flutter_app/components/BottomButtons.dart';
-import 'package:conquer_flutter_app/components/EachWeekCell.dart';
-import 'package:conquer_flutter_app/components/IncompleteTodos.dart';
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Todos.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/components/BottomButtons.dart';
+import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/components/IncompleteTodos.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/navigatorKeys.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
@@ -47,7 +49,7 @@ class _WeekNavigatorState extends State<WeekNavigator> {
   }
 }
 
-class WeekPage extends StatefulWidget {
+class WeekPage extends StatefulWidget with GetItStatefulWidgetMixin {
   WeekPage({Key? key}) : super(key: key);
 
   @override
@@ -62,12 +64,13 @@ String formattedWeek(DateTime day) {
   return formattedString;
 }
 
-class _WeekPageState extends State<WeekPage> {
+class _WeekPageState extends State<WeekPage> with GetItStateMixin {
   String timeType = "week";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
+  StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
   List<String> unfinishedWeeks = [];
@@ -138,7 +141,7 @@ class _WeekPageState extends State<WeekPage> {
   }
 
   createTodo(Todo todo) async {
-    await todosdb.createTodo(todo);
+    await todosdb.createTodo(todo, false);
     loadTodos();
   }
 
@@ -150,6 +153,13 @@ class _WeekPageState extends State<WeekPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadWeekTodos);
+    if (reloadTodos) {
+      debugPrint("gotta reload");
+      loadTodos();
+      startTodos.reloadWeekTodos.value = false;
+    }
+
     return Column(
       children: [
         Container(

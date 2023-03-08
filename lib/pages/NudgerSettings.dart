@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/components/BlacklistedAppsDialog.dart';
-import 'package:conquer_flutter_app/components/NudgerConfirmationDialog.dart';
-import 'package:conquer_flutter_app/components/SettingsButton.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/pages/InputModal.dart';
-import 'package:conquer_flutter_app/states/nudgerState.dart';
+import 'package:doneify/components/BlacklistedAppsDialog.dart';
+import 'package:doneify/components/NudgerConfirmationDialog.dart';
+import 'package:doneify/components/SettingsButton.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/states/nudgerState.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
@@ -31,7 +31,6 @@ class _NudgerSettingsState extends State<NudgerSettings> {
   String time = "Day";
   bool presentTodos = false;
   TextEditingController duration = TextEditingController();
-
 
   void handleSwitch() async {
     bool newState = !nudgerSwitch;

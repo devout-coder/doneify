@@ -1,5 +1,13 @@
+import 'dart:convert';
+
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/ip.dart';
+import 'package:doneify/states/authState.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 
 class Auth extends StatefulWidget {
   String type;
@@ -11,13 +19,133 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   double borderRadius = 10;
-  bool _passwordVisible = false;
+  bool _passwordVisible = true;
   Color textFieldActiveColor = Color.fromARGB(255, 230, 230, 230);
   Color textFieldInactiveColor = Colors.grey;
+
+  AuthState authState = GetIt.I.get();
+
+  bool loading = false;
 
   String username = '';
   String email = "";
   String password = "";
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  bool fieldsValid() {
+    bool ret = true;
+    if ((widget.type == "login" && (email.isEmpty || password.isEmpty)) ||
+        (widget.type == "signup" &&
+            (email.isEmpty || password.isEmpty || username.isEmpty))) {
+      ret = false;
+      Fluttertoast.showToast(
+        msg: "No field should be empty",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    } else if (password.length < 8) {
+      ret = false;
+      Fluttertoast.showToast(
+        msg: "Password should be atleast 8 characters long",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
+    return ret;
+  }
+
+  void dealWithResponse(int statusCode, String body) {
+    if (statusCode == 200) {
+      Map res = json.decode(body);
+      User newUser = User(
+        res["data"]["username"],
+        res["data"]["email"],
+        res["token"],
+      );
+      authState.saveUserToStorage(newUser);
+      setState(() {
+        loading = false;
+      });
+      Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(
+        msg: json.decode(body)["message"],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+    }
+  }
+
+  void signup() async {
+    if (fieldsValid()) {
+      setState(() {
+        loading = true;
+      });
+      Map data = {
+        'username': username,
+        'email': email,
+        'password': password,
+      };
+      var body = json.encode(data);
+      var response = await http.post(
+        Uri.parse("$serverUrl/signup"),
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+      dealWithResponse(response.statusCode, response.body);
+    }
+  }
+
+  void login() async {
+    if (fieldsValid()) {
+      setState(() {
+        loading = true;
+      });
+      Map data = {
+        'email': email,
+        'password': password,
+      };
+      var body = json.encode(data);
+      var response = await http.post(
+        Uri.parse("$serverUrl/login"),
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      dealWithResponse(response.statusCode, response.body);
+    }
+  }
+
+  Future<void> signinGoogle(BuildContext context) async {
+    try {
+      setState(() {
+        loading = true;
+      });
+      GoogleSignInAccount? signIn = await _googleSignIn.signIn();
+      if (signIn != null) {
+        Map data = {
+          "username": signIn.displayName,
+          'email': signIn.email,
+        };
+        var body = json.encode(data);
+        var response = await http.post(
+          Uri.parse("$serverUrl/signupGoogle"),
+          headers: {"Content-Type": "application/json"},
+          body: body,
+        );
+        dealWithResponse(response.statusCode, response.body);
+      }
+    } catch (error) {
+      debugPrint(error.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    // _googleSignIn.signOut();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +167,9 @@ class _AuthState extends State<Auth> {
             SizedBox(
               width: 300,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  signinGoogle(context);
+                },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.all(0)),
                   foregroundColor: MaterialStateProperty.all(Colors.white),
@@ -224,8 +354,11 @@ class _AuthState extends State<Auth> {
               width: 300,
               child: ElevatedButton(
                 onPressed: () {
-                  debugPrint(
-                      "username:$username, email:$email, password:$password");
+                  if (widget.type == "login") {
+                    login();
+                  } else {
+                    signup();
+                  }
                 },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.all(0)),
@@ -268,6 +401,10 @@ class _AuthState extends State<Auth> {
                 ),
               ),
             ),
+            SizedBox(
+              height: 25,
+            ),
+            loading ? CircularProgressIndicator() : Container(),
           ],
         ),
       ),

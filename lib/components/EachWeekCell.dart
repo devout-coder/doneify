@@ -1,6 +1,6 @@
-import 'package:conquer_flutter_app/components/SelectTimeDialog.dart';
-import 'package:conquer_flutter_app/globalColors.dart';
-import 'package:conquer_flutter_app/pages/Week.dart';
+import 'package:doneify/components/SelectTimeDialog.dart';
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/pages/Week.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';

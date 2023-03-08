@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:conquer_flutter_app/impClasses.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
-import 'package:conquer_flutter_app/states/todoDAO.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
@@ -91,7 +91,7 @@ class LabelDAO {
     List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
     requiredTodos.forEach((todo) {
       todo.labelName = labelName;
-      _todosdb.updateTodo(todo);
+      _todosdb.updateTodo(todo, false);
     });
 
     Label newLabel = Label(labelName, labelColor.toString());
@@ -127,7 +127,7 @@ class LabelDAO {
     List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
     requiredTodos.forEach((todo) {
       todo.labelName = labels[0].name;
-      _todosdb.updateTodo(todo);
+      _todosdb.updateTodo(todo, false);
     });
 
     labels.removeAt(labelIndex);

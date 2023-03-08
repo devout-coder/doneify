@@ -1,5 +1,5 @@
-import 'package:conquer_flutter_app/components/NewColorDialog.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
+import 'package:doneify/components/NewColorDialog.dart';
+import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';

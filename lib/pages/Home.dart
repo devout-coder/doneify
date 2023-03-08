@@ -1,22 +1,31 @@
-import 'package:conquer_flutter_app/globalColors.dart';
+import 'dart:convert';
+
+import 'package:doneify/globalColors.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/ip.dart';
+import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/startTodos.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:doneify/pages/LongTerm.dart';
+import 'package:doneify/pages/Month.dart';
+import 'package:doneify/pages/Week.dart';
+import 'package:doneify/pages/Year.dart';
+import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/Settings.dart';
+import 'package:doneify/icons/time_type_icons.dart';
+import 'package:doneify/navigatorKeys.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import 'package:conquer_flutter_app/pages/LongTerm.dart';
-import 'package:conquer_flutter_app/pages/Month.dart';
-import 'package:conquer_flutter_app/pages/Week.dart';
-import 'package:conquer_flutter_app/pages/Year.dart';
-import 'package:conquer_flutter_app/pages/Day.dart';
-import 'package:conquer_flutter_app/pages/Settings.dart';
-import 'package:conquer_flutter_app/icons/time_type_icons.dart';
-import 'package:conquer_flutter_app/navigatorKeys.dart';
-import 'package:conquer_flutter_app/states/labelDAO.dart';
-import 'package:conquer_flutter_app/states/selectedFilters.dart';
+IO.Socket? socket;
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatefulWidget with GetItStatefulWidgetMixin {
   // String? launchFromWidgetTimeType;
   // String? launchFromWidgetCommand;
   HomePage({
@@ -29,8 +38,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  int currentPage = 5;
+class _HomePageState extends State<HomePage> with GetItStateMixin {
+  int currentPage = 0;
   var timeTypeMap = {
     'Day': 0,
     'Week': 1,
@@ -39,10 +48,77 @@ class _HomePageState extends State<HomePage> {
     "Long Term": 4
   };
 
+  void reloadAppropriateTodos(
+      String timeType, String time, StartTodos startTodos) {
+    startTodos.reloadTodos.value = time;
+    switch (timeType) {
+      case "day":
+        startTodos.reloadDayTodos.value = true;
+        break;
+      case "week":
+        startTodos.reloadWeekTodos.value = true;
+        break;
+      case "month":
+        startTodos.reloadMonthTodos.value = true;
+        break;
+      case "year":
+        startTodos.reloadYearTodos.value = true;
+        break;
+      case "longTerm":
+        startTodos.reloadLongTermTodos.value = true;
+        break;
+      default:
+    }
+  }
+
+  void initSocket(String token) {
+    debugPrint("connection token is $token");
+
+    socket?.auth = {"auth_token": token};
+    socket?.connect();
+    socket?.onConnect((_) {
+      print('Connection established');
+    });
+
+    socket?.on('todo_operation', (data) async {
+      debugPrint("real time data is $data");
+      // var dataMap = json.decode(data);
+      String operation = data['operation'];
+      TodoDAO todoDAO = GetIt.I.get();
+      StartTodos startTodos = GetIt.I.get();
+      Todo todo = Todo.fromMap(data['data']);
+
+      switch (operation) {
+        case "create":
+          await todoDAO.createTodo(todo, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "update":
+          await todoDAO.updateTodo(todo, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "delete":
+          await todoDAO.deleteTodo(todo.id, true);
+          reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+      }
+      debugPrint("data is ${data['operation']}");
+    });
+    socket?.onDisconnect((_) => print('Connection Disconnection'));
+    socket?.onConnectError((err) => print(err));
+    socket?.onError((err) => print(err));
+  }
+
   @override
   void initState() {
     super.initState();
     debugPrint("home rendered");
+
+    socket = IO.io(serverUrl, <String, dynamic>{
+      'autoConnect': false,
+      'transports': ['websocket'],
+    });
+
     // debugPrint("In Home ${widget.launchFromWidgetTimeType}");
     // if (widget.launchFromWidgetTimeType == null) {
     //   currentPage = 5;
@@ -54,6 +130,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = watchX((AuthState auth) => auth.user);
+    if (user != null) {
+      initSocket(user.token);
+    } else {
+      socket?.disconnect();
+    }
+
     return WillPopScope(
       onWillPop: () async {
         if (navigatorKeys[currentPage].currentState!.canPop()) {
@@ -84,12 +167,12 @@ class _HomePageState extends State<HomePage> {
             body: IndexedStack(
               index: currentPage,
               children: [
-                DayNavigator(),
-                WeekNavigator(),
-                MonthNavigator(),
-                YearNavigator(),
-                LongTermPage(),
-                SettingsNavigator()
+                DayNavigator(key: UniqueKey()),
+                WeekNavigator(key: UniqueKey()),
+                MonthNavigator(key: UniqueKey()),
+                YearNavigator(key: UniqueKey()),
+                LongTermPage(key: UniqueKey()),
+                SettingsNavigator(key: UniqueKey())
               ],
             ),
             backgroundColor: Colors.transparent,

@@ -43,8 +43,8 @@ Future registerDB() async {
   //don't fuck up this order
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
-  await startTodos.loadTodos();
   await authState.fetchUserFromStorage();
+  await startTodos.loadTodos();
 
   nudgerStates.fetchNudgerStates();
 }

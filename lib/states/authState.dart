@@ -9,12 +9,13 @@ class AuthState extends ChangeNotifier {
   Future fetchUserFromStorage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    String id = prefs.getString('id') ?? "";
     String name = prefs.getString('userName') ?? "";
     String email = prefs.getString('userEmail') ?? "";
     String token = prefs.getString('userToken') ?? "";
     debugPrint("current token is $token");
     if (name.isNotEmpty) {
-      user.value = User(name, email, token);
+      user.value = User(id, name, email, token);
       debugPrint("fetched user from storage: $user");
     }
   }
@@ -25,6 +26,7 @@ class AuthState extends ChangeNotifier {
 
     debugPrint("new user: $user");
 
+    prefs.setString('id', newUser.id);
     prefs.setString('userName', newUser.name);
     prefs.setString('userEmail', newUser.email);
     prefs.setString('userToken', newUser.token);
@@ -35,6 +37,7 @@ class AuthState extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     googleSignIn.signOut();
 
+    prefs.setString('id', "");
     prefs.setString('userName', "");
     prefs.setString('userEmail', "");
     prefs.setString('userToken', "");

@@ -58,7 +58,9 @@ class _AuthState extends State<Auth> {
   void dealWithResponse(int statusCode, String body) {
     if (statusCode == 200) {
       Map res = json.decode(body);
+      debugPrint(res.toString());
       User newUser = User(
+        res["data"]["_id"],
         res["data"]["username"],
         res["data"]["email"],
         res["token"],

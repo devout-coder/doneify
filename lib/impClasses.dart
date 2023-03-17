@@ -9,11 +9,12 @@ class Label {
 }
 
 class User {
+  String id;
   String name;
   String email;
   String token;
 
-  User(this.name, this.email, this.token);
+  User(this.id, this.name, this.email, this.token);
 }
 
 class Alarm {
@@ -76,7 +77,7 @@ class Todo {
     };
   }
 
-  static Todo fromMap(Map<String, dynamic> map) {
+  static Todo fromMap(Map<dynamic, dynamic> map) {
     return Todo(
       map["taskName"],
       map["taskDesc"],

@@ -10,6 +10,7 @@ import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:sembast/sembast.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoDAO {
   final Database _db = GetIt.I.get();
@@ -61,6 +62,9 @@ class TodoDAO {
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',
     );
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastOfflineUpdated', todo.timeStamp);
   }
 
   Future<Todo?> getTodo(int key) async {
@@ -140,6 +144,9 @@ class TodoDAO {
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',
     );
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastOfflineUpdated', todo.timeStamp);
   }
 
   Future deleteTodo(int todoId, bool receivedFromServer) async {
@@ -191,6 +198,9 @@ class TodoDAO {
       name: 'WidgetProvider',
       iOSName: 'WidgetProvider',
     );
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastOfflineUpdated', todo.timeStamp);
   }
 
   Future rearrangeTodos(int oldIndex, int newIndex, String time) async {

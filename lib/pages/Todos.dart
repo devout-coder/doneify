@@ -11,8 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:intl/intl.dart';
-// import 'package:animations/animations.dart';
-
+import 'dart:io' show Platform;
 import 'package:doneify/pages/Day.dart';
 import 'package:sembast/sembast.dart';
 
@@ -163,14 +162,37 @@ class _TodosState extends State<Todos> with GetItStateMixin {
         SizedBox(
           height: 10,
         ),
-        Text(
-          formattedDateTodosPage(widget.time, widget.timeType),
-          style: const TextStyle(
-            fontFamily: "EuclidCircular",
-            fontWeight: FontWeight.w600,
-            fontSize: 23,
-            color: Color(0xffffffff),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Platform.isLinux || Platform.isMacOS || Platform.isWindows
+                ? Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                    ],
+                  )
+                : Container(),
+            Text(
+              formattedDateTodosPage(widget.time, widget.timeType),
+              style: const TextStyle(
+                fontFamily: "EuclidCircular",
+                fontWeight: FontWeight.w600,
+                fontSize: 23,
+                color: Color(0xffffffff),
+              ),
+            ),
+          ],
         ),
         SizedBox(
           height: 12,

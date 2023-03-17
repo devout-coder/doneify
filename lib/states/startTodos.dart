@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StartTodos {
   //already loading the day todos so that after circular progress stops there is no delay before the todos are shown
+  //index fuck up
   List<Todo> todos = [];
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
@@ -41,14 +42,13 @@ class StartTodos {
     }
   }
 
-  loadTodos() async {
-    // debugPrint("todos loaded");
+  Future fetchOnlineTodos() async {
+    AuthState auth = GetIt.I.get();
     TodoDAO todosdb = GetIt.I.get();
 
-    AuthState auth = GetIt.I.get();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? lastOfflineUpdated = prefs.getInt('lastOfflineUpdated');
-    debugPrint("offline db was updated at $lastOfflineUpdated");
+    // debugPrint("offline db was updated at $lastOfflineUpdated");
     debugPrint("user is ${auth.user.value!.token}");
 
     if (auth.user.value != null) {
@@ -59,16 +59,42 @@ class StartTodos {
           "authorization": auth.user.value!.token
         },
       );
-      debugPrint("todos reponse is ${response.body}");
+      // debugPrint("todos reponse is ${response.body}");
       Map body = json.decode(response.body);
-      List todoMap = body["data"];
-      List<Todo> newTodos = [];
-      for (Map each in todoMap) {
-        Todo todo = Todo.fromMap(each);
-        newTodos.add(todo);
+      if (body["message"] != "offline db up to date") {
+        List newTodoList = body["todos"];
+        List deletedTodoList = body["deletedTodos"];
+        debugPrint("all todos are: $newTodoList");
+        // debugPrint("deleted todos are: $deletedTodoMap");
+
+        // List<Todo> newTodos = [];
+        for (Map each in newTodoList) {
+          debugPrint("each todo is $each");
+          Todo todo = Todo.fromMap(each);
+          Todo? todoFromDb = await todosdb.getTodo(todo.id);
+          if (todoFromDb == null) {
+            debugPrint("gotta create ${todo.taskName}");
+            await todosdb.createTodo(todo, true);
+          } else {
+            debugPrint("gotta update ${todo.taskName}");
+            await todosdb.updateTodo(todo, true);
+          }
+        }
+        for (Map each in deletedTodoList) {
+          int id = each["_id"];
+          debugPrint("gotta delete $id");
+          await todosdb.deleteTodo(id, true);
+          // Todo todo = Todo.fromMap(each);
+          // newTodos.add(todo);
+        }
+        // debugPrint("todos reponse ${todos}");
       }
-      // debugPrint("todos reponse ${todos}");
     }
+  }
+
+  loadTodos() async {
+    await fetchOnlineTodos();
+    TodoDAO todosdb = GetIt.I.get();
 
     var finder = Finder(
       filter: Filter.equals(
@@ -101,8 +127,8 @@ class StartTodos {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
+    todosTemp.forEach(
+        (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
     // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
     // debugPrint("finished");

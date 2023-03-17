@@ -90,7 +90,7 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
   }
 
   loadTodos() async {
-    debugPrint("inside reload");
+    // debugPrint("inside reload");
     _controller.selectedDate = null;
     // }
     var finder = Finder(

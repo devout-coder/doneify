@@ -29,9 +29,10 @@ class TodoDAO {
       ],
     );
     final allTodos = await getAllTodos(finder);
-    todo.index = allTodos.length;
+    todo.index = receivedFromServer ? todo.index : allTodos.length;
     // }
     await _store.record(todo.id).put(_db, todo.toMap());
+    debugPrint("created todo ${todo.taskName} ${todo.index}");
 
     Map newTodo = {
       "id": todo.id.toString(),
@@ -45,14 +46,13 @@ class TodoDAO {
       "index": todo.index,
     };
     try {
-      debugPrint("creating todo for system ${todo.id}");
+      // debugPrint("creating todo for system ${todo.id}");
       platform.invokeMethod("createTodo", newTodo);
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while creating todo: $e");
     }
-    AuthState auth = GetIt.I.get();
 
-    if (auth.user.value != null && !receivedFromServer) {
+    if (!receivedFromServer) {
       socket?.emitWithAck("create_todo", json.encode(newTodo), ack: (response) {
         debugPrint("ack from server $response");
       });
@@ -68,10 +68,11 @@ class TodoDAO {
   }
 
   Future<Todo?> getTodo(int key) async {
-    debugPrint("tryna fetch a todo id: $key");
+    // debugPrint("tryna fetch a todo id: $key");
     final snapshot = await _store.record(key).getSnapshot(_db);
-    Map<String, dynamic> map = snapshot?.value as Map<String, dynamic>;
-    return Future<Todo?>.value(snapshot != null ? Todo.fromMap(map) : null);
+    Map<String, dynamic>? map = snapshot?.value as Map<String, dynamic>?;
+    return Future<Todo?>.value(
+        snapshot != null && map != null ? Todo.fromMap(map) : null);
   }
 
   Future<List<Todo>> getAllTodos(Finder finder) async {
@@ -84,9 +85,9 @@ class TodoDAO {
   }
 
   Future updateTodo(Todo todo, bool receivedFromServer) async {
-    debugPrint("updating todo id: ${todo.id}");
+    // debugPrint("updating todo id: ${todo.id}");
     Todo? prevTodo = await getTodo(todo.id);
-    if (prevTodo!.time != todo.time) {
+    if (prevTodo!.time != todo.time && !receivedFromServer) {
       var finder = Finder(
         filter: Filter.equals(
           'time',
@@ -110,6 +111,7 @@ class TodoDAO {
       todo.index = presentTodos.length;
     }
     await _store.record(todo.id).put(_db, todo.toMap(), merge: true);
+    debugPrint("updated todo ${todo.taskName} ${todo.index}");
 
     Map updatedTodo = {
       "id": todo.id.toString(),
@@ -123,14 +125,14 @@ class TodoDAO {
       "index": todo.index,
     };
     try {
-      debugPrint("updating todo for system ${todo.id}");
+      // debugPrint("updating todo for system ${todo.id}");
       platform.invokeMethod("updateTodo", updatedTodo);
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while updating todo: $e");
     }
 
     AuthState auth = GetIt.I.get();
-    if (auth.user.value != null && !receivedFromServer) {
+    if (!receivedFromServer) {
       socket?.emitWithAck(
         "update_todo",
         json.encode(updatedTodo),
@@ -151,20 +153,13 @@ class TodoDAO {
 
   Future deleteTodo(int todoId, bool receivedFromServer) async {
     Todo? todo = await getTodo(todoId);
-    debugPrint("deleting todo id: $todoId");
+    // debugPrint("deleting todo id: $todoId");
     var finder = Finder(
       filter: Filter.equals(
         'time',
         todo!.time,
       ),
     );
-    final presentTodos = await getAllTodos(finder);
-    presentTodos.forEach((element) async {
-      if (element.index > todo.index) {
-        element.index--;
-        await updateTodo(element, receivedFromServer);
-      }
-    });
     await _store.record(todoId).delete(_db);
 
     AlarmDAO alarmsdb = GetIt.I.get();
@@ -172,10 +167,10 @@ class TodoDAO {
     toDeleteAlarms.forEach((alarm) {
       alarmsdb.deleteAlarm(alarm.alarmId);
     });
-    debugPrint("working flawlessly till after alarms");
+    // debugPrint("working flawlessly till after alarms");
 
     try {
-      debugPrint("deleting todo for system ${todo.id}");
+      // debugPrint("deleting todo for system ${todo.id}");
       platform.invokeMethod("deleteTodo", {
         "id": todo.id.toString(),
       });
@@ -183,11 +178,20 @@ class TodoDAO {
       debugPrint("some fuckup happended while deleting todo: $e");
     }
 
-    AuthState auth = GetIt.I.get();
-    if (auth.user.value != null && !receivedFromServer) {
+    if (!receivedFromServer) {
+      final presentTodos = await getAllTodos(finder);
+      presentTodos.forEach((element) async {
+        if (element.index > todo.index) {
+          element.index--;
+          await updateTodo(element, receivedFromServer);
+        }
+      });
       socket?.emitWithAck(
         "delete_todo",
-        json.encode({"id": todo.id.toString()}),
+        json.encode({
+          "id": todo.id.toString(),
+          "timeStamp": DateTime.now().millisecondsSinceEpoch,
+        }),
         ack: (response) {
           debugPrint("ack from server $response");
         },

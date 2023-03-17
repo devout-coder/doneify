@@ -13,10 +13,10 @@ class AuthState extends ChangeNotifier {
     String name = prefs.getString('userName') ?? "";
     String email = prefs.getString('userEmail') ?? "";
     String token = prefs.getString('userToken') ?? "";
-    debugPrint("current token is $token");
+    // debugPrint("current token is $token");
     if (name.isNotEmpty) {
       user.value = User(id, name, email, token);
-      debugPrint("fetched user from storage: $user");
+      // debugPrint("fetched user from storage: $user");
     }
   }
 

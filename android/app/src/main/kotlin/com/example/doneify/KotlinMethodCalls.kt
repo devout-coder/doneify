@@ -218,7 +218,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
     } else if (call.method == "createTodo" || call.method == "updateTodo") {
 //        methodChannel!!.invokeMethod("callBack", "data1")
         val id: String = call.argument<String>("id")!!
-        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
+        // Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
         // Log.d("debugging", "in method call receiver: id = $id")
         val taskName: String = call.argument<String>("taskName")!!
         val taskDesc: String = call.argument<String>("taskDesc")!!
@@ -253,7 +253,7 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
         }.start()
     } else if (call.method == "deleteTodo") {
         val id: String = call.argument<String>("id")!!
-        Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
+        // Log.d("debugging", "kotlin side: tryna ${call.method}, $id")
         var reqTodo: Todo?
         Thread {
             val fetchedTodos: List<Todo> = todoDAO!!.getById(id)

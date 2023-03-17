@@ -31,7 +31,7 @@ void kotlinMethodCallHandler(MethodCall call) async {
     // debugPrint("updated todo record in storage");
 
     try {
-      debugPrint("updating todo for system ${todo.id}");
+      // debugPrint("updating todo for system ${todo.id}");
       channel.invokeMethod("updateTodo", {
         "id": todo.id.toString(),
         "taskName": todo.taskName,

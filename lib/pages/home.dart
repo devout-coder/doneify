@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     });
 
     socket?.on('todo_operation', (data) async {
-      debugPrint("real time data is $data");
+      debugPrint("real time data for todo is $data");
       // var dataMap = json.decode(data);
       String operation = data['operation'];
       TodoDAO todoDAO = GetIt.I.get();
@@ -100,6 +100,30 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
         case "delete":
           await todoDAO.deleteTodo(todo.id, true);
           reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+      }
+      debugPrint("data is ${data['operation']}");
+    });
+
+    socket?.on('label_operation', (data) async {
+      debugPrint("real time data for label is $data");
+      String operation = data['operation'];
+      LabelDAO labelDAO = GetIt.I.get();
+      // StartTodos startTodos = GetIt.I.get();
+      Label label = Label.fromMap(data['data']);
+
+      switch (operation) {
+        case "create":
+          labelDAO.addLabel(label, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "update":
+          labelDAO.editLabel(label, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "delete":
+          labelDAO.deleteLabel(label.id, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
           break;
       }
       debugPrint("data is ${data['operation']}");

@@ -20,18 +20,6 @@ class SelectLabelDialog extends StatefulWidget {
   State<SelectLabelDialog> createState() => _SelectLabelDialogState();
 }
 
-List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
-  List<Map<String, dynamic>> jsonLabels = [];
-  labels.forEach((label) {
-    Map<String, dynamic> jsonLabel = {
-      "name": label.name,
-      "color": label.color.toString(),
-    };
-    jsonLabels.add(jsonLabel);
-  });
-  return jsonLabels;
-}
-
 class _SelectLabelDialogState extends State<SelectLabelDialog> {
   int? selectedLabel;
 
@@ -136,6 +124,8 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                                     .transform(a1.value);
                                                 return AddOrEditLabelDialog(
                                                   curve: curve,
+                                                  labelId:
+                                                      labelsDB.labels[index].id,
                                                   labelIndex: index,
                                                 );
                                               },
@@ -161,7 +151,9 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                                       selectedLabel = 0;
                                                     });
                                                   }
-                                                  labelsDB.deleteLabel(index);
+                                                  labelsDB.deleteLabel(
+                                                      labelsDB.labels[index].id,
+                                                      false);
                                                   setState(() {});
                                                 }
                                               : () {

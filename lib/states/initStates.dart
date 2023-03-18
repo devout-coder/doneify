@@ -16,7 +16,7 @@ import 'package:sembast/sembast_io.dart';
 
 class GetItRegister {
   Future initializeGlobalStates() async {
-    String dbPath = 'conquer.db';
+    String dbPath = 'doneify.db';
     final appDocDir = await getApplicationDocumentsDirectory();
     Database db = await databaseFactoryIo
         .openDatabase(join(appDocDir.path, dbPath), version: 1);

@@ -42,58 +42,7 @@ class StartTodos {
     }
   }
 
-  Future fetchOnlineTodos() async {
-    AuthState auth = GetIt.I.get();
-    TodoDAO todosdb = GetIt.I.get();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? lastOfflineUpdated = prefs.getInt('lastOfflineUpdated');
-    // debugPrint("offline db was updated at $lastOfflineUpdated");
-    debugPrint("user is ${auth.user.value!.token}");
-
-    if (auth.user.value != null) {
-      var response = await http.get(
-        Uri.parse("$serverUrl/todos/$lastOfflineUpdated"),
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": auth.user.value!.token
-        },
-      );
-      // debugPrint("todos reponse is ${response.body}");
-      Map body = json.decode(response.body);
-      if (body["message"] != "offline db up to date") {
-        List newTodoList = body["todos"];
-        List deletedTodoList = body["deletedTodos"];
-        debugPrint("all todos are: $newTodoList");
-        // debugPrint("deleted todos are: $deletedTodoMap");
-
-        // List<Todo> newTodos = [];
-        for (Map each in newTodoList) {
-          debugPrint("each todo is $each");
-          Todo todo = Todo.fromMap(each);
-          Todo? todoFromDb = await todosdb.getTodo(todo.id);
-          if (todoFromDb == null) {
-            debugPrint("gotta create ${todo.taskName}");
-            await todosdb.createTodo(todo, true);
-          } else {
-            debugPrint("gotta update ${todo.taskName}");
-            await todosdb.updateTodo(todo, true);
-          }
-        }
-        for (Map each in deletedTodoList) {
-          int id = each["_id"];
-          debugPrint("gotta delete $id");
-          await todosdb.deleteTodo(id, true);
-          // Todo todo = Todo.fromMap(each);
-          // newTodos.add(todo);
-        }
-        // debugPrint("todos reponse ${todos}");
-      }
-    }
-  }
-
   loadTodos() async {
-    await fetchOnlineTodos();
     TodoDAO todosdb = GetIt.I.get();
 
     var finder = Finder(

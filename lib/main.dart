@@ -35,6 +35,7 @@ void main() async {
 Future registerDB() async {
   await GetItRegister().initializeGlobalStates();
   LabelDAO labelsDB = GetIt.I.get();
+  TodoDAO todosDB = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
   StartTodos startTodos = GetIt.I.get();
   NudgerStates nudgerStates = GetIt.I.get();
@@ -44,6 +45,7 @@ Future registerDB() async {
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
   await authState.fetchUserFromStorage();
+  await todosDB.syncOnlineDB();
   await startTodos.loadTodos();
 
   nudgerStates.fetchNudgerStates();

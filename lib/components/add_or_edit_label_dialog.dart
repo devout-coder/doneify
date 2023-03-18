@@ -1,4 +1,6 @@
 import 'package:doneify/components/new_color_dialog.dart';
+import 'package:doneify/impClasses.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';
 
@@ -8,11 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AddOrEditLabelDialog extends StatefulWidget {
   final double curve;
+  int? labelId;
   int? labelIndex;
 
   AddOrEditLabelDialog({
     Key? key,
     required this.curve,
+    this.labelId,
     this.labelIndex,
   }) : super(key: key);
 
@@ -80,11 +84,15 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
 
   void saveLabel() {
     if (!labelPresent(tagName.text, selectedColor!)) {
-      if (widget.labelIndex != null) {
+      if (widget.labelId != null) {
         debugPrint("label has been edited");
-        labelsDB.editLabel(tagName.text, selectedColor!, labelIndex!);
+        labelsDB.editLabel(
+            Label(widget.labelId!, tagName.text, selectedColor!.toString()),
+            false);
       } else {
-        labelsDB.addLabel(tagName.text, selectedColor!);
+        labelsDB.addLabel(
+            Label(getRandInt(10), tagName.text, selectedColor!.toString()),
+            false);
       }
       Navigator.pop(context);
     } else {

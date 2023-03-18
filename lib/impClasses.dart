@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
 class Label {
+  int id;
   String name;
   String color;
 
-  Label(this.name, this.color);
+  Label(this.id, this.name, this.color);
+
+  static Label fromMap(Map<dynamic, dynamic> map) {
+    return Label(
+      map["id"] ?? map["_id"],
+      map["name"],
+      map["color"],
+    );
+  }
 }
 
 class User {

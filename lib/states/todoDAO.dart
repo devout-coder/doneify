@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/ip.dart';
 import 'package:doneify/pages/home.dart';
 import 'package:doneify/states/alarmDAO.dart';
 import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
@@ -17,6 +19,81 @@ class TodoDAO {
 
   final StoreRef _store = intMapStoreFactory.store("todos");
   static const platform = MethodChannel('alarm_method_channel');
+
+  Future syncOnlineDB() async {
+    AuthState auth = GetIt.I.get();
+    TodoDAO todosdb = GetIt.I.get();
+    LabelDAO labelsdb = GetIt.I.get();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? lastOfflineUpdated = prefs.getInt('lastOfflineUpdated');
+    // debugPrint("offline db was updated at $lastOfflineUpdated");
+    debugPrint("user is ${auth.user.value!.token}");
+
+    if (auth.user.value != null) {
+      var response = await http.get(
+        Uri.parse("$serverUrl/todos/$lastOfflineUpdated"),
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": auth.user.value!.token
+        },
+      );
+      // debugPrint("todos reponse is ${response.body}");
+      Map body = json.decode(response.body);
+      if (body["message"] != "offline db up to date") {
+        List newLabelList = body["labels"];
+        List deletedLabelList = body["deletedLabels"];
+        debugPrint("all labels are: $newLabelList");
+
+        for (Map each in newLabelList) {
+          debugPrint("each label is $each");
+          Label label = Label.fromMap(each);
+          Label? labelFromDB = labelsdb.getLabelById(label.id);
+          if (labelFromDB == null) {
+            debugPrint("gotta create ${label.name}");
+            labelsdb.addLabel(label, true);
+          } else {
+            debugPrint("gotta update ${label.name}");
+            labelsdb.editLabel(label, true);
+          }
+        }
+        for (Map each in deletedLabelList) {
+          int id = each["_id"];
+          debugPrint("gotta delete $id");
+          labelsdb.deleteLabel(id, true);
+          // Todo todo = Todo.fromMap(each);
+          // newTodos.add(todo);
+        }
+
+        List newTodoList = body["todos"];
+        List deletedTodoList = body["deletedTodos"];
+        debugPrint("all todos are: $newTodoList");
+        // debugPrint("deleted todos are: $deletedTodoMap");
+
+        // List<Todo> newTodos = [];
+        for (Map each in newTodoList) {
+          debugPrint("each todo is $each");
+          Todo todo = Todo.fromMap(each);
+          Todo? todoFromDb = await todosdb.getTodo(todo.id);
+          if (todoFromDb == null) {
+            debugPrint("gotta create ${todo.taskName}");
+            await todosdb.createTodo(todo, true);
+          } else {
+            debugPrint("gotta update ${todo.taskName}");
+            await todosdb.updateTodo(todo, true);
+          }
+        }
+        for (Map each in deletedTodoList) {
+          int id = each["_id"];
+          debugPrint("gotta delete $id");
+          await todosdb.deleteTodo(id, true);
+          // Todo todo = Todo.fromMap(each);
+          // newTodos.add(todo);
+        }
+        // debugPrint("todos reponse ${todos}");
+      }
+    }
+  }
 
   Future createTodo(Todo todo, bool receivedFromServer) async {
     var finder = Finder(

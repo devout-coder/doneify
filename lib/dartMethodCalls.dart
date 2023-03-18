@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void kotlinMethodCallHandler(MethodCall call) async {
   if (call.method == 'task_done') {
-    String dbPath = 'conquer.db';
+    String dbPath = 'doneify.db';
     final appDocDir = await getApplicationDocumentsDirectory();
     Database db = await databaseFactoryIo
         .openDatabase(join(appDocDir.path, dbPath), version: 1);

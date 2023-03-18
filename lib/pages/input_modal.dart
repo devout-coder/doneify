@@ -1,14 +1,14 @@
-import 'package:doneify/components/AddOrEditLabelDialog.dart';
-import 'package:doneify/components/EachWeekCell.dart';
-import 'package:doneify/components/SelectLabelDialog.dart';
-import 'package:doneify/components/SelectTimeDialog.dart';
-import 'package:doneify/components/SetAlarmDialog.dart';
+import 'package:doneify/keyboardIntents.dart';
+import 'package:doneify/components/each_week_cell.dart';
+import 'package:doneify/components/select_label_dialog.dart';
+import 'package:doneify/components/select_time_dialog.dart';
+import 'package:doneify/components/set_alarm_dialog.dart';
 import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/Day.dart';
-import 'package:doneify/pages/Month.dart';
-import 'package:doneify/pages/Week.dart';
-import 'package:doneify/pages/Year.dart';
+import 'package:doneify/pages/day.dart';
+import 'package:doneify/pages/month.dart';
+import 'package:doneify/pages/week.dart';
+import 'package:doneify/pages/year.dart';
 import 'package:doneify/states/alarmDAO.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:doneify/states/todoDAO.dart';
@@ -104,6 +104,7 @@ class _InputModalState extends State<InputModal> {
 
   final taskName = TextEditingController();
   final taskDesc = TextEditingController();
+  FocusNode taskNameFocus = FocusNode();
   int? taskId;
   String? time;
   String? timeType;
@@ -562,221 +563,264 @@ class _InputModalState extends State<InputModal> {
         future: init,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return Container(
-              color: themePurple,
-              height: screenHeight,
-              padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  TextFormField(
-                    //! taskName text field
-                    controller: taskName,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 35,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    decoration: const InputDecoration(
-                      hintText: "Task Name",
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  LayoutBuilder(
-                    //! task description text field
-                    builder: (context, constraints) => Container(
-                      constraints: BoxConstraints(
-                          maxHeight:
-                              MediaQuery.of(context).viewInsets.bottom != 0
-                                  ? screenHeight * 0.7 - 250
-                                  : screenHeight * 0.65),
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        child: SingleChildScrollView(
-                          child: TextFormField(
-                            controller: taskDesc,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 30,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: null,
-                            // minLines: 15,
-                            decoration: const InputDecoration(
-                              hintText: "Task Description",
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
+            return Shortcuts(
+              shortcuts: <LogicalKeySet, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
+                LogicalKeySet(
+                  LogicalKeyboardKey.controlLeft,
+                  LogicalKeyboardKey.keyS,
+                ): SaveIntent(),
+                LogicalKeySet(
+                  LogicalKeyboardKey.keyF,
+                ): KeyboardFocusIntent(),
+              },
+              child: Actions(
+                actions: <Type, Action<Intent>>{
+                  BackIntent:
+                      CallbackAction<BackIntent>(onInvoke: (BackIntent intent) {
+                    // debugPrint('tryna go back');
+                    widget.goBack();
+                  }),
+                  KeyboardFocusIntent: CallbackAction<KeyboardFocusIntent>(
+                      onInvoke: (KeyboardFocusIntent intent) {
+                    if (!taskNameFocus.hasFocus) {
+                      taskNameFocus.requestFocus();
+                    }
+                  }),
+                  SaveIntent:
+                      CallbackAction<SaveIntent>(onInvoke: (SaveIntent intent) {
+                    // debugPrint('tryna save');
+                    // widget.goBack();
+                    _saveTodo();
+                  }),
+                },
+                child: Focus(
+                  autofocus: true,
+                  child: Container(
+                    color: themePurple,
+                    height: screenHeight,
+                    padding: const EdgeInsets.fromLTRB(20, 40, 5, 20),
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        TextFormField(
+                          //! taskName text field
+                          controller: taskName,
+                          focusNode: taskNameFocus,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 35,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: "Task Name",
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        LayoutBuilder(
+                          //! task description text field
+                          builder: (context, constraints) => Container(
+                            constraints: BoxConstraints(
+                                maxHeight:
+                                    MediaQuery.of(context).viewInsets.bottom !=
+                                            0
+                                        ? screenHeight * 0.7 - 250
+                                        : screenHeight * 0.65),
+                            child: Scrollbar(
+                              thumbVisibility: true,
+                              child: SingleChildScrollView(
+                                child: TextFormField(
+                                  controller: taskDesc,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: null,
+                                  // minLines: 15,
+                                  decoration: const InputDecoration(
+                                    hintText: "Task Description",
+                                    border: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    //! bottom icon row
-                    child: Align(
-                      alignment: FractionalOffset.bottomCenter,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.label,
-                              size: 30,
-                            ),
-                            tooltip: "Add label",
-                            onPressed: () => {
-                              showGeneralDialog(
-                                //! add label dialog box
-                                context: context,
-                                barrierDismissible: true,
-                                barrierLabel: "Select Label",
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation) {
-                                  return Container();
-                                },
-                                transitionBuilder: (ctx, a1, a2, child) {
-                                  var curve =
-                                      Curves.easeInOut.transform(a1.value);
-                                  return SelectLabelDialog(
-                                    curve: curve,
-                                    selectedLabel: selectedLabel,
-                                    updateSelectedLabel: (newLabel) {
-                                      setState(() {
-                                        selectedLabel = newLabel;
-                                      });
-                                    },
-                                  );
-                                },
-                                transitionDuration:
-                                    const Duration(milliseconds: 300),
-                              )
-                            },
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              showGeneralDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                barrierLabel: "Select Time",
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secondaryAnimation) {
-                                  return Container();
-                                },
-                                transitionBuilder: (ctx, a1, a2, child) {
-                                  var curve =
-                                      Curves.easeInOut.transform(a1.value);
-                                  return SelectTimeDialog(
-                                    // key: UniqueKey(),
-                                    curve: curve,
-                                    timeType: timeType!,
-                                    alarms: alarms,
-                                    taskId: taskId!,
-                                    createdAlarms: createdAlarms,
-                                    updateCreatedAlarms:
-                                        (List<Alarm> newCreatedAlarms) {
-                                      setState(() {
-                                        // debugPrint(newCreatedAlarms.toString());
-                                        createdAlarms = [
-                                          ...createdAlarms,
-                                          ...newCreatedAlarms
-                                        ];
-                                        alarms = [
-                                          ...alarms,
-                                          ...newCreatedAlarms
-                                        ];
-                                      });
-                                    },
-                                    deletedAlarms: deletedAlarms,
-                                    updateDeletedAlarms: (Alarm deletedAlarm) {
-                                      setState(() {
-                                        alarms.remove(deletedAlarm);
-                                        if (createdAlarms
-                                            .contains(deletedAlarm)) {
-                                          createdAlarms.remove(deletedAlarm);
-                                        } else {
-                                          deletedAlarms = [
-                                            ...deletedAlarms,
-                                            deletedAlarm
-                                          ];
-                                        }
-                                      });
-                                    },
-                                    selectedTime: selectedTime,
-                                    selectedWeekDates: selectedWeekDates,
-                                    updateSelectedWeekDates: (newWeekDates) {
-                                      setState(() {
-                                        selectedWeekDates = newWeekDates;
-                                      });
-                                    },
-                                    updateSelectedTime: (newTime) {
-                                      setState(() {
-                                        selectedTime = newTime;
-                                      });
-                                    },
-                                  );
-                                },
-                                transitionDuration:
-                                    const Duration(milliseconds: 300),
-                              );
-                              // saveReminder();
-                              // widget.goBack();
-                            },
-                            tooltip: "Add reminder",
-                            icon: const Icon(
-                              Icons.access_alarm,
-                              size: 30,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // action.call();
-                            },
-                            tooltip: "Share task with friends",
-                            icon: const Icon(
-                              Icons.people,
-                              size: 30,
-                            ),
-                          ),
-                          todo != null
-                              ? IconButton(
-                                  onPressed: widget.onDelete,
-                                  tooltip: "Delete this task",
+                        Expanded(
+                          //! bottom icon row
+                          child: Align(
+                            alignment: FractionalOffset.bottomCenter,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
                                   icon: const Icon(
-                                    Icons.delete,
+                                    Icons.label,
                                     size: 30,
                                   ),
-                                )
-                              : SizedBox(),
-                          IconButton(
-                            onPressed: () {
-                              _saveTodo();
-                            },
-                            tooltip: "Save this task",
-                            icon: const Icon(
-                              Icons.save,
-                              size: 30,
+                                  tooltip: "Add label",
+                                  onPressed: () => {
+                                    showGeneralDialog(
+                                      //! add label dialog box
+                                      context: context,
+                                      barrierDismissible: true,
+                                      barrierLabel: "Select Label",
+                                      pageBuilder: (BuildContext context,
+                                          Animation<double> animation,
+                                          Animation<double>
+                                              secondaryAnimation) {
+                                        return Container();
+                                      },
+                                      transitionBuilder: (ctx, a1, a2, child) {
+                                        var curve = Curves.easeInOut
+                                            .transform(a1.value);
+                                        return SelectLabelDialog(
+                                          curve: curve,
+                                          selectedLabel: selectedLabel,
+                                          updateSelectedLabel: (newLabel) {
+                                            setState(() {
+                                              selectedLabel = newLabel;
+                                            });
+                                          },
+                                        );
+                                      },
+                                      transitionDuration:
+                                          const Duration(milliseconds: 300),
+                                    )
+                                  },
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    showGeneralDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      barrierLabel: "Select Time",
+                                      pageBuilder: (BuildContext context,
+                                          Animation<double> animation,
+                                          Animation<double>
+                                              secondaryAnimation) {
+                                        return Container();
+                                      },
+                                      transitionBuilder: (ctx, a1, a2, child) {
+                                        var curve = Curves.easeInOut
+                                            .transform(a1.value);
+                                        return SelectTimeDialog(
+                                          // key: UniqueKey(),
+                                          curve: curve,
+                                          timeType: timeType!,
+                                          alarms: alarms,
+                                          taskId: taskId!,
+                                          createdAlarms: createdAlarms,
+                                          updateCreatedAlarms:
+                                              (List<Alarm> newCreatedAlarms) {
+                                            setState(() {
+                                              // debugPrint(newCreatedAlarms.toString());
+                                              createdAlarms = [
+                                                ...createdAlarms,
+                                                ...newCreatedAlarms
+                                              ];
+                                              alarms = [
+                                                ...alarms,
+                                                ...newCreatedAlarms
+                                              ];
+                                            });
+                                          },
+                                          deletedAlarms: deletedAlarms,
+                                          updateDeletedAlarms:
+                                              (Alarm deletedAlarm) {
+                                            setState(() {
+                                              alarms.remove(deletedAlarm);
+                                              if (createdAlarms
+                                                  .contains(deletedAlarm)) {
+                                                createdAlarms
+                                                    .remove(deletedAlarm);
+                                              } else {
+                                                deletedAlarms = [
+                                                  ...deletedAlarms,
+                                                  deletedAlarm
+                                                ];
+                                              }
+                                            });
+                                          },
+                                          selectedTime: selectedTime,
+                                          selectedWeekDates: selectedWeekDates,
+                                          updateSelectedWeekDates:
+                                              (newWeekDates) {
+                                            setState(() {
+                                              selectedWeekDates = newWeekDates;
+                                            });
+                                          },
+                                          updateSelectedTime: (newTime) {
+                                            setState(() {
+                                              selectedTime = newTime;
+                                            });
+                                          },
+                                        );
+                                      },
+                                      transitionDuration:
+                                          const Duration(milliseconds: 300),
+                                    );
+                                    // saveReminder();
+                                    // widget.goBack();
+                                  },
+                                  tooltip: "Add reminder",
+                                  icon: const Icon(
+                                    Icons.access_alarm,
+                                    size: 30,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    // action.call();
+                                  },
+                                  tooltip: "Share task with friends",
+                                  icon: const Icon(
+                                    Icons.people,
+                                    size: 30,
+                                  ),
+                                ),
+                                todo != null
+                                    ? IconButton(
+                                        onPressed: widget.onDelete,
+                                        tooltip: "Delete this task",
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          size: 30,
+                                        ),
+                                      )
+                                    : SizedBox(),
+                                IconButton(
+                                  onPressed: () {
+                                    _saveTodo();
+                                  },
+                                  tooltip: "Save this task",
+                                  icon: const Icon(
+                                    Icons.save,
+                                    size: 30,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        )
+                      ],
                     ),
-                  )
-                ],
+                  ),
+                ),
               ),
             );
           } else {

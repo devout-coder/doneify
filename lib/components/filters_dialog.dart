@@ -1,4 +1,4 @@
-import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/components/add_or_edit_label_dialog.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +78,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
       );
+
       return false;
     }
   }

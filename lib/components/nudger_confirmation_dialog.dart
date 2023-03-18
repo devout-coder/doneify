@@ -1,4 +1,4 @@
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:doneify/states/nudgerState.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -1,8 +1,8 @@
-import 'package:doneify/components/EachWeekCell.dart';
-import 'package:doneify/components/MyExpansionPanel.dart';
+import 'package:doneify/components/each_week_cell.dart';
+import 'package:doneify/components/my_expansion_panel.dart';
 import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';

@@ -1,4 +1,4 @@
-import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/components/add_or_edit_label_dialog.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';

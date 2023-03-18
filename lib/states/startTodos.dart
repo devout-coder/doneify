@@ -4,7 +4,7 @@ import 'package:doneify/ip.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:http/http.dart' as http;
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/day.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';

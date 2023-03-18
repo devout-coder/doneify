@@ -1,8 +1,8 @@
-import 'package:doneify/components/EachWeekCell.dart';
-import 'package:doneify/components/SetAlarmDialog.dart';
+import 'package:doneify/components/each_week_cell.dart';
+import 'package:doneify/components/set_alarm_dialog.dart';
 import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';

@@ -1,16 +1,10 @@
-import 'dart:ui';
-
-import 'package:animations/animations.dart';
-import 'package:doneify/components/BottomButtons.dart';
-import 'package:doneify/components/EachDayCell.dart';
-import 'package:doneify/components/FiltersDialog.dart';
-import 'package:doneify/components/IncompleteTodos.dart';
-import 'package:doneify/globalColors.dart';
+import 'package:doneify/components/bottom_buttons.dart';
+import 'package:doneify/components/each_month_cell.dart';
+import 'package:doneify/components/incomplete_todos.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/pages/todos.dart';
 import 'package:doneify/states/selectedFilters.dart';
-import 'package:doneify/components/FiltersDialog.dart';
 import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
@@ -18,22 +12,20 @@ import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:home_widget/home_widget.dart';
 
-class DayNavigator extends StatefulWidget {
-  DayNavigator({Key? key}) : super(key: key);
+class MonthNavigator extends StatefulWidget {
+  MonthNavigator({Key? key}) : super(key: key);
 
   @override
-  State<DayNavigator> createState() => _DayNavigatorState();
+  State<MonthNavigator> createState() => _MonthNavigatorState();
 }
 
-class _DayNavigatorState extends State<DayNavigator> {
+class _MonthNavigatorState extends State<MonthNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: dayNavigatorKey,
+      key: monthNavigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         // Cast the arguments to the correct
         // type: ScreenArguments.
@@ -47,7 +39,7 @@ class _DayNavigatorState extends State<DayNavigator> {
         } else {
           return MaterialPageRoute(
             builder: (context) {
-              return DayPage();
+              return MonthPage();
             },
           );
         }
@@ -56,21 +48,21 @@ class _DayNavigatorState extends State<DayNavigator> {
   }
 }
 
-class DayPage extends StatefulWidget with GetItStatefulWidgetMixin {
-  DayPage({Key? key}) : super(key: key);
+class MonthPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  MonthPage({Key? key}) : super(key: key);
 
   @override
-  State<DayPage> createState() => _DayPageState();
+  State<MonthPage> createState() => _MonthPageState();
 }
 
-String formattedDate(DateTime date) {
-  final DateFormat formatter = DateFormat("d/M/y");
+String formattedMonth(DateTime date) {
+  final DateFormat formatter = DateFormat("MMM y");
   final String formatted = formatter.format(date);
   return formatted;
 }
 
-class _DayPageState extends State<DayPage> with GetItStateMixin {
-  String timeType = "day";
+class _MonthPageState extends State<MonthPage> with GetItStateMixin {
+  String timeType = "month";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
@@ -78,15 +70,15 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
   StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
-  List<String> unfinishedDays = [];
+  List<String> unfinishedMonths = [];
   List<Todo> currentTodos = [];
 
   // bool currentFirst = false;
   // bool ascending = false;
 
   int comparingTodos(Todo todo1, Todo todo2) {
-    DateTime time1 = DateFormat("d/M/y").parse(todo1.time);
-    DateTime time2 = DateFormat("d/M/y").parse(todo2.time);
+    DateTime time1 = DateFormat("MMM y").parse(todo1.time);
+    DateTime time2 = DateFormat("MMM y").parse(todo2.time);
     int compared = selectedFilters.ascending
         ? time1.compareTo(time2)
         : time2.compareTo(time1);
@@ -98,6 +90,9 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
   }
 
   loadTodos() async {
+    // debugPrint("inside reload");
+    _controller.selectedDate = null;
+    // }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -109,22 +104,22 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
     List<Todo> todosTemp = await todosdb.getAllTodos(finder);
     List<Todo> currentTodosTemp = [];
     setState(() {
-      unfinishedDays = [];
+      unfinishedMonths = [];
     });
     todosTemp.forEach((element) {
-      if (element.time == formattedDate(DateTime.now())) {
+      if (element.time == formattedMonth(DateTime.now())) {
         currentTodosTemp.add(element);
       }
-      if (!unfinishedDays.contains(element.time)) {
-        List<String> tempUnfinishedDates = [...unfinishedDays, element.time];
+      if (!unfinishedMonths.contains(element.time)) {
+        List<String> tempUnfinishedMonths = [...unfinishedMonths, element.time];
         setState(() {
-          unfinishedDays = tempUnfinishedDates;
+          unfinishedMonths = tempUnfinishedMonths;
         });
       }
     });
     if (selectedFilters.currentFirst) {
       todosTemp = todosTemp
-          .where((element) => element.time != formattedDate(DateTime.now()))
+          .where((element) => element.time != formattedMonth(DateTime.now()))
           .toList();
     }
 
@@ -134,12 +129,6 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
-    // debugPrint("unfinished");
-    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
-    // debugPrint("finished");
-    // finishedTodosTemp.forEach)((element) => debugPrint(element.taskName));
 
     setState(() {
       todos = todosTemp;
@@ -154,31 +143,53 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
 
   @override
   void initState() {
-    _controller.selectedDate = null;
-    todos = startTodos.todos;
-    currentTodos = startTodos.currentTodos;
-    unfinishedDays = startTodos.unfinishedDays;
-    // debugPrint("todos: $todos");
+    loadTodos();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool reloadTodos = watchX((StartTodos todos) => todos.reloadDayTodos);
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadMonthTodos);
     if (reloadTodos) {
       debugPrint("gotta reload");
       loadTodos();
-      startTodos.reloadDayTodos.value = false;
+      startTodos.reloadMonthTodos.value = false;
     }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-          height: 330,
+          height: 300,
           child: SfDateRangePicker(
             controller: _controller,
+            view: DateRangePickerView.year,
+            // onViewChanged: (args) {
+            //   WidgetsBinding.instance.addPostFrameCallback((_) {
+            //     if (args.view == DateRangePickerView.month) {
+            //       _controller.view = DateRangePickerView.year;
+            //     } else if (args.view == DateRangePickerView.year) {
+            //       PickerDateRange dateRange = args.visibleDateRange;
+            //       if (dateRange.startDate != null) {
+            //         Navigator.pushNamed(context, "/todos",
+            //                 arguments: ScreenArguments(
+            //                     formattedMonth(dateRange.startDate!), timeType))
+            //             .whenComplete(() => loadTodos());
+            //       }
+            //     }
+            //   });
+            //   debugPrint(args.visibleDateRange.toString());
+            // },
             initialSelectedDate: null,
+            allowViewNavigation: false,
+            onSelectionChanged: (args) {
+              if (_controller.selectedDate != null) {
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedMonth(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
+            },
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,
               textStyle: TextStyle(
@@ -197,21 +208,12 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
             todayHighlightColor: Color(0xffEADA76),
             headerHeight: 40,
             selectionColor: Colors.transparent,
-            onSelectionChanged: (args) {
-              if (_controller.selectedDate != null) {
-                _controller.selectedDate = null;
-                Navigator.pushNamed(context, "/todos",
-                        arguments: ScreenArguments(
-                            formattedDate(args.value), timeType))
-                    .whenComplete(() => loadTodos());
-              }
-            },
             cellBuilder:
                 (BuildContext context, DateRangePickerCellDetails details) {
-              return EachDayCell(
+              return EachMonthCell(
                 key: UniqueKey(),
                 date: details.date,
-                unfinishedDays: unfinishedDays,
+                unfinishedMonths: unfinishedMonths,
                 currentView: _controller.view,
               );
             },
@@ -223,7 +225,7 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
           loadTodos: loadTodos,
         ),
         BottomButtons(
-          time: formattedDate(DateTime.now()),
+          time: formattedMonth(DateTime.now()),
           timeType: timeType,
           loadTodos: loadTodos,
           createTodo: createTodo,

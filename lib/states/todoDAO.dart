@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/Home.dart';
+import 'package:doneify/pages/home.dart';
 import 'package:doneify/states/alarmDAO.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:flutter/services.dart';

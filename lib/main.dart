@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:doneify/dartMethodCalls.dart';
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/home.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:doneify/states/initStates.dart';
 import 'package:doneify/states/labelDAO.dart';
@@ -12,7 +13,6 @@ import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:doneify/timeFuncs.dart';
 import 'package:flutter/material.dart';
-import 'package:doneify/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';

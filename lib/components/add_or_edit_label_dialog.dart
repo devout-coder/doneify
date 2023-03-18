@@ -1,4 +1,4 @@
-import 'package:doneify/components/NewColorDialog.dart';
+import 'package:doneify/components/new_color_dialog.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';
 

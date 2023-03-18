@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:doneify/components/BlacklistedAppsDialog.dart';
-import 'package:doneify/components/NudgerConfirmationDialog.dart';
-import 'package:doneify/components/SettingsButton.dart';
+import 'package:doneify/components/blacklisted_apps_dialog.dart';
+import 'package:doneify/components/nudger_confirmation_dialog.dart';
+import 'package:doneify/components/settings_button.dart';
 import 'package:doneify/globalColors.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:doneify/states/nudgerState.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

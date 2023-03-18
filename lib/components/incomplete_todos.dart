@@ -1,4 +1,4 @@
-import 'package:doneify/components/EachTodo.dart';
+import 'package:doneify/components/each_todo.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/todoDAO.dart';

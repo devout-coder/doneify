@@ -1,6 +1,6 @@
-import 'package:doneify/components/SelectTimeDialog.dart';
+import 'package:doneify/components/select_time_dialog.dart';
 import 'package:doneify/globalColors.dart';
-import 'package:doneify/pages/Week.dart';
+import 'package:doneify/pages/week.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';

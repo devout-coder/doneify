@@ -69,6 +69,7 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
 
   @override
   void initState() {
+    debugPrint("selected time is ${widget.selectedTime}");
     super.initState();
   }
 
@@ -115,6 +116,7 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                                 SfDateRangePicker(
                                   controller: _controller,
                                   initialSelectedDate: null,
+                                  initialDisplayDate: widget.selectedTime,
                                   allowViewNavigation:
                                       widget.timeType == "week" ||
                                           widget.timeType == "day",

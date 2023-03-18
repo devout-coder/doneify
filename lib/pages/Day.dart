@@ -199,6 +199,7 @@ class _DayPageState extends State<DayPage> with GetItStateMixin {
             selectionColor: Colors.transparent,
             onSelectionChanged: (args) {
               if (_controller.selectedDate != null) {
+                _controller.selectedDate = null;
                 Navigator.pushNamed(context, "/todos",
                         arguments: ScreenArguments(
                             formattedDate(args.value), timeType))

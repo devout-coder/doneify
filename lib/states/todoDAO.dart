@@ -44,23 +44,25 @@ class TodoDAO {
         List newLabelList = body["labels"];
         List deletedLabelList = body["deletedLabels"];
         debugPrint("all labels are: $newLabelList");
+        debugPrint("all deleted labels are: $deletedLabelList");
 
         for (Map each in newLabelList) {
           debugPrint("each label is $each");
           Label label = Label.fromMap(each);
           Label? labelFromDB = labelsdb.getLabelById(label.id);
+          debugPrint("label from db is ${labelFromDB?.name}");
           if (labelFromDB == null) {
             debugPrint("gotta create ${label.name}");
-            labelsdb.addLabel(label, true);
+            await labelsdb.addLabel(label, true);
           } else {
             debugPrint("gotta update ${label.name}");
-            labelsdb.editLabel(label, true);
+            await labelsdb.editLabel(label, true);
           }
         }
         for (Map each in deletedLabelList) {
           int id = each["_id"];
           debugPrint("gotta delete $id");
-          labelsdb.deleteLabel(id, true);
+          await labelsdb.deleteLabel(id, true);
           // Todo todo = Todo.fromMap(each);
           // newTodos.add(todo);
         }

@@ -21,6 +21,7 @@ import 'package:doneify/icons/time_type_icons.dart';
 import 'package:doneify/navigatorKeys.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:doneify/states/selectedFilters.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 IO.Socket? socket;
@@ -72,7 +73,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
   }
 
   void initSocket(String token) {
-    debugPrint("connection token is $token");
+    // debugPrint("connection token is $token");
 
     socket?.auth = {"auth_token": token};
     socket?.connect();
@@ -133,11 +134,16 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     socket?.onError((err) => print(err));
   }
 
+  void random() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
+
   @override
   void initState() {
     super.initState();
     debugPrint("home rendered");
-
+    // random();
     socket = IO.io(serverUrl, <String, dynamic>{
       'autoConnect': false,
       'transports': ['websocket'],

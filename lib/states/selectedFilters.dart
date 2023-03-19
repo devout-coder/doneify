@@ -35,13 +35,12 @@ class SelectedFilters {
     });
   }
 
-  void addLabel(String labelName) {
+  Future addLabel(String labelName) async {
     List<String> newLabelList = [...selectedLabels, labelName];
     selectedLabels = newLabelList;
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('selectedLabels', newLabelList);
-    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('selectedLabels', newLabelList);
   }
 
   void addLabels(List<String> newLabels) {
@@ -53,12 +52,10 @@ class SelectedFilters {
     });
   }
 
-  void deleteLabel(String labelName) {
+  Future deleteLabel(String labelName) async {
     selectedLabels.remove(labelName);
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('selectedLabels', selectedLabels);
-    });
-    // notifyListeners();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('selectedLabels', selectedLabels);
   }
 }

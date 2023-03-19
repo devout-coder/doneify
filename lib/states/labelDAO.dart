@@ -3,6 +3,7 @@ import 'package:doneify/pages/home.dart';
 
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/pages/input_modal.dart';
+import 'package:doneify/pages/nudger_settings.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
@@ -72,18 +73,18 @@ class LabelDAO {
         {'id': newId, 'name': newLabel.name, 'color': newLabel.color.toString()}
       ];
 
-      socket?.emitWithAck(
-        "add_label",
-        json.encode({
-          "id": newLabel.id.toString(),
-          "name": newLabel.name,
-          "color": newLabel.color,
-          "timeStamp": DateTime.now().millisecondsSinceEpoch,
-        }),
-        ack: (response) {
-          debugPrint("ack from server $response");
-        },
-      );
+      // socket?.emitWithAck(
+      //   "add_label",
+      //   json.encode({
+      //     "id": newLabel.id.toString(),
+      //     "name": newLabel.name,
+      //     "color": newLabel.color,
+      //     "timeStamp": DateTime.now().millisecondsSinceEpoch,
+      //   }),
+      //   ack: (response) {
+      //     debugPrint("ack from server $response");
+      //   },
+      // );
 
       String labelsJSON = jsonEncode(mapList);
       prefs.setString('labels', labelsJSON);
@@ -94,44 +95,51 @@ class LabelDAO {
     // notifyListeners();
   }
 
-  void addLabel(Label newLabel, bool receivedFromServer) {
+  Future addLabel(Label newLabel, bool receivedFromServer) async {
     // int newId = getRandInt(10);
-    selectedFilters.addLabel(newLabel.name);
+    Label? oldLabel = getLabelById(newLabel.id);
+    if (oldLabel == null) {
+      await selectedFilters.addLabel(newLabel.name);
 
-    List<Label> newLabelList = [...labels, newLabel];
-    labels = newLabelList;
+      List<Label> newLabelList = [...labels, newLabel];
+      labels = newLabelList;
 
-    List<Map<String, dynamic>> mapList = stringifyLabels(newLabelList);
-    String labelsJSON = jsonEncode(mapList);
+      List<Map<String, dynamic>> mapList = stringifyLabels(newLabelList);
+      String labelsJSON = jsonEncode(mapList);
 
-    SharedPreferences.getInstance().then((prefs) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('labels', labelsJSON);
-    });
 
-    if (!receivedFromServer) {
-      socket?.emitWithAck(
-        "add_label",
-        json.encode({
-          "id": newLabel.id.toString(),
-          "name": newLabel.name,
-          "color": newLabel.color,
-          "timeStamp": DateTime.now().millisecondsSinceEpoch,
-        }),
-        ack: (response) {
-          debugPrint("ack from server $response");
-        },
-      );
+      // debugPrint("labels are now: $labels");
+      debugPrint("in storage, labels are now: ${prefs.getString('labels')}");
+
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+      if (!receivedFromServer) {
+        socket?.emitWithAck(
+          "add_label",
+          json.encode({
+            "id": newLabel.id.toString(),
+            "name": newLabel.name,
+            "color": newLabel.color,
+            "timeStamp": timestamp,
+          }),
+          ack: (response) {
+            debugPrint("ack from server $response");
+          },
+        );
+      }
+      prefs.setInt('lastOfflineUpdated', timestamp);
     }
   }
 
-  void editLabel(Label newLabel, bool receivedFromServer) async {
+  Future editLabel(Label newLabel, bool receivedFromServer) async {
     Label? oldLabel = getLabelById(newLabel.id);
     int oldLabelPosition = getLabelPosition(newLabel.id);
 
     if (oldLabel != null) {
       if (selectedFilters.selectedLabels.contains(oldLabel.name)) {
-        selectedFilters.deleteLabel(oldLabel.name);
-        selectedFilters.addLabel(newLabel.name);
+        await selectedFilters.deleteLabel(oldLabel.name);
+        await selectedFilters.addLabel(newLabel.name);
       }
 
       if (!receivedFromServer) {
@@ -150,7 +158,7 @@ class LabelDAO {
 
       // Label newLabel = Label(labelId, labelName, labelColor.toString());
       List<Label> newLabelList = [...labels];
-      newLabelList.insert(oldLabelPosition, newLabel);
+      newLabelList[oldLabelPosition] = newLabel;
       labels = newLabelList;
       List<Map<String, dynamic>> mapList = [];
       for (var element in newLabelList) {
@@ -162,10 +170,11 @@ class LabelDAO {
         mapList.add(eachMap);
       }
       String labelsJSON = jsonEncode(mapList);
-      SharedPreferences.getInstance().then((prefs) {
-        prefs.setString('labels', labelsJSON);
-      });
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('labels', labelsJSON);
+
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
       if (!receivedFromServer) {
         socket?.emitWithAck(
           "edit_label",
@@ -173,25 +182,27 @@ class LabelDAO {
             "id": newLabel.id.toString(),
             "name": newLabel.name,
             "color": newLabel.color,
-            "timeStamp": DateTime.now().millisecondsSinceEpoch,
+            "timeStamp": timestamp,
           }),
           ack: (response) {
             debugPrint("ack from server $response");
           },
         );
       }
+
+      prefs.setInt('lastOfflineUpdated', timestamp);
     } else {
       debugPrint("no label found");
     }
   }
 
-  void deleteLabel(int labelId, bool receivedFromServer) async {
+  Future deleteLabel(int labelId, bool receivedFromServer) async {
     Label? oldLabel = getLabelById(labelId);
     int oldLabelPosition = getLabelPosition(labelId);
 
     if (oldLabel != null) {
       if (selectedFilters.selectedLabels.contains(oldLabel.name)) {
-        selectedFilters.deleteLabel(oldLabel.name);
+        await selectedFilters.deleteLabel(oldLabel.name);
       }
 
       var finder = Finder(
@@ -202,39 +213,41 @@ class LabelDAO {
       );
       List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
       if (!receivedFromServer) {
-        requiredTodos.forEach((todo) {
+        for (Todo todo in requiredTodos) {
           todo.labelName = labels[0].name;
           _todosdb.updateTodo(todo, false);
-        });
+        }
       }
 
       labels.removeAt(oldLabelPosition);
       List<Map<String, dynamic>> mapList = [];
-      for (var element in labels) {
+      for (Label element in labels) {
         Map<String, dynamic> eachMap = {
           'id': element.id,
           'name': element.name,
-          'color': element.color.toString()
+          'color': element.color
         };
         mapList.add(eachMap);
       }
       String labelsJSON = jsonEncode(mapList);
-      SharedPreferences.getInstance().then((prefs) {
-        prefs.setString('labels', labelsJSON);
-      });
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('labels', labelsJSON);
 
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
       if (!receivedFromServer) {
         socket?.emitWithAck(
           "delete_label",
           json.encode({
             "id": labelId.toString(),
-            "timeStamp": DateTime.now().millisecondsSinceEpoch,
+            "timeStamp": timestamp,
           }),
           ack: (response) {
             debugPrint("ack from server $response");
           },
         );
       }
+
+      prefs.setInt('lastOfflineUpdated', timestamp);
     } else {
       debugPrint("label not found");
     }

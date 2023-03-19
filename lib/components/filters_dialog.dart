@@ -49,6 +49,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
   void readFiltersVal() {
     Map<String, bool> labelsSelectedValTemp = {};
     labelsDB.labels.forEach((element) {
+      debugPrint("in filters dialog, label is ${element.name}");
       labelsSelectedValTemp[element.name] =
           selectedFilters.selectedLabels.contains(element.name);
     });

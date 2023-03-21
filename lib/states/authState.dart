@@ -20,7 +20,7 @@ class AuthState extends ChangeNotifier {
     }
   }
 
-  void saveUserToStorage(User newUser) async {
+  Future saveUserToStorage(User newUser) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     user.value = newUser;
 

@@ -20,6 +20,57 @@ class TodoDAO {
   final StoreRef _store = intMapStoreFactory.store("todos");
   static const platform = MethodChannel('alarm_method_channel');
 
+  Future syncOnlineDBOnLogin() async {
+    debugPrint("this is run");
+    LabelDAO labelDAO = GetIt.I.get();
+    AuthState auth = GetIt.I.get();
+
+    List<Todo> allTodos = await getAllTodos(Finder());
+    List<Label> allLabels = labelDAO.labels;
+
+    List<Map> allTodosMap = [];
+    List<Map> allLabelsMap = [];
+    for (Todo todo in allTodos) {
+      Map newTodo = {
+        "id": todo.id.toString(),
+        "taskName": todo.taskName,
+        "taskDesc": todo.taskDesc,
+        "finished": todo.finished,
+        "labelName": todo.labelName,
+        "timeStamp": todo.timeStamp,
+        "time": todo.time,
+        "timeType": todo.timeType,
+        "index": todo.index,
+      };
+      allTodosMap.add(newTodo);
+    }
+
+    for (Label label in allLabels) {
+      Map newLabel = {
+        "id": label.id.toString(),
+        "name": label.name,
+        "color": label.color,
+      };
+      // json.encode(allTodosMap);
+      allLabelsMap.add(newLabel);
+    }
+
+    Map data = {
+      "todos": allTodosMap,
+      "labels": allLabelsMap,
+    };
+    debugPrint("data to be sent is $data");
+    var body = json.encode(data);
+    var response = await http.post(
+      Uri.parse("$serverUrl/postLogin"),
+      headers: {
+        "Content-Type": "application/json",
+        "authorization": auth.user.value!.token
+      },
+      body: body,
+    );
+  }
+
   Future syncOnlineDB() async {
     AuthState auth = GetIt.I.get();
     TodoDAO todosdb = GetIt.I.get();
@@ -174,12 +225,12 @@ class TodoDAO {
         ),
       );
       List<Todo> prevTodos = await getAllTodos(finder);
-      prevTodos.forEach((element) {
+      for (Todo element in prevTodos) {
         if (element.index > prevTodo.index) {
           element.index--;
           updateTodo(element, receivedFromServer);
         }
-      });
+      }
       finder = Finder(
         filter: Filter.equals(
           'time',
@@ -210,7 +261,7 @@ class TodoDAO {
       debugPrint("some fuckup happended while updating todo: $e");
     }
 
-    AuthState auth = GetIt.I.get();
+    // AuthState auth = GetIt.I.get();
     if (!receivedFromServer) {
       socket?.emitWithAck(
         "update_todo",
@@ -243,9 +294,9 @@ class TodoDAO {
 
     AlarmDAO alarmsdb = GetIt.I.get();
     List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
-    toDeleteAlarms.forEach((alarm) {
+    for (Alarm alarm in toDeleteAlarms) {
       alarmsdb.deleteAlarm(alarm.alarmId);
-    });
+    }
     // debugPrint("working flawlessly till after alarms");
 
     try {
@@ -258,13 +309,13 @@ class TodoDAO {
     }
 
     if (!receivedFromServer) {
-      final presentTodos = await getAllTodos(finder);
-      presentTodos.forEach((element) async {
+      List<Todo> presentTodos = await getAllTodos(finder);
+      for (var element in presentTodos) {
         if (element.index > todo.index) {
           element.index--;
           await updateTodo(element, receivedFromServer);
         }
-      });
+      }
       socket?.emitWithAck(
         "delete_todo",
         json.encode({
@@ -293,9 +344,9 @@ class TodoDAO {
         time,
       ),
     );
-    final todos = await getAllTodos(finder);
+    List<Todo> todos = await getAllTodos(finder);
     if (newIndex > oldIndex) {
-      todos.forEach((element) async {
+      for (Todo element in todos) {
         if (element.index == oldIndex) {
           element.index = newIndex;
           await updateTodo(element, false);
@@ -303,9 +354,9 @@ class TodoDAO {
           element.index -= 1;
           await updateTodo(element, false);
         }
-      });
+      }
     } else if (oldIndex > newIndex) {
-      todos.forEach((element) async {
+      for (Todo element in todos) {
         if (element.index == oldIndex) {
           element.index = newIndex;
           await updateTodo(element, false);
@@ -313,7 +364,7 @@ class TodoDAO {
           element.index += 1;
           await updateTodo(element, false);
         }
-      });
+      }
     }
   }
 }

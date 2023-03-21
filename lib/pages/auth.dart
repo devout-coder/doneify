@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/ip.dart';
 import 'package:doneify/states/authState.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
@@ -55,7 +56,7 @@ class _AuthState extends State<Auth> {
     return ret;
   }
 
-  void dealWithResponse(int statusCode, String body) {
+  Future dealWithResponse(int statusCode, String body) async {
     if (statusCode == 200) {
       Map res = json.decode(body);
       debugPrint(res.toString());
@@ -65,7 +66,8 @@ class _AuthState extends State<Auth> {
         res["data"]["email"],
         res["token"],
       );
-      authState.saveUserToStorage(newUser);
+      await authState.saveUserToStorage(newUser);
+      await TodoDAO().syncOnlineDBOnLogin();
       setState(() {
         loading = false;
       });
@@ -95,7 +97,7 @@ class _AuthState extends State<Auth> {
         headers: {"Content-Type": "application/json"},
         body: body,
       );
-      dealWithResponse(response.statusCode, response.body);
+      await dealWithResponse(response.statusCode, response.body);
     }
   }
 
@@ -115,7 +117,7 @@ class _AuthState extends State<Auth> {
         body: body,
       );
 
-      dealWithResponse(response.statusCode, response.body);
+      await dealWithResponse(response.statusCode, response.body);
     }
   }
 
@@ -136,7 +138,7 @@ class _AuthState extends State<Auth> {
           headers: {"Content-Type": "application/json"},
           body: body,
         );
-        dealWithResponse(response.statusCode, response.body);
+        await dealWithResponse(response.statusCode, response.body);
       }
     } catch (error) {
       debugPrint(error.toString());

@@ -1,6 +1,11 @@
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/states/labelDAO.dart';
+import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthState extends ChangeNotifier {
@@ -32,7 +37,7 @@ class AuthState extends ChangeNotifier {
     prefs.setString('userToken', newUser.token);
   }
 
-  void logOut() async {
+  Future logOut() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     googleSignIn.signOut();
@@ -42,5 +47,23 @@ class AuthState extends ChangeNotifier {
     prefs.setString('userEmail', "");
     prefs.setString('userToken', "");
     user.value = null;
+
+    //deleting everything
+    TodoDAO todoDAO = GetIt.I.get();
+    List<Todo> allTodos = await todoDAO.getAllTodos(Finder());
+    for (Todo todo in allTodos) {
+      await todoDAO.deleteTodo(todo.id, true);
+    }
+    LabelDAO labelDAO = GetIt.I.get();
+    String stringStoredLabels = prefs.getString('labels') ?? "";
+    List<Label> labels = LabelDAO().extractLabels(stringStoredLabels);
+    for (Label label in labels) {
+      await labelDAO.deleteLabel(label.id, true);
+    }
+
+    //create default labels
+    SelectedFilters selectedFilters = GetIt.I.get();
+    await selectedFilters.fetchFiltersFromStorage();
+    await labelDAO.readLabelsFromStorage();
   }
 }

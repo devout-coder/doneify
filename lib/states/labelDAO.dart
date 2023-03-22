@@ -15,6 +15,7 @@ class LabelDAO {
   List<Label> labels = [];
   SelectedFilters selectedFilters = GetIt.I.get();
   final TodoDAO _todosdb = GetIt.I.get();
+  SharedPreferences? prefs;
 
   Label? getLabelById(int labelId) {
     for (Label label in labels) {
@@ -23,6 +24,11 @@ class LabelDAO {
       }
     }
     return null;
+  }
+
+  List<Label> getAllLabels() {
+    debugPrint("this is run now");
+    return labels;
   }
 
   int getLabelPosition(int labelId) {
@@ -63,10 +69,11 @@ class LabelDAO {
   }
 
   Future<void> readLabelsFromStorage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     // prefs.clear();
-    String stringStoredLabels = prefs.getString('labels') ?? "";
-    if (stringStoredLabels == "") {
+    String stringStoredLabels = prefs?.getString('labels') ?? "";
+    debugPrint("string labels in storage : $stringStoredLabels");
+    if (stringStoredLabels == "" || stringStoredLabels == "[]") {
       int newId = getRandInt(10);
       Label newLabel = Label(newId, "General", Colors.white.toString());
       List<Map<String, dynamic>> mapList = [
@@ -87,7 +94,7 @@ class LabelDAO {
       // );
 
       String labelsJSON = jsonEncode(mapList);
-      prefs.setString('labels', labelsJSON);
+      prefs?.setString('labels', labelsJSON);
       stringStoredLabels = labelsJSON;
     }
     // debugPrint(stringStoredLabels);
@@ -107,11 +114,11 @@ class LabelDAO {
       List<Map<String, dynamic>> mapList = stringifyLabels(newLabelList);
       String labelsJSON = jsonEncode(mapList);
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('labels', labelsJSON);
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs?.setString('labels', labelsJSON);
 
       // debugPrint("labels are now: $labels");
-      debugPrint("in storage, labels are now: ${prefs.getString('labels')}");
+      debugPrint("in storage, labels are now: ${prefs?.getString('labels')}");
 
       int timestamp = DateTime.now().millisecondsSinceEpoch;
       if (!receivedFromServer) {
@@ -128,7 +135,7 @@ class LabelDAO {
           },
         );
       }
-      prefs.setInt('lastOfflineUpdated', timestamp);
+      prefs?.setInt('lastOfflineUpdated', timestamp);
     }
   }
 
@@ -171,8 +178,8 @@ class LabelDAO {
       }
       String labelsJSON = jsonEncode(mapList);
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('labels', labelsJSON);
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs?.setString('labels', labelsJSON);
 
       int timestamp = DateTime.now().millisecondsSinceEpoch;
       if (!receivedFromServer) {
@@ -190,7 +197,7 @@ class LabelDAO {
         );
       }
 
-      prefs.setInt('lastOfflineUpdated', timestamp);
+      prefs?.setInt('lastOfflineUpdated', timestamp);
     } else {
       debugPrint("no label found");
     }
@@ -211,8 +218,8 @@ class LabelDAO {
           oldLabel.name,
         ),
       );
-      List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
       if (!receivedFromServer) {
+        List<Todo> requiredTodos = await _todosdb.getAllTodos(finder);
         for (Todo todo in requiredTodos) {
           todo.labelName = labels[0].name;
           _todosdb.updateTodo(todo, false);
@@ -230,8 +237,8 @@ class LabelDAO {
         mapList.add(eachMap);
       }
       String labelsJSON = jsonEncode(mapList);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('labels', labelsJSON);
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs?.setString('labels', labelsJSON);
 
       int timestamp = DateTime.now().millisecondsSinceEpoch;
       if (!receivedFromServer) {
@@ -247,7 +254,7 @@ class LabelDAO {
         );
       }
 
-      prefs.setInt('lastOfflineUpdated', timestamp);
+      prefs?.setInt('lastOfflineUpdated', timestamp);
     } else {
       debugPrint("label not found");
     }

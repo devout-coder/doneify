@@ -273,12 +273,12 @@ class _SettingsPageState extends State<SettingsPage> with GetItStateMixin {
                   SizedBox(height: 20),
                   SettingsButton(
                     buttonWidth: 195,
-                    onPressed: () {
+                    onPressed: () async {
                       // Navigator.pushNamed(
                       //   context,
                       //   "/accountSettings",
                       // );
-                      authState.logOut();
+                      await authState.logOut();
                     },
                     title: "Log out",
                     icon: Icon(

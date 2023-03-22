@@ -27,6 +27,7 @@ class TodoDAO {
 
     List<Todo> allTodos = await getAllTodos(Finder());
     List<Label> allLabels = labelDAO.labels;
+    // debugPrint("all labels should be $allLabels");
 
     List<Map> allTodosMap = [];
     List<Map> allLabelsMap = [];
@@ -69,6 +70,26 @@ class TodoDAO {
       },
       body: body,
     );
+    Map res = json.decode(response.body);
+
+    for (Todo todo in allTodos) {
+      await deleteTodo(todo.id, true);
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String stringStoredLabels = prefs.getString('labels') ?? "";
+    List<Label> labels = LabelDAO().extractLabels(stringStoredLabels);
+    for (Label label in labels) {
+      await labelDAO.deleteLabel(label.id, true);
+    }
+
+    for (Map todo in res["todos"]) {
+      Todo newTodo = Todo.fromMap(todo);
+      await createTodo(newTodo, true);
+    }
+    for (Map label in res["labels"]) {
+      Label newLabel = Label.fromMap(label);
+      await labelDAO.addLabel(newLabel, true);
+    }
   }
 
   Future syncOnlineDB() async {
@@ -300,7 +321,7 @@ class TodoDAO {
     // debugPrint("working flawlessly till after alarms");
 
     try {
-      // debugPrint("deleting todo for system ${todo.id}");
+      debugPrint("deleting todo for system ${todo.id}");
       platform.invokeMethod("deleteTodo", {
         "id": todo.id.toString(),
       });

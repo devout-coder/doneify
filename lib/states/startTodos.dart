@@ -43,6 +43,7 @@ class StartTodos {
   }
 
   loadTodos() async {
+    debugPrint("loading todos");
     TodoDAO todosdb = GetIt.I.get();
 
     var finder = Finder(

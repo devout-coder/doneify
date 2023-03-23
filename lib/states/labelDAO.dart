@@ -26,11 +26,6 @@ class LabelDAO {
     return null;
   }
 
-  List<Label> getAllLabels() {
-    debugPrint("this is run now");
-    return labels;
-  }
-
   int getLabelPosition(int labelId) {
     for (int i = 0; i < labels.length; i++) {
       if (labels[i].id == labelId) {

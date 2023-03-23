@@ -29,7 +29,7 @@ void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // HomeWidget.registerBackgroundCallback(
   //     backgroundCallback); //replace this with method channel
-  runApp(MyApp());
+  runApp(RestartWidget(child: MyApp()));
 }
 
 Future registerDB() async {
@@ -49,6 +49,7 @@ Future registerDB() async {
   await startTodos.loadTodos();
 
   nudgerStates.fetchNudgerStates();
+  debugPrint("really reloaded");
 }
 
 class MyApp extends StatefulWidget {
@@ -279,6 +280,37 @@ class _MainContainerState extends State<MainContainer>
                 })),
         backgroundColor: Colors.transparent,
       ),
+    );
+  }
+}
+
+class RestartWidget extends StatefulWidget {
+  RestartWidget({required this.child});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
     );
   }
 }

@@ -92,7 +92,7 @@ class _AddOrEditLabelDialogState extends State<AddOrEditLabelDialog> {
       } else {
         labelsDB.addLabel(
             Label(getRandInt(10), tagName.text, selectedColor!.toString()),
-            false, true);
+            false);
       }
       Navigator.pop(context);
     } else {

@@ -21,7 +21,7 @@ class TodoDAO {
   static const platform = MethodChannel('alarm_method_channel');
 
   Future syncOnlineDBOnLogin() async {
-    debugPrint("this is run");
+    // debugPrint("this is run");
     LabelDAO labelDAO = GetIt.I.get();
     AuthState auth = GetIt.I.get();
 
@@ -100,7 +100,7 @@ class TodoDAO {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? lastOfflineUpdated = prefs.getInt('lastOfflineUpdated');
     // debugPrint("offline db was updated at $lastOfflineUpdated");
-    debugPrint("user is ${auth.user.value!.token}");
+    // debugPrint("user is ${auth.user.value?.token}");
 
     if (auth.user.value != null) {
       var response = await http.get(
@@ -110,7 +110,7 @@ class TodoDAO {
           "authorization": auth.user.value!.token
         },
       );
-      // debugPrint("todos reponse is ${response.body}");
+      debugPrint("todos reponse is ${response.body}");
       Map body = json.decode(response.body);
       if (body["message"] != "offline db up to date") {
         List newLabelList = body["labels"];

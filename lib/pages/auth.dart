@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/ip.dart';
+import 'package:doneify/main.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +72,9 @@ class _AuthState extends State<Auth> {
       setState(() {
         loading = false;
       });
-      Navigator.pop(context);
+
+      // Navigator.pop(context);
+      RestartWidget.restartApp(context);
     } else {
       Fluttertoast.showToast(
         msg: json.decode(body)["message"],

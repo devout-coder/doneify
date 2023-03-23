@@ -1,6 +1,7 @@
 import 'package:doneify/components/gradient_text.dart';
 import 'package:doneify/components/settings_button.dart';
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/main.dart';
 import 'package:doneify/navigatorKeys.dart';
 import 'package:doneify/pages/account_settings.dart';
 import 'package:doneify/pages/auth.dart';
@@ -279,6 +280,7 @@ class _SettingsPageState extends State<SettingsPage> with GetItStateMixin {
                       //   "/accountSettings",
                       // );
                       await authState.logOut();
+                      RestartWidget.restartApp(context);
                     },
                     title: "Log out",
                     icon: Icon(

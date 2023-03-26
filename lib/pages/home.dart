@@ -20,11 +20,11 @@ import 'package:doneify/pages/settings.dart';
 import 'package:doneify/icons/time_type_icons.dart';
 import 'package:doneify/navigatorKeys.dart';
 import 'package:doneify/states/labelDAO.dart';
-import 'package:doneify/states/selectedFilters.dart';
+// import 'package:doneify/states/selectedFilters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
-IO.Socket? socket;
+io.Socket? socket;
 
 class HomePage extends StatefulWidget with GetItStatefulWidgetMixin {
   // String? launchFromWidgetTimeType;
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
   }
 
   void initSocket(String token) {
-    // debugPrint("connection token is $token");
+    debugPrint("connection token is $token");
 
     socket?.auth = {"auth_token": token};
     socket?.connect();
@@ -144,7 +144,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     super.initState();
     debugPrint("home rendered");
     // random();
-    socket = IO.io(serverUrl, <String, dynamic>{
+    socket = io.io(serverUrl, <String, dynamic>{
       'autoConnect': false,
       'transports': ['websocket'],
     });

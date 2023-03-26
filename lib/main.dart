@@ -46,6 +46,7 @@ Future registerDB() async {
   await labelsDB.readLabelsFromStorage();
   await authState.fetchUserFromStorage();
   await todosDB.syncOnlineDB();
+  debugPrint("in main");
   await startTodos.loadTodos();
 
   nudgerStates.fetchNudgerStates();

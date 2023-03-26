@@ -73,6 +73,7 @@ class TodoDAO {
     Map res = json.decode(response.body);
 
     for (Todo todo in allTodos) {
+      debugPrint("deleting name ${todo.taskName}, index ${todo.index}");
       await deleteTodo(todo.id, true);
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -83,10 +84,12 @@ class TodoDAO {
     }
 
     for (Map todo in res["todos"]) {
+      debugPrint("created todo is $todo");
       Todo newTodo = Todo.fromMap(todo);
       await createTodo(newTodo, true);
     }
     for (Map label in res["labels"]) {
+      debugPrint("created label is $label");
       Label newLabel = Label.fromMap(label);
       await labelDAO.addLabel(newLabel, true);
     }
@@ -305,57 +308,61 @@ class TodoDAO {
   Future deleteTodo(int todoId, bool receivedFromServer) async {
     Todo? todo = await getTodo(todoId);
     // debugPrint("deleting todo id: $todoId");
-    var finder = Finder(
-      filter: Filter.equals(
-        'time',
-        todo!.time,
-      ),
-    );
-    await _store.record(todoId).delete(_db);
-
-    AlarmDAO alarmsdb = GetIt.I.get();
-    List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
-    for (Alarm alarm in toDeleteAlarms) {
-      alarmsdb.deleteAlarm(alarm.alarmId);
-    }
-    // debugPrint("working flawlessly till after alarms");
-
-    try {
-      debugPrint("deleting todo for system ${todo.id}");
-      platform.invokeMethod("deleteTodo", {
-        "id": todo.id.toString(),
-      });
-    } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while deleting todo: $e");
-    }
-
-    if (!receivedFromServer) {
-      List<Todo> presentTodos = await getAllTodos(finder);
-      for (var element in presentTodos) {
-        if (element.index > todo.index) {
-          element.index--;
-          await updateTodo(element, receivedFromServer);
-        }
-      }
-      socket?.emitWithAck(
-        "delete_todo",
-        json.encode({
-          "id": todo.id.toString(),
-          "timeStamp": DateTime.now().millisecondsSinceEpoch,
-        }),
-        ack: (response) {
-          debugPrint("ack from server $response");
-        },
+    if (todo != null) {
+      var finder = Finder(
+        filter: Filter.equals(
+          'time',
+          todo.time,
+        ),
       );
+      await _store.record(todoId).delete(_db);
+
+      AlarmDAO alarmsdb = GetIt.I.get();
+      List<Alarm> toDeleteAlarms = await alarmsdb.getAlarms(todoId);
+      for (Alarm alarm in toDeleteAlarms) {
+        alarmsdb.deleteAlarm(alarm.alarmId);
+      }
+      // debugPrint("working flawlessly till after alarms");
+
+      try {
+        debugPrint("deleting todo for system ${todo.id}");
+        platform.invokeMethod("deleteTodo", {
+          "id": todo.id.toString(),
+        });
+      } on PlatformException catch (e) {
+        debugPrint("some fuckup happended while deleting todo: $e");
+      }
+
+      if (!receivedFromServer) {
+        List<Todo> presentTodos = await getAllTodos(finder);
+        for (var element in presentTodos) {
+          if (element.index > todo.index) {
+            element.index--;
+            await updateTodo(element, receivedFromServer);
+          }
+        }
+        socket?.emitWithAck(
+          "delete_todo",
+          json.encode({
+            "id": todo.id.toString(),
+            "timeStamp": DateTime.now().millisecondsSinceEpoch,
+          }),
+          ack: (response) {
+            debugPrint("ack from server $response");
+          },
+        );
+      }
+
+      HomeWidget.updateWidget(
+        name: 'WidgetProvider',
+        iOSName: 'WidgetProvider',
+      );
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setInt('lastOfflineUpdated', todo.timeStamp);
+    } else {
+      debugPrint("couldn't find todo");
     }
-
-    HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
-    );
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('lastOfflineUpdated', todo.timeStamp);
   }
 
   Future rearrangeTodos(int oldIndex, int newIndex, String time) async {

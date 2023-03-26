@@ -1,10 +1,10 @@
-import 'package:doneify/components/BottomButtons.dart';
-import 'package:doneify/components/EachWeekCell.dart';
-import 'package:doneify/components/IncompleteTodos.dart';
+import 'package:doneify/components/bottom_buttons.dart';
+import 'package:doneify/components/each_week_cell.dart';
+import 'package:doneify/components/incomplete_todos.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/Day.dart';
-import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/pages/day.dart';
+import 'package:doneify/pages/todos.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';

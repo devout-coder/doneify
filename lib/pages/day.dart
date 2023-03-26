@@ -1,40 +1,39 @@
-import 'package:doneify/components/BottomButtons.dart';
-import 'package:doneify/components/EachYearCell.dart';
-import 'package:doneify/components/IncompleteTodos.dart';
+import 'dart:ui';
+
+import 'package:animations/animations.dart';
+import 'package:doneify/components/bottom_buttons.dart';
+import 'package:doneify/components/each_day_cell.dart';
+import 'package:doneify/components/filters_dialog.dart';
+import 'package:doneify/components/incomplete_todos.dart';
+import 'package:doneify/globalColors.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/pages/todos.dart';
 import 'package:doneify/states/selectedFilters.dart';
+import 'package:doneify/components/filters_dialog.dart';
 import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:intl/intl.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
+import 'package:home_widget/home_widget.dart';
 
-class YearlyPage extends StatelessWidget {
-  const YearlyPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class YearNavigator extends StatefulWidget {
-  YearNavigator({Key? key}) : super(key: key);
+class DayNavigator extends StatefulWidget {
+  DayNavigator({Key? key}) : super(key: key);
 
   @override
-  State<YearNavigator> createState() => _YearNavigatorState();
+  State<DayNavigator> createState() => _DayNavigatorState();
 }
 
-class _YearNavigatorState extends State<YearNavigator> {
+class _DayNavigatorState extends State<DayNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: yearNavigatorKey,
+      key: dayNavigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         // Cast the arguments to the correct
         // type: ScreenArguments.
@@ -48,7 +47,7 @@ class _YearNavigatorState extends State<YearNavigator> {
         } else {
           return MaterialPageRoute(
             builder: (context) {
-              return YearPage();
+              return DayPage();
             },
           );
         }
@@ -57,21 +56,21 @@ class _YearNavigatorState extends State<YearNavigator> {
   }
 }
 
-class YearPage extends StatefulWidget with GetItStatefulWidgetMixin {
-  YearPage({Key? key}) : super(key: key);
+class DayPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  DayPage({Key? key}) : super(key: key);
 
   @override
-  State<YearPage> createState() => _YearPageState();
+  State<DayPage> createState() => _DayPageState();
 }
 
-String formattedYear(DateTime date) {
-  final DateFormat formatter = DateFormat("y");
+String formattedDate(DateTime date) {
+  final DateFormat formatter = DateFormat("d/M/y");
   final String formatted = formatter.format(date);
   return formatted;
 }
 
-class _YearPageState extends State<YearPage> with GetItStateMixin {
-  String timeType = "year";
+class _DayPageState extends State<DayPage> with GetItStateMixin {
+  String timeType = "day";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
@@ -79,15 +78,15 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
   StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
-  List<String> unfinishedYears = [];
+  List<String> unfinishedDays = [];
   List<Todo> currentTodos = [];
 
   // bool currentFirst = false;
   // bool ascending = false;
 
   int comparingTodos(Todo todo1, Todo todo2) {
-    DateTime time1 = DateFormat("y").parse(todo1.time);
-    DateTime time2 = DateFormat("y").parse(todo2.time);
+    DateTime time1 = DateFormat("d/M/y").parse(todo1.time);
+    DateTime time2 = DateFormat("d/M/y").parse(todo2.time);
     int compared = selectedFilters.ascending
         ? time1.compareTo(time2)
         : time2.compareTo(time1);
@@ -99,10 +98,6 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
   }
 
   loadTodos() async {
-    // debugPrint(selectedLabelsClass.selectedLabels.toString());
-    // debugPrint("todos loaded");
-
-    _controller.selectedDate = null;
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -114,22 +109,22 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
     List<Todo> todosTemp = await todosdb.getAllTodos(finder);
     List<Todo> currentTodosTemp = [];
     setState(() {
-      unfinishedYears = [];
+      unfinishedDays = [];
     });
     todosTemp.forEach((element) {
-      if (element.time == formattedYear(DateTime.now())) {
+      if (element.time == formattedDate(DateTime.now())) {
         currentTodosTemp.add(element);
       }
-      if (!unfinishedYears.contains(element.time)) {
-        List<String> tempUnfinishedYears = [...unfinishedYears, element.time];
+      if (!unfinishedDays.contains(element.time)) {
+        List<String> tempUnfinishedDates = [...unfinishedDays, element.time];
         setState(() {
-          unfinishedYears = tempUnfinishedYears;
+          unfinishedDays = tempUnfinishedDates;
         });
       }
     });
     if (selectedFilters.currentFirst) {
       todosTemp = todosTemp
-          .where((element) => element.time != formattedYear(DateTime.now()))
+          .where((element) => element.time != formattedDate(DateTime.now()))
           .toList();
     }
 
@@ -139,6 +134,12 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
+    // todosTemp.forEach(
+    //     (element) => debugPrint("${element.taskName} ${element.index}"));
+    // debugPrint("unfinished");
+    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
+    // debugPrint("finished");
+    // finishedTodosTemp.forEach)((element) => debugPrint(element.taskName));
 
     setState(() {
       todos = todosTemp;
@@ -153,52 +154,31 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
 
   @override
   void initState() {
-    loadTodos();
+    _controller.selectedDate = null;
+    todos = startTodos.todos;
+    currentTodos = startTodos.currentTodos;
+    unfinishedDays = startTodos.unfinishedDays;
+    // debugPrint("todos: $todos");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool reloadTodos = watchX((StartTodos todos) => todos.reloadYearTodos);
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadDayTodos);
     if (reloadTodos) {
       debugPrint("gotta reload");
       loadTodos();
-      startTodos.reloadYearTodos.value = false;
+      startTodos.reloadDayTodos.value = false;
     }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-          height: 300,
+          height: 330,
           child: SfDateRangePicker(
             controller: _controller,
-            view: DateRangePickerView.decade,
             initialSelectedDate: null,
-            // onViewChanged: (args) {
-            //   WidgetsBinding.instance.addPostFrameCallback((_) {
-            //     if (args.view == DateRangePickerView.month) {
-            //       _controller.view = DateRangePickerView.year;
-            //     } else if (args.view == DateRangePickerView.year) {
-            //       PickerDateRange dateRange = args.visibleDateRange;
-            //       if (dateRange.startDate != null) {
-            //         Navigator.pushNamed(context, "/todos",
-            //                 arguments: ScreenArguments(
-            //                     formattedYear(dateRange.startDate!), timeType))
-            //             .whenComplete(() => loadTodos());
-            //       }
-            //     }
-            //   });
-            //   debugPrint(args.visibleDateRange.toString());
-            // },
-            allowViewNavigation: false,
-            onSelectionChanged: (args) {
-              if (_controller.selectedDate != null) {
-                Navigator.pushNamed(context, "/todos",
-                        arguments: ScreenArguments(
-                            formattedYear(args.value), timeType))
-                    .whenComplete(() => loadTodos());
-              }
-            },
             headerStyle: const DateRangePickerHeaderStyle(
               textAlign: TextAlign.center,
               textStyle: TextStyle(
@@ -208,14 +188,30 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
                 color: Color(0xffffffff),
               ),
             ),
+            monthViewSettings: const DateRangePickerMonthViewSettings(
+              viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                textStyle: TextStyle(color: Color(0xffEADA76)),
+              ),
+              firstDayOfWeek: 1,
+            ),
+            todayHighlightColor: Color(0xffEADA76),
             headerHeight: 40,
             selectionColor: Colors.transparent,
+            onSelectionChanged: (args) {
+              if (_controller.selectedDate != null) {
+                _controller.selectedDate = null;
+                Navigator.pushNamed(context, "/todos",
+                        arguments: ScreenArguments(
+                            formattedDate(args.value), timeType))
+                    .whenComplete(() => loadTodos());
+              }
+            },
             cellBuilder:
                 (BuildContext context, DateRangePickerCellDetails details) {
-              return EachYearCell(
+              return EachDayCell(
                 key: UniqueKey(),
                 date: details.date,
-                unfinishedYears: unfinishedYears,
+                unfinishedDays: unfinishedDays,
                 currentView: _controller.view,
               );
             },
@@ -227,7 +223,7 @@ class _YearPageState extends State<YearPage> with GetItStateMixin {
           loadTodos: loadTodos,
         ),
         BottomButtons(
-          time: formattedYear(DateTime.now()),
+          time: formattedDate(DateTime.now()),
           timeType: timeType,
           loadTodos: loadTodos,
           createTodo: createTodo,

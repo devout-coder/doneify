@@ -1,31 +1,40 @@
-import 'package:doneify/components/BottomButtons.dart';
-import 'package:doneify/components/EachMonthCell.dart';
-import 'package:doneify/components/IncompleteTodos.dart';
+import 'package:doneify/components/bottom_buttons.dart';
+import 'package:doneify/components/each_year_cell.dart';
+import 'package:doneify/components/incomplete_todos.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/Todos.dart';
+import 'package:doneify/pages/todos.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
+import 'package:intl/intl.dart';
 import 'package:sembast/sembast.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'package:intl/intl.dart';
 
-class MonthNavigator extends StatefulWidget {
-  MonthNavigator({Key? key}) : super(key: key);
+class YearlyPage extends StatelessWidget {
+  const YearlyPage({Key? key}) : super(key: key);
 
   @override
-  State<MonthNavigator> createState() => _MonthNavigatorState();
+  Widget build(BuildContext context) {
+    return Container();
+  }
 }
 
-class _MonthNavigatorState extends State<MonthNavigator> {
+class YearNavigator extends StatefulWidget {
+  YearNavigator({Key? key}) : super(key: key);
+
+  @override
+  State<YearNavigator> createState() => _YearNavigatorState();
+}
+
+class _YearNavigatorState extends State<YearNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: monthNavigatorKey,
+      key: yearNavigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         // Cast the arguments to the correct
         // type: ScreenArguments.
@@ -39,7 +48,7 @@ class _MonthNavigatorState extends State<MonthNavigator> {
         } else {
           return MaterialPageRoute(
             builder: (context) {
-              return MonthPage();
+              return YearPage();
             },
           );
         }
@@ -48,21 +57,21 @@ class _MonthNavigatorState extends State<MonthNavigator> {
   }
 }
 
-class MonthPage extends StatefulWidget with GetItStatefulWidgetMixin {
-  MonthPage({Key? key}) : super(key: key);
+class YearPage extends StatefulWidget with GetItStatefulWidgetMixin {
+  YearPage({Key? key}) : super(key: key);
 
   @override
-  State<MonthPage> createState() => _MonthPageState();
+  State<YearPage> createState() => _YearPageState();
 }
 
-String formattedMonth(DateTime date) {
-  final DateFormat formatter = DateFormat("MMM y");
+String formattedYear(DateTime date) {
+  final DateFormat formatter = DateFormat("y");
   final String formatted = formatter.format(date);
   return formatted;
 }
 
-class _MonthPageState extends State<MonthPage> with GetItStateMixin {
-  String timeType = "month";
+class _YearPageState extends State<YearPage> with GetItStateMixin {
+  String timeType = "year";
   final DateRangePickerController _controller = DateRangePickerController();
 
   TodoDAO todosdb = GetIt.I.get();
@@ -70,15 +79,15 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
   StartTodos startTodos = GetIt.I.get();
 
   List<Todo> todos = [];
-  List<String> unfinishedMonths = [];
+  List<String> unfinishedYears = [];
   List<Todo> currentTodos = [];
 
   // bool currentFirst = false;
   // bool ascending = false;
 
   int comparingTodos(Todo todo1, Todo todo2) {
-    DateTime time1 = DateFormat("MMM y").parse(todo1.time);
-    DateTime time2 = DateFormat("MMM y").parse(todo2.time);
+    DateTime time1 = DateFormat("y").parse(todo1.time);
+    DateTime time2 = DateFormat("y").parse(todo2.time);
     int compared = selectedFilters.ascending
         ? time1.compareTo(time2)
         : time2.compareTo(time1);
@@ -90,9 +99,10 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
   }
 
   loadTodos() async {
-    debugPrint("inside reload");
+    // debugPrint(selectedLabelsClass.selectedLabels.toString());
+    // debugPrint("todos loaded");
+
     _controller.selectedDate = null;
-    // }
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -104,22 +114,22 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
     List<Todo> todosTemp = await todosdb.getAllTodos(finder);
     List<Todo> currentTodosTemp = [];
     setState(() {
-      unfinishedMonths = [];
+      unfinishedYears = [];
     });
     todosTemp.forEach((element) {
-      if (element.time == formattedMonth(DateTime.now())) {
+      if (element.time == formattedYear(DateTime.now())) {
         currentTodosTemp.add(element);
       }
-      if (!unfinishedMonths.contains(element.time)) {
-        List<String> tempUnfinishedMonths = [...unfinishedMonths, element.time];
+      if (!unfinishedYears.contains(element.time)) {
+        List<String> tempUnfinishedYears = [...unfinishedYears, element.time];
         setState(() {
-          unfinishedMonths = tempUnfinishedMonths;
+          unfinishedYears = tempUnfinishedYears;
         });
       }
     });
     if (selectedFilters.currentFirst) {
       todosTemp = todosTemp
-          .where((element) => element.time != formattedMonth(DateTime.now()))
+          .where((element) => element.time != formattedYear(DateTime.now()))
           .toList();
     }
 
@@ -149,13 +159,12 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    bool reloadTodos = watchX((StartTodos todos) => todos.reloadMonthTodos);
+    bool reloadTodos = watchX((StartTodos todos) => todos.reloadYearTodos);
     if (reloadTodos) {
       debugPrint("gotta reload");
       loadTodos();
-      startTodos.reloadMonthTodos.value = false;
+      startTodos.reloadYearTodos.value = false;
     }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -163,7 +172,8 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
           height: 300,
           child: SfDateRangePicker(
             controller: _controller,
-            view: DateRangePickerView.year,
+            view: DateRangePickerView.decade,
+            initialSelectedDate: null,
             // onViewChanged: (args) {
             //   WidgetsBinding.instance.addPostFrameCallback((_) {
             //     if (args.view == DateRangePickerView.month) {
@@ -173,20 +183,19 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
             //       if (dateRange.startDate != null) {
             //         Navigator.pushNamed(context, "/todos",
             //                 arguments: ScreenArguments(
-            //                     formattedMonth(dateRange.startDate!), timeType))
+            //                     formattedYear(dateRange.startDate!), timeType))
             //             .whenComplete(() => loadTodos());
             //       }
             //     }
             //   });
             //   debugPrint(args.visibleDateRange.toString());
             // },
-            initialSelectedDate: null,
             allowViewNavigation: false,
             onSelectionChanged: (args) {
               if (_controller.selectedDate != null) {
                 Navigator.pushNamed(context, "/todos",
                         arguments: ScreenArguments(
-                            formattedMonth(args.value), timeType))
+                            formattedYear(args.value), timeType))
                     .whenComplete(() => loadTodos());
               }
             },
@@ -199,21 +208,14 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
                 color: Color(0xffffffff),
               ),
             ),
-            monthViewSettings: const DateRangePickerMonthViewSettings(
-              viewHeaderStyle: DateRangePickerViewHeaderStyle(
-                textStyle: TextStyle(color: Color(0xffEADA76)),
-              ),
-              firstDayOfWeek: 1,
-            ),
-            todayHighlightColor: Color(0xffEADA76),
             headerHeight: 40,
             selectionColor: Colors.transparent,
             cellBuilder:
                 (BuildContext context, DateRangePickerCellDetails details) {
-              return EachMonthCell(
+              return EachYearCell(
                 key: UniqueKey(),
                 date: details.date,
-                unfinishedMonths: unfinishedMonths,
+                unfinishedYears: unfinishedYears,
                 currentView: _controller.view,
               );
             },
@@ -225,7 +227,7 @@ class _MonthPageState extends State<MonthPage> with GetItStateMixin {
           loadTodos: loadTodos,
         ),
         BottomButtons(
-          time: formattedMonth(DateTime.now()),
+          time: formattedYear(DateTime.now()),
           timeType: timeType,
           loadTodos: loadTodos,
           createTodo: createTodo,

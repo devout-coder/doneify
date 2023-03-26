@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:doneify/dartMethodCalls.dart';
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/home.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:doneify/states/initStates.dart';
 import 'package:doneify/states/labelDAO.dart';
@@ -12,7 +13,6 @@ import 'package:doneify/states/startTodos.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:doneify/timeFuncs.dart';
 import 'package:flutter/material.dart';
-import 'package:doneify/pages/Home.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_widget/home_widget.dart';
@@ -29,12 +29,13 @@ void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // HomeWidget.registerBackgroundCallback(
   //     backgroundCallback); //replace this with method channel
-  runApp(MyApp());
+  runApp(RestartWidget(child: MyApp()));
 }
 
 Future registerDB() async {
   await GetItRegister().initializeGlobalStates();
   LabelDAO labelsDB = GetIt.I.get();
+  TodoDAO todosDB = GetIt.I.get();
   SelectedFilters selectedFilters = GetIt.I.get();
   StartTodos startTodos = GetIt.I.get();
   NudgerStates nudgerStates = GetIt.I.get();
@@ -43,10 +44,13 @@ Future registerDB() async {
   //don't fuck up this order
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
-  await startTodos.loadTodos();
   await authState.fetchUserFromStorage();
+  await todosDB.syncOnlineDB();
+  debugPrint("in main");
+  await startTodos.loadTodos();
 
   nudgerStates.fetchNudgerStates();
+  debugPrint("really reloaded");
 }
 
 class MyApp extends StatefulWidget {
@@ -277,6 +281,37 @@ class _MainContainerState extends State<MainContainer>
                 })),
         backgroundColor: Colors.transparent,
       ),
+    );
+  }
+}
+
+class RestartWidget extends StatefulWidget {
+  RestartWidget({required this.child});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
     );
   }
 }

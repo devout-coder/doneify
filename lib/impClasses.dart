@@ -2,18 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:sembast/timestamp.dart';
 
 class Label {
+  int id;
   String name;
   String color;
 
-  Label(this.name, this.color);
+  Label(this.id, this.name, this.color);
+
+  static Label fromMap(Map<dynamic, dynamic> map) {
+    return Label(
+      map["id"] ?? map["_id"],
+      map["name"],
+      map["color"],
+    );
+  }
 }
 
 class User {
+  String id;
   String name;
   String email;
   String token;
 
-  User(this.name, this.email, this.token);
+  User(this.id, this.name, this.email, this.token);
 }
 
 class Alarm {
@@ -76,7 +86,7 @@ class Todo {
     };
   }
 
-  static Todo fromMap(Map<String, dynamic> map) {
+  static Todo fromMap(Map<dynamic, dynamic> map) {
     return Todo(
       map["taskName"],
       map["taskDesc"],

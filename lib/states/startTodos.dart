@@ -1,14 +1,21 @@
+import 'dart:convert';
+
+import 'package:doneify/ip.dart';
+import 'package:doneify/states/authState.dart';
+import 'package:http/http.dart' as http;
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/pages/Day.dart';
+import 'package:doneify/pages/day.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/todoDAO.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StartTodos {
   //already loading the day todos so that after circular progress stops there is no delay before the todos are shown
+  //index fuck up
   List<Todo> todos = [];
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
@@ -19,7 +26,6 @@ class StartTodos {
   final reloadYearTodos = ValueNotifier<bool>(false);
   final reloadLongTermTodos = ValueNotifier<bool>(false);
   final reloadTodos = ValueNotifier<String>("");
-  
 
   SelectedFilters selectedFilters = GetIt.I.get();
 
@@ -37,8 +43,9 @@ class StartTodos {
   }
 
   loadTodos() async {
-    // debugPrint("todos loaded");
+    // debugPrint("loading todos");
     TodoDAO todosdb = GetIt.I.get();
+
     var finder = Finder(
       filter: Filter.equals(
             'timeType',
@@ -70,8 +77,8 @@ class StartTodos {
     if (selectedFilters.currentFirst) {
       todosTemp = [...currentTodosTemp, ...todosTemp];
     }
-    // todosTemp.forEach(
-    //     (element) => debugPrint("${element.taskName} ${element.index}"));
+    todosTemp.forEach(
+        (element) => debugPrint("${element.taskName} ${element.index}"));
     // debugPrint("unfinished");
     // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
     // debugPrint("finished");

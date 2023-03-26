@@ -4,61 +4,59 @@ class SelectedFilters {
   List<String> selectedLabels = [];
   bool currentFirst = true;
   bool ascending = false;
+  SharedPreferences? prefs;
 
   Future<void> fetchFiltersFromStorage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     bool firstTime =
-        prefs.getStringList("selectedLabels") != null ? false : true;
-    selectedLabels = prefs.getStringList('selectedLabels') ?? ["General"];
-    currentFirst = prefs.getBool("filtersCurrentFirst") ?? true;
-    ascending = prefs.getBool("filtersAscending") ?? false;
+        prefs?.getStringList("selectedLabels") != null ? false : true;
+    selectedLabels = prefs?.getStringList('selectedLabels') ?? ["General"];
+    currentFirst = prefs?.getBool("filtersCurrentFirst") ?? true;
+    ascending = prefs?.getBool("filtersAscending") ?? false;
     if (firstTime) {
-      prefs.setStringList('selectedLabels', ["General"]);
-      prefs.setBool("filtersCurrentFirst", true);
-      prefs.setBool("filtersAscending", false);
+      prefs?.setStringList('selectedLabels', ["General"]);
+      prefs?.setBool("filtersCurrentFirst", true);
+      prefs?.setBool("filtersAscending", false);
     }
   }
 
   void setCurrentFirst(bool newCurrentFirstVal) async {
     currentFirst = newCurrentFirstVal;
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('filtersCurrentFirst', currentFirst);
-    });
+    // SharedPreferences.getInstance().then((prefs) {
+    prefs?.setBool('filtersCurrentFirst', currentFirst);
+    // });
   }
 
   void setAscending(bool newAscendingVal) async {
     ascending = newAscendingVal;
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('filtersAscending', ascending);
-    });
+    // SharedPreferences.getInstance().then((prefs) {
+    prefs?.setBool('filtersAscending', ascending);
+    // });
   }
 
-  void addLabel(String labelName) {
+  Future addLabel(String labelName) async {
     List<String> newLabelList = [...selectedLabels, labelName];
     selectedLabels = newLabelList;
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('selectedLabels', newLabelList);
-    });
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs?.setStringList('selectedLabels', newLabelList);
   }
 
   void addLabels(List<String> newLabels) {
     List<String> newLabelList = [...newLabels];
     selectedLabels = newLabelList;
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('selectedLabels', newLabelList);
-    });
+    // SharedPreferences.getInstance().then((prefs) {
+    prefs?.setStringList('selectedLabels', newLabelList);
+    // });
   }
 
-  void deleteLabel(String labelName) {
+  Future deleteLabel(String labelName) async {
     selectedLabels.remove(labelName);
 
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('selectedLabels', selectedLabels);
-    });
-    // notifyListeners();
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs?.setStringList('selectedLabels', selectedLabels);
   }
 }

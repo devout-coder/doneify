@@ -1,4 +1,4 @@
-import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/components/add_or_edit_label_dialog.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';
@@ -18,18 +18,6 @@ class SelectLabelDialog extends StatefulWidget {
 
   @override
   State<SelectLabelDialog> createState() => _SelectLabelDialogState();
-}
-
-List<Map<String, dynamic>> stringifyLabels(List<Label> labels) {
-  List<Map<String, dynamic>> jsonLabels = [];
-  labels.forEach((label) {
-    Map<String, dynamic> jsonLabel = {
-      "name": label.name,
-      "color": label.color.toString(),
-    };
-    jsonLabels.add(jsonLabel);
-  });
-  return jsonLabels;
 }
 
 class _SelectLabelDialogState extends State<SelectLabelDialog> {
@@ -136,6 +124,8 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                                     .transform(a1.value);
                                                 return AddOrEditLabelDialog(
                                                   curve: curve,
+                                                  labelId:
+                                                      labelsDB.labels[index].id,
                                                   labelIndex: index,
                                                 );
                                               },
@@ -161,7 +151,9 @@ class _SelectLabelDialogState extends State<SelectLabelDialog> {
                                                       selectedLabel = 0;
                                                     });
                                                   }
-                                                  labelsDB.deleteLabel(index);
+                                                  labelsDB.deleteLabel(
+                                                      labelsDB.labels[index].id,
+                                                      false);
                                                   setState(() {});
                                                 }
                                               : () {

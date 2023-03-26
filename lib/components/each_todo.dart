@@ -1,15 +1,15 @@
 import 'dart:convert';
 
 import 'package:animations/animations.dart';
-import 'package:doneify/components/AddOrEditLabelDialog.dart';
+import 'package:doneify/components/add_or_edit_label_dialog.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/Day.dart';
-import 'package:doneify/pages/InputModal.dart';
-import 'package:doneify/pages/Month.dart';
-import 'package:doneify/pages/Todos.dart';
-import 'package:doneify/pages/Week.dart';
-import 'package:doneify/pages/Year.dart';
+import 'package:doneify/pages/day.dart';
+import 'package:doneify/pages/input_modal.dart';
+import 'package:doneify/pages/month.dart';
+import 'package:doneify/pages/todos.dart';
+import 'package:doneify/pages/week.dart';
+import 'package:doneify/pages/year.dart';
 import 'package:doneify/states/alarmDAO.dart';
 import 'package:doneify/states/labelDAO.dart';
 import 'package:flutter/material.dart';

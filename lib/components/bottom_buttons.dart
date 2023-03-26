@@ -1,7 +1,7 @@
 import 'package:animations/animations.dart';
-import 'package:doneify/components/FiltersDialog.dart';
+import 'package:doneify/components/filters_dialog.dart';
 import 'package:doneify/globalColors.dart';
-import 'package:doneify/pages/InputModal.dart';
+import 'package:doneify/pages/input_modal.dart';
 import 'package:flutter/material.dart';
 
 class BottomButtons extends StatefulWidget {

@@ -1,12 +1,13 @@
-import 'package:doneify/components/GradientText.dart';
-import 'package:doneify/components/SettingsButton.dart';
+import 'package:doneify/components/gradient_text.dart';
+import 'package:doneify/components/settings_button.dart';
 import 'package:doneify/impClasses.dart';
+import 'package:doneify/main.dart';
 import 'package:doneify/navigatorKeys.dart';
-import 'package:doneify/pages/AccountSettings.dart';
-import 'package:doneify/pages/Auth.dart';
-import 'package:doneify/pages/FriendsSettings.dart';
-import 'package:doneify/pages/LabelsSettings.dart';
-import 'package:doneify/pages/NudgerSettings.dart';
+import 'package:doneify/pages/account_settings.dart';
+import 'package:doneify/pages/auth.dart';
+import 'package:doneify/pages/friends_settings.dart';
+import 'package:doneify/pages/labels_settings.dart';
+import 'package:doneify/pages/nudger_settings.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:doneify/states/nudgerState.dart';
 import 'package:flutter/material.dart';
@@ -273,12 +274,13 @@ class _SettingsPageState extends State<SettingsPage> with GetItStateMixin {
                   SizedBox(height: 20),
                   SettingsButton(
                     buttonWidth: 195,
-                    onPressed: () {
+                    onPressed: () async {
                       // Navigator.pushNamed(
                       //   context,
                       //   "/accountSettings",
                       // );
-                      authState.logOut();
+                      await authState.logOut();
+                      RestartWidget.restartApp(context);
                     },
                     title: "Log out",
                     icon: Icon(

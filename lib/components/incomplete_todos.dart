@@ -1,4 +1,4 @@
-import 'package:doneify/components/EachTodo.dart';
+import 'package:doneify/components/each_todo.dart';
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/states/selectedFilters.dart';
 import 'package:doneify/states/todoDAO.dart';
@@ -85,7 +85,7 @@ class _IncompleteTodosState extends State<IncompleteTodos> {
             height: 8,
           ),
           Container(
-            height: scrolledUp ? 0.85 * screenHeight : 0.33 * screenHeight,
+            height: scrolledUp ? 0.85 * screenHeight : 0.31 * screenHeight,
             width: screenWidth * 0.9,
             child: Theme(
               data: ThemeData(canvasColor: Colors.transparent),

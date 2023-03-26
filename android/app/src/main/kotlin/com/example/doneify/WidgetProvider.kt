@@ -134,7 +134,7 @@ class WidgetProvider : HomeWidgetProvider() {
                                     R.id.each_todo_container_checkbox,
                                     todo.finished
                                 )
-                                Log.d("debugging", "task name is ${todo.taskName}")
+                                // Log.d("debugging", "task name is ${todo.taskName}")
 
                                 val extras = Bundle().apply {
                                     putString("todoId", todo.id)

@@ -1,8 +1,8 @@
-import 'package:doneify/components/EachWeekCell.dart';
+import 'package:doneify/components/each_week_cell.dart';
 import 'package:doneify/globalColors.dart';
-import 'package:doneify/pages/Day.dart';
-import 'package:doneify/pages/Week.dart';
-import 'package:doneify/pages/Year.dart';
+import 'package:doneify/pages/day.dart';
+import 'package:doneify/pages/week.dart';
+import 'package:doneify/pages/year.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';

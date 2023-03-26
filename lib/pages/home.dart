@@ -11,19 +11,20 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:get_it_mixin/get_it_mixin.dart';
-import 'package:doneify/pages/LongTerm.dart';
-import 'package:doneify/pages/Month.dart';
-import 'package:doneify/pages/Week.dart';
-import 'package:doneify/pages/Year.dart';
-import 'package:doneify/pages/Day.dart';
-import 'package:doneify/pages/Settings.dart';
+import 'package:doneify/pages/long_term.dart';
+import 'package:doneify/pages/month.dart';
+import 'package:doneify/pages/week.dart';
+import 'package:doneify/pages/year.dart';
+import 'package:doneify/pages/day.dart';
+import 'package:doneify/pages/settings.dart';
 import 'package:doneify/icons/time_type_icons.dart';
 import 'package:doneify/navigatorKeys.dart';
 import 'package:doneify/states/labelDAO.dart';
-import 'package:doneify/states/selectedFilters.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+// import 'package:doneify/states/selectedFilters.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
-IO.Socket? socket;
+io.Socket? socket;
 
 class HomePage extends StatefulWidget with GetItStatefulWidgetMixin {
   // String? launchFromWidgetTimeType;
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
     });
 
     socket?.on('todo_operation', (data) async {
-      debugPrint("real time data is $data");
+      debugPrint("real time data for todo is $data");
       // var dataMap = json.decode(data);
       String operation = data['operation'];
       TodoDAO todoDAO = GetIt.I.get();
@@ -104,17 +105,46 @@ class _HomePageState extends State<HomePage> with GetItStateMixin {
       }
       debugPrint("data is ${data['operation']}");
     });
+
+    socket?.on('label_operation', (data) async {
+      debugPrint("real time data for label is $data");
+      String operation = data['operation'];
+      LabelDAO labelDAO = GetIt.I.get();
+      // StartTodos startTodos = GetIt.I.get();
+      Label label = Label.fromMap(data['data']);
+
+      switch (operation) {
+        case "create":
+          labelDAO.addLabel(label, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "update":
+          labelDAO.editLabel(label, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+        case "delete":
+          labelDAO.deleteLabel(label.id, true);
+          // reloadAppropriateTodos(todo.timeType, todo.time, startTodos);
+          break;
+      }
+      debugPrint("data is ${data['operation']}");
+    });
     socket?.onDisconnect((_) => print('Connection Disconnection'));
     socket?.onConnectError((err) => print(err));
     socket?.onError((err) => print(err));
+  }
+
+  void random() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   }
 
   @override
   void initState() {
     super.initState();
     debugPrint("home rendered");
-
-    socket = IO.io(serverUrl, <String, dynamic>{
+    // random();
+    socket = io.io(serverUrl, <String, dynamic>{
       'autoConnect': false,
       'transports': ['websocket'],
     });

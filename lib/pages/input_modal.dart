@@ -571,8 +571,10 @@ class _InputModalState extends State<InputModal> {
                   LogicalKeyboardKey.keyS,
                 ): SaveIntent(),
                 LogicalKeySet(
+                  LogicalKeyboardKey.altLeft,
                   LogicalKeyboardKey.keyF,
                 ): KeyboardFocusIntent(),
+                //commented this out cause it wasn't allowing me to use f key
               },
               child: Actions(
                 actions: <Type, Action<Intent>>{

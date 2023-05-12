@@ -1,4 +1,4 @@
-package com.example.doneify
+package com.awesome_forever.doneify
 
 import android.content.Context
 import androidx.room.*

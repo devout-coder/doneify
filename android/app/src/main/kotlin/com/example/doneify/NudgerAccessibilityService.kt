@@ -1,4 +1,4 @@
-package com.example.doneify
+package com.awesome_forever.doneify
 
 import android.accessibilityservice.AccessibilityService
 import android.app.AlarmManager

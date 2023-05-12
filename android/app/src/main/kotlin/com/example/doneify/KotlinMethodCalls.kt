@@ -1,4 +1,4 @@
-package com.example.doneify
+package com.awesome_forever.doneify
 
 import android.app.Activity
 import io.flutter.embedding.android.FlutterActivity

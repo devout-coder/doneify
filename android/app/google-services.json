@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:52294703459:android:b1d8369cbcbe072a38db56",
         "android_client_info": {
-          "package_name": "com.example.doneify"
+          "package_name": "com.awesome_forever.doneify"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "52294703459-388f732f6cvv4c1aqtpdr3tl7b7ejb9p.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.doneify",
+            "package_name": "com.awesome_forever.doneify",
             "certificate_hash": "908d2f1e2baae43b4c9add557aefefd8ca542186"
           }
         },

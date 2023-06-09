@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io' show Platform;
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/ip.dart';
 import 'package:doneify/pages/home.dart';
@@ -101,7 +101,9 @@ class TodoDAO {
     LabelDAO labelsdb = GetIt.I.get();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? lastOfflineUpdated = prefs.getInt('lastOfflineUpdated');
+    int? lastOfflineUpdated = Platform.isLinux
+        ? 0
+        : prefs.getInt('lastOfflineUpdated');
     // debugPrint("offline db was updated at $lastOfflineUpdated");
     // debugPrint("user is ${auth.user.value?.token}");
 

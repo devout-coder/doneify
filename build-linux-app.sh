@@ -13,7 +13,7 @@ set -x
 
 projectName=Doneify
 
-archiveName=$projectName-Linux-Portable.tar.gz
+archiveName=$projectName-Linux-Bundle.tar.gz
 baseDir=$(pwd)
 
 

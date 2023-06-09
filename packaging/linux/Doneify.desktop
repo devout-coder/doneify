@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Doneify
+Comment=Productivity App
+Exec=/usr/bin/Doneify
+Icon=doneify_logo
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=Productivity;Application;
+StartupWMClass=doneify
+MimeType=x-scheme-handler/zoommtg;x-scheme-handler/zoomus;x-scheme-handler/tel;x-scheme-handler/callto;x-scheme-handler/zoomphonecall;application/x-zoom
+X-KDE-Protocols=zoommtg;zoomus;tel;callto;zoomphonecall;
+Name[en_US]=Doneify
+

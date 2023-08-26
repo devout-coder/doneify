@@ -22,6 +22,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -123,7 +124,7 @@ class WidgetProvider : HomeWidgetProvider() {
 //                        AppDatabase::class.java, "db"
 //                    ).build()
                     val todosDAO = db.todoDAO()
-                    val todos = todosDAO?.getByTimeType(timeTypeHash[timeType]!!)
+                    val todos = todosDAO?.getByTimeAndTimeType(timeTypeHash[timeType]!!, formattedTime(timeTypeHash[timeType]!!, LocalDateTime.now()) )
 
 //                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
                     for (todo in todos!!) {

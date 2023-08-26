@@ -52,6 +52,9 @@ interface ActiveAlarmDAO {
 
 @Dao
 interface TodoDAO {
+    @Query("SELECT * FROM Todo WHERE timeType like :timeType  and time like :time order by `index` ASC")
+    suspend fun getByTimeAndTimeType(timeType: String, time: String): List<Todo>
+
     @Query("SELECT * FROM Todo WHERE timeType like :timeType")
     suspend fun getByTimeType(timeType: String): List<Todo>
 

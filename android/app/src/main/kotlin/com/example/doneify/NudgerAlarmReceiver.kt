@@ -27,38 +27,6 @@ import java.time.format.DateTimeFormatter
 //longTerm
 // }
 
-fun formattedTime(timeType: String, time: LocalDateTime): String {
-
-    var formatter: DateTimeFormatter =
-        if (timeType == "day") DateTimeFormatter.ofPattern("d/M/yyyy") else if (timeType == "month") DateTimeFormatter.ofPattern(
-            "MMM yyyy"
-        ) else DateTimeFormatter.ofPattern(
-            "yyyy"
-        )
-
-    val formatted: String
-    if (timeType == "week") {
-        val firstDay = time.minusDays((time.dayOfWeek.value - 1).toLong())
-        val lastDay = firstDay.plusDays(6)
-        formatted =
-            "${formattedTime("day", firstDay)}-${formattedTime("day", lastDay)}";
-    } else if (timeType == "longTerm") {
-        formatted = "longTerm";
-    } else {
-        formatted = formatter.format(time);
-    }
-
-    return formatted
-}
-
-fun isPresent(time: String, timeType: String): Boolean {
-    val current = LocalDateTime.now()
-//    val formatter: DateTimeFormatter
-    Log.d("debugging", "$timeType: ${formattedTime(timeType, current)}")
-    Log.d("debugging", "$timeType: ${time == formattedTime(timeType, current)}")
-
-    return time == formattedTime(timeType, current)
-}
 
 class NudgerFlutterActivity : FlutterActivity() {
 

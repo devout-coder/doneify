@@ -302,7 +302,7 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                       new BorderRadius.circular(
                                                           30.0),
                                                 ),
-                                                primary: Colors.white,
+                                                // primary: Colors.white,
                                                 elevation: 2,
                                                 backgroundColor: Color.fromARGB(
                                                     255, 39, 37, 37)),
@@ -360,10 +360,10 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                             RoundedRectangleBorder(
                                                           borderRadius:
                                                               new BorderRadius
-                                                                      .circular(
+                                                                  .circular(
                                                                   30.0),
                                                         ),
-                                                        primary: Colors.white,
+                                                        // primary: Colors.white,
                                                         elevation: 2,
                                                         backgroundColor:
                                                             Color.fromARGB(255,
@@ -449,12 +449,12 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             12),
                                                                     shape:
                                                                         RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          new BorderRadius.circular(
-                                                                              30.0),
+                                                                      borderRadius: new BorderRadius
+                                                                          .circular(
+                                                                          30.0),
                                                                     ),
-                                                                    primary: Colors
-                                                                        .white,
+                                                                    // primary: Colors
+                                                                    //     .white,
                                                                     elevation:
                                                                         2,
                                                                     backgroundColor:
@@ -560,12 +560,12 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             12),
                                                                     shape:
                                                                         RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          new BorderRadius.circular(
-                                                                              30.0),
+                                                                      borderRadius: new BorderRadius
+                                                                          .circular(
+                                                                          30.0),
                                                                     ),
-                                                                    primary: Colors
-                                                                        .white,
+                                                                    // primary: Colors
+                                                                    // .white,
                                                                     elevation:
                                                                         2,
                                                                     backgroundColor:
@@ -597,12 +597,12 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             12),
                                                                     shape:
                                                                         RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          new BorderRadius.circular(
-                                                                              30.0),
+                                                                      borderRadius: new BorderRadius
+                                                                          .circular(
+                                                                          30.0),
                                                                     ),
-                                                                    primary: Colors
-                                                                        .white,
+                                                                    // primary: Colors
+                                                                    //     .white,
                                                                     elevation:
                                                                         2,
                                                                     backgroundColor:
@@ -642,8 +642,8 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             borderRadius:
                                                                                 new BorderRadius.circular(30.0),
                                                                           ),
-                                                                          primary: Colors
-                                                                              .white,
+                                                                          // primary: Colors
+                                                                          //     .white,
                                                                           elevation:
                                                                               2,
                                                                           backgroundColor: Color.fromARGB(
@@ -676,12 +676,12 @@ class _SetAlarmDialogState extends State<SetAlarmDialog> {
                                                                             12),
                                                                     shape:
                                                                         RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          new BorderRadius.circular(
-                                                                              30.0),
+                                                                      borderRadius: new BorderRadius
+                                                                          .circular(
+                                                                          30.0),
                                                                     ),
-                                                                    primary: Colors
-                                                                        .white,
+                                                                    // primary: Colors
+                                                                    //     .white,
                                                                     elevation:
                                                                         2,
                                                                     backgroundColor:

@@ -277,7 +277,7 @@ class _SelectTimeDialogState extends State<SelectTimeDialog> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: new BorderRadius.circular(30.0),
                               ),
-                              primary: themeDarkPurple,
+                              // primary: themeDarkPurple,
                               elevation: 2,
                               backgroundColor: themePurple),
                           onPressed: () {

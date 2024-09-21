@@ -101,9 +101,8 @@ class TodoDAO {
     LabelDAO labelsdb = GetIt.I.get();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? lastOfflineUpdated = Platform.isLinux
-        ? 0
-        : prefs.getInt('lastOfflineUpdated');
+    int? lastOfflineUpdated =
+        Platform.isLinux ? 0 : prefs.getInt('lastOfflineUpdated');
     // debugPrint("offline db was updated at $lastOfflineUpdated");
     // debugPrint("user is ${auth.user.value?.token}");
 
@@ -203,7 +202,9 @@ class TodoDAO {
     };
     try {
       // debugPrint("creating todo for system ${todo.id}");
-      platform.invokeMethod("createTodo", newTodo);
+      platform
+          .invokeMethod("createTodo", newTodo)
+          .then((_) => platform.invokeMethod("updateWidget"));
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while creating todo: $e");
     }
@@ -214,10 +215,10 @@ class TodoDAO {
       });
     }
 
-    HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
-    );
+    // HomeWidget.updateWidget(
+    //   name: 'WidgetProvider',
+    //   iOSName: 'WidgetProvider',
+    // );
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('lastOfflineUpdated', todo.timeStamp);
@@ -282,7 +283,9 @@ class TodoDAO {
     };
     try {
       // debugPrint("updating todo for system ${todo.id}");
-      platform.invokeMethod("updateTodo", updatedTodo);
+      platform
+          .invokeMethod("updateTodo", updatedTodo)
+          .then((_) => platform.invokeMethod("updateWidget"));
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while updating todo: $e");
     }
@@ -298,10 +301,10 @@ class TodoDAO {
       );
     }
 
-    HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
-    );
+    // HomeWidget.updateWidget(
+    //   name: 'WidgetProvider',
+    //   iOSName: 'WidgetProvider',
+    // );
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('lastOfflineUpdated', todo.timeStamp);
@@ -330,7 +333,7 @@ class TodoDAO {
         debugPrint("deleting todo for system ${todo.id}");
         platform.invokeMethod("deleteTodo", {
           "id": todo.id.toString(),
-        });
+        }).then((_) => platform.invokeMethod("updateWidget"));
       } on PlatformException catch (e) {
         debugPrint("some fuckup happended while deleting todo: $e");
       }
@@ -355,10 +358,12 @@ class TodoDAO {
         );
       }
 
-      HomeWidget.updateWidget(
-        name: 'WidgetProvider',
-        iOSName: 'WidgetProvider',
-      );
+      // HomeWidget.updateWidget(
+      //   name: 'WidgetProvider',
+      //   iOSName: 'WidgetProvider',
+      // );
+
+      platform.invokeMethod("updateWidget");
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('lastOfflineUpdated', todo.timeStamp);

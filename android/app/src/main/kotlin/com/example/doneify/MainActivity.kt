@@ -1,6 +1,7 @@
 package com.example.doneify
 
 import android.app.*
+import android.appwidget.AppWidgetManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
@@ -59,7 +60,6 @@ class MainActivity : FlutterActivity() {
         //        isPresent("Jan 2023", "month")
         //        isPresent("2023", "year")
         //        isPresent("longTerm", "longTerm")
-
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel!!.setMethodCallHandler { call: MethodCall?, result: MethodChannel.Result? ->
             handleMethodCalls(context, call, result)

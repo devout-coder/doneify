@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/main.dart';
+import 'package:doneify/pages/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
@@ -29,27 +31,39 @@ void kotlinMethodCallHandler(MethodCall call) async {
     todo.finished = true;
     await store.record(todoId).put(db, todo.toMap(), merge: true);
     // debugPrint("updated todo record in storage");
+    bool receivedVal =
+        await channel.invokeMethod("setWidgetChanged", {"widgetChanged": true});
+    debugPrint("in dart set val, $receivedVal");
 
+    Map updatedTodo = {
+      "id": todo.id.toString(),
+      "taskName": todo.taskName,
+      "taskDesc": todo.taskDesc,
+      "finished": true,
+      "labelName": todo.labelName,
+      "timeStamp": todo.timeStamp,
+      "time": todo.time,
+      "timeType": todo.timeType,
+      "index": todo.index,
+    };
     try {
       // debugPrint("updating todo for system ${todo.id}");
-      channel.invokeMethod("updateTodo", {
-        "id": todo.id.toString(),
-        "taskName": todo.taskName,
-        "taskDesc": todo.taskDesc,
-        "finished": todo.finished,
-        "labelName": todo.labelName,
-        "timeStamp": todo.timeStamp,
-        "time": todo.time,
-        "timeType": todo.timeType,
-        "index": todo.index,
+      channel.invokeMethod("updateTodo", updatedTodo).then((_) async {
+        channel.invokeMethod("updateWidget");
       });
     } on PlatformException catch (e) {
       debugPrint("some fuckup happended while updating todo: $e");
     }
-    HomeWidget.updateWidget(
-      name: 'WidgetProvider',
-      iOSName: 'WidgetProvider',
+
+    socket?.emitWithAck(
+      "update_todo",
+      json.encode(updatedTodo),
+      ack: (response) {
+        debugPrint("ack from server $response");
+      },
     );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastOfflineUpdated', todo.timeStamp);
   }
   //  else if (call.method == "event") {
   //   Map details = call.arguments;

@@ -1,5 +1,6 @@
 package com.example.doneify
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.Context
 import androidx.room.*
 
@@ -69,6 +70,51 @@ interface TodoDAO {
 
     @Delete
     fun delete(todo: Todo)
+}
+
+class TodoRepository(private val todoDAO: TodoDAO) {
+
+    // Function to get todos by timeType and time using suspend and coroutine
+    suspend fun getTodosByTimeAndTimeType(timeType: String, time: String): List<Todo> {
+        return withContext(Dispatchers.IO) {
+            todoDAO.getByTimeAndTimeType(timeType, time)
+        }
+    }
+
+    // Function to get todos by timeType using suspend and coroutine
+    suspend fun getTodosByTimeType(timeType: String): List<Todo> {
+        return withContext(Dispatchers.IO) {
+            todoDAO.getByTimeType(timeType)
+        }
+    }
+
+    // Function to get todos by id (without suspend since it's not using suspend in DAO)
+    suspend fun getTodosById(id: String): List<Todo> {
+        return withContext(Dispatchers.IO) {
+            todoDAO.getById(id)
+        }
+    }
+
+    // Function to insert a new todo
+    suspend fun insertTodo(todo: Todo) {
+        withContext(Dispatchers.IO) {
+            todoDAO.insert(todo)
+        }
+    }
+
+    // Function to update a todo
+    suspend fun updateTodo(todo: Todo) {
+        withContext(Dispatchers.IO) {
+            todoDAO.update(todo)
+        }
+    }
+
+    // Function to delete a todo
+    suspend fun deleteTodo(todo: Todo) {
+        withContext(Dispatchers.IO) {
+            todoDAO.delete(todo)
+        }
+    }
 }
 
 //@Database(entities = [ActiveAlarm::class, Todo::class], version = 1)

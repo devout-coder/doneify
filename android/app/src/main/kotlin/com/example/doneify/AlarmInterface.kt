@@ -18,7 +18,8 @@ import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
-
+import androidx.appcompat.app.AppCompatActivity
+import com.awesome_forever.doneify.R
 
 class AlarmInterface : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {

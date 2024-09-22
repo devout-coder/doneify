@@ -1,14 +1,17 @@
 package com.example.doneify
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.room.Room
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -23,6 +26,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import androidx.appcompat.app.AppCompatActivity
+import com.awesome_forever.doneify.R
+import kotlinx.coroutines.async
 
 //import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 //import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -89,14 +95,20 @@ fun createWidget(appWidgetIds: IntArray, context: Context) {
 //                        context,
 //                        AppDatabase::class.java, "db"
 //                    ).build()
-                val todosDAO = db.todoDAO()
-                val todos = todosDAO?.getByTimeAndTimeType(
-                    timeTypeHash[timeType]!!,
-                    formattedTime(timeTypeHash[timeType]!!, LocalDateTime.now())
-                )
+
+                val todoDAO = db.todoDAO()
+                val todoRepo = TodoRepository(todoDAO!!);
+                val getDeferred = async {
+                    todoRepo.getTodosByTimeAndTimeType(
+                        timeTypeHash[timeType]!!,
+                        formattedTime(timeTypeHash[timeType]!!, LocalDateTime.now())
+                    )
+                }
+                val todos: List<Todo> =
+                    getDeferred.await() // Waits for insertion to complete
 
 //                    Log.d("debugging", "all the todos for ${timeTypeHash[timeType]} are $todos")
-                for (todo in todos!!) {
+                for (todo in todos) {
                     if (!todo.finished!!) {
                         val view = RemoteViews(context.packageName, R.layout.each_todo).apply {
                             setTextViewText(R.id.each_todo_container_text, todo.taskName)

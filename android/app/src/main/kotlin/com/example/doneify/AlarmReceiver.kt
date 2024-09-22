@@ -9,6 +9,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.room.Room
+import com.awesome_forever.doneify.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*

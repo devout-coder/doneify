@@ -1,4 +1,5 @@
 package com.example.doneify
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.content.Context
@@ -54,10 +55,10 @@ interface ActiveAlarmDAO {
 @Dao
 interface TodoDAO {
     @Query("SELECT * FROM Todo WHERE timeType like :timeType  and time like :time order by `index` ASC")
-    suspend fun getByTimeAndTimeType(timeType: String, time: String): List<Todo>
+    fun getByTimeAndTimeType(timeType: String, time: String): List<Todo>
 
     @Query("SELECT * FROM Todo WHERE timeType like :timeType")
-    suspend fun getByTimeType(timeType: String): List<Todo>
+    fun getByTimeType(timeType: String): List<Todo>
 
     @Query("SELECT * FROM Todo WHERE id LIKE :id")
     fun getById(id: String): List<Todo>

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+import com.awesome_forever.doneify.R
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall

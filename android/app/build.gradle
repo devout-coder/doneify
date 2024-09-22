@@ -6,33 +6,15 @@ plugins {
 }
 
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
+def keystorePropertiesFile = rootProject.file('/home/pranil/code_repo/doneify/android/app/key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1.0'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
-
 android {
-    compileSdkVersion 34
-    ndkVersion flutter.ndkVersion
+    namespace = "com.awesome_forever.doneify"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
     //splits part was added by me
     splits {
         abi {
@@ -61,26 +43,26 @@ android {
         applicationId "com.awesome_forever.doneify"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion 31
-        targetSdkVersion flutter.targetSdkVersion
+        minSdk = 32
+        targetSdk = flutter.targetSdkVersion
         // versionCode flutterVersionCode.toInteger()
         // versionName flutterVersionName
-        versionCode 3
-        versionName "3"
+        versionCode 4
+        versionName "4"
     }
-  signingConfigs {
-       release {
-           keyAlias keystoreProperties['keyAlias']
-           keyPassword keystoreProperties['keyPassword']
-           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-           storePassword keystoreProperties['storePassword']
-       }
-   }
+    signingConfigs {
+        release {
+            keyAlias = keystoreProperties['keyAlias']
+            keyPassword =  keystoreProperties['keyPassword']
+            storeFile =  keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword = keystoreProperties['storePassword']
+        }
+    }
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-           signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
 
             // signingConfig signingConfigs.debug
         }
@@ -92,7 +74,8 @@ flutter {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0-alpha01'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
     implementation("androidx.room:room-ktx:2.4.3")

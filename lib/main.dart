@@ -179,6 +179,9 @@ class _MainContainerState extends State<MainContainer>
       case AppLifecycleState.detached:
         // print('appLifeCycleState detached');
         break;
+      case AppLifecycleState.hidden:
+        // print('appLifeCycleState detached');
+        break;
     }
   }
 

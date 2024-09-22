@@ -8,12 +8,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.awesome_forever.doneify.R
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -113,8 +115,17 @@ class NudgerAlarmReceiver : BroadcastReceiver() {
         val timeType = timeTypeHash[sharedPref.getString("timeType", "Day")]
         CoroutineScope(Dispatchers.Main.immediate).launch {
             val db: AppDB = AppDB.getDatabase(context)
+
             val todoDAO = db.todoDAO()
-            var todos: List<Todo> = todoDAO!!.getByTimeType(timeType!!)
+            val todoRepo = TodoRepository(todoDAO!!);
+            val getDeferred = async {
+                todoRepo.getTodosByTimeType(
+                    timeTypeHash[timeType]!!
+                )
+            }
+            var todos: List<Todo> =
+                getDeferred.await() // Waits for insertion to complete
+
             if (sharedPref.getBoolean("onlyPresent", false)) {
                 Log.d("debugging", "this is run")
                 todos = todos.filter { todo -> isPresent(todo.time!!, todo.timeType!!) }

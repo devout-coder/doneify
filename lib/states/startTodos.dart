@@ -1,8 +1,3 @@
-import 'dart:convert';
-
-import 'package:doneify/ip.dart';
-import 'package:doneify/states/authState.dart';
-import 'package:http/http.dart' as http;
 import 'package:doneify/impClasses.dart';
 import 'package:doneify/pages/day.dart';
 import 'package:doneify/states/selectedFilters.dart';
@@ -11,11 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sembast/sembast.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class StartTodos {
   //already loading the day todos so that after circular progress stops there is no delay before the todos are shown
-  //index fuck up
   List<Todo> todos = [];
   List<Todo> currentTodos = [];
   List<String> unfinishedDays = [];
@@ -79,10 +72,6 @@ class StartTodos {
     }
     todosTemp.forEach(
         (element) => debugPrint("${element.taskName} ${element.index}"));
-    // debugPrint("unfinished");
-    // unfinishedTodosTemp.forEach((element) => debugPrint(element.taskName));
-    // debugPrint("finished");
-    // finishedTodosTemp.forEach)((element) => debugPrint(element.taskName));
     todos = todosTemp;
     currentTodos = currentTodosTemp;
   }

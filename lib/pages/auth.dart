@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/ip.dart';
+import 'package:doneify/serverUrl.dart';
 import 'package:doneify/main.dart';
 import 'package:doneify/states/authState.dart';
 import 'package:doneify/states/todoDAO.dart';

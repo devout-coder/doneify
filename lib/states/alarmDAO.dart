@@ -35,12 +35,11 @@ class AlarmDAO {
         "finished": finished,
       });
     } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while creating alarm: $e");
+      debugPrint("encountered an issue while creating alarm: $e");
     }
   }
 
   Future<List<Alarm>> getAlarms(int taskId) async {
-    // debugPrint("while getting alarms id: " + taskId.toString());
     var finder = Finder(
       filter: Filter.equals(
         'taskId',
@@ -56,14 +55,12 @@ class AlarmDAO {
 
   Future deleteAlarm(int alarmId) async {
     await _store.record(alarmId).delete(_db);
-    debugPrint("deleting alarm id " + alarmId.toString());
-    debugPrint("deleting alarm, kotlin id $alarmId");
     try {
       await platform.invokeMethod("deleteAlarm", {
         "alarmId": alarmId.toString(),
       });
     } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while deleting alarm: $e");
+      debugPrint("encountered an issue while deleting alarm: $e");
     }
   }
 }

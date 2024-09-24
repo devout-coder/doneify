@@ -152,7 +152,6 @@ fun handleMethodCalls(context: Context, call: MethodCall?, result: MethodChannel
             result!!.success(onlyPresent)
         } else if (call.method == "setWidgetChanged") {
             val widgetChanged: Boolean = call.argument<Boolean>("widgetChanged")!!
-            Log.d("debugging", "setting the value kotlin $widgetChanged")
             val sharedPref: SharedPreferences = context.getSharedPreferences(
                 "nudger", Context.MODE_PRIVATE
             )

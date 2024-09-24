@@ -41,7 +41,6 @@ Future registerDB() async {
   NudgerStates nudgerStates = GetIt.I.get();
   AuthState authState = GetIt.I.get();
 
-  //don't fuck up this order
   await selectedFilters.fetchFiltersFromStorage();
   await labelsDB.readLabelsFromStorage();
   await authState.fetchUserFromStorage();

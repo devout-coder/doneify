@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:doneify/impClasses.dart';
-import 'package:doneify/ip.dart';
+import 'package:doneify/serverUrl.dart';
 import 'package:doneify/pages/home.dart';
 import 'package:doneify/states/alarmDAO.dart';
 import 'package:doneify/states/authState.dart';
@@ -206,7 +206,7 @@ class TodoDAO {
           .invokeMethod("createTodo", newTodo)
           .then((_) => platform.invokeMethod("updateWidget"));
     } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while creating todo: $e");
+      debugPrint("encountered an issue while creating todo: $e");
     }
 
     if (!receivedFromServer) {
@@ -287,7 +287,7 @@ class TodoDAO {
           .invokeMethod("updateTodo", updatedTodo)
           .then((_) => platform.invokeMethod("updateWidget"));
     } on PlatformException catch (e) {
-      debugPrint("some fuckup happended while updating todo: $e");
+      debugPrint("encountered an issue while updating todo: $e");
     }
 
     // AuthState auth = GetIt.I.get();
@@ -335,7 +335,7 @@ class TodoDAO {
           "id": todo.id.toString(),
         }).then((_) => platform.invokeMethod("updateWidget"));
       } on PlatformException catch (e) {
-        debugPrint("some fuckup happended while deleting todo: $e");
+        debugPrint("encountered an issue while deleting todo: $e");
       }
 
       if (!receivedFromServer) {
